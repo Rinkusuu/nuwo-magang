@@ -171,6 +171,18 @@ h1,h2,.serif{font-family:var(--serif);font-weight:600;letter-spacing:-.012em;col
 .autosave::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--green);transition:background-color .2s;}
 .autosave.is-saving::before{background:var(--gold);animation:kedip 1s ease-in-out infinite;}
 @media(max-width:720px){.topbar .title span.full,.autosave{display:none;}.topbar .right{gap:12px;}.user .name{display:none;}}
+/* HP: judul cukup diwakili logo supaya menu, avatar, dan Keluar tidak terdesak ke tepi */
+@media(max-width:480px){.topbar .title .teks{display:none;}}
+
+/* ---------- Footer ringkas (formulir, status) ---------- */
+/* Halaman pendek: footer tetap menempel di dasar layar */
+body:has(> .kaki-ringkas){min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;}
+body:has(> .kaki-ringkas) > .wrap{width:100%;}
+.kaki-ringkas{margin-top:auto;border-top:1px solid var(--line);background:#fff;padding:22px 0;font-size:12.5px;color:var(--ink-3);}
+.kaki-ringkas .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px 24px;flex-wrap:wrap;}
+.kaki-ringkas img{height:22px;width:auto;}
+.kaki-ringkas a{color:var(--navy-700);font-weight:600;text-decoration:none;}
+.kaki-ringkas a:hover{text-decoration:underline;text-underline-offset:3px;}
 
 /* ---------- Toast ---------- */
 .toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,160%);background:var(--navy-900);color:#fff;padding:13px 20px;border-radius:12px;font-size:13.5px;font-weight:600;

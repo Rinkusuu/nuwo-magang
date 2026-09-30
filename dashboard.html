@@ -69,7 +69,9 @@
   .section-head h2{font-size:clamp(26px,3.2vw,38px);line-height:1.12;letter-spacing:-.018em;max-width:720px;text-wrap:balance;}
 
   /* ---------- Persyaratan ---------- */
-  .req{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:20px;align-items:start;}
+  /* Kotak A dan B sama tinggi dan sejajar atas; .card + .card tidak berlaku di dalam grid */
+  .req{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:20px;align-items:stretch;}
+  .req > .card + .card{margin-top:0;}
   @media(max-width:880px){.req{grid-template-columns:1fr;}}
   .req h3{font-size:17px;font-weight:700;margin-bottom:16px;}
   .req ol.num-list{list-style:none;display:flex;flex-direction:column;gap:16px;}
@@ -153,11 +155,22 @@
   .cta-band p{color:#C9D8EA;margin-top:8px;}
   @media(max-width:560px){.cta-band{padding:34px 24px;}}
 
-  footer{border-top:1px solid var(--line);padding:32px 0;font-size:13px;color:var(--ink-2);}
-  footer .wrap{display:flex;justify-content:space-between;align-items:center;gap:16px 24px;flex-wrap:wrap;}
-  footer .kiri{display:flex;align-items:center;gap:18px;flex-wrap:wrap;}
-  footer .kiri img{height:34px;width:auto;}
-  footer a{color:var(--navy-700);font-weight:600;}
+  /* ---------- Footer: jalur berakhir di sini ---------- */
+  footer.kaki{position:relative;overflow:hidden;isolation:isolate;background:var(--navy-900);color:#B9C8DB;margin-top:0;padding:72px 0 0;font-size:14px;}
+  footer.kaki > .rute{z-index:-1;}
+  .kaki .atas{display:grid;grid-template-columns:minmax(0,1.6fr) repeat(3,minmax(0,1fr));gap:40px 32px;padding-bottom:56px;}
+  .kaki .identitas .logo-putih{display:inline-block;background:#fff;border-radius:12px;padding:12px 16px;margin-bottom:20px;}
+  .kaki .identitas .logo-putih img{height:32px;width:auto;}
+  .kaki .identitas b{display:block;font-family:var(--serif);font-weight:600;font-size:21px;color:#fff;line-height:1.25;margin-bottom:8px;}
+  .kaki .identitas p{max-width:340px;color:#9FB2C9;font-size:13.5px;}
+  .kaki h2{font-family:var(--sans);font-size:13px;font-weight:700;color:#fff;letter-spacing:.01em;margin-bottom:14px;}
+  .kaki ul{list-style:none;display:flex;flex-direction:column;gap:10px;}
+  .kaki ul a{color:#B9C8DB;text-decoration:none;transition:color .2s;display:inline-flex;align-items:center;gap:6px;}
+  .kaki ul a:hover{color:#fff;}
+  .kaki ul a [data-ikon]{opacity:.6;}
+  .kaki .bawah{border-top:1px solid rgba(255,255,255,.08);padding:22px 0 28px;display:flex;justify-content:space-between;gap:10px 24px;flex-wrap:wrap;font-size:12.5px;color:#7F95B4;}
+  @media(max-width:900px){.kaki .atas{grid-template-columns:repeat(3,minmax(0,1fr));}.kaki .identitas{grid-column:1 / -1;}}
+  @media(max-width:560px){footer.kaki > .rute{display:none;}footer.kaki{padding-top:56px;}.kaki .atas{grid-template-columns:repeat(2,minmax(0,1fr));gap:32px 20px;padding-bottom:40px;}}
 </style>
 </head>
 <body>
@@ -291,19 +304,53 @@
   </div>
 </section>
 
-<footer>
+<footer class="kaki">
+  <svg class="rute" viewBox="0 0 1440 420" preserveAspectRatio="xMaxYMax slice" aria-hidden="true" focusable="false">
+    <path class="garis" d="M1500 -20 C 1380 60 1330 150 1210 190 S 1010 250 930 330 S 820 430 760 460"/>
+  </svg>
   <div class="wrap">
-    <div class="kiri">
-      <img src="assets/bi-logo.png" alt="Bank Indonesia" width="107" height="34" loading="lazy">
-      <span>Program Magang Mahasiswa · Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
+    <div class="atas">
+      <div class="identitas">
+        <span class="logo-putih"><img src="assets/bi-logo.png" alt="Bank Indonesia" width="720" height="130"></span>
+        <b>Portal Magang Mahasiswa</b>
+        <p>Kantor Perwakilan Bank Indonesia Provinsi Lampung. Pendaftaran, seleksi, dan pengumuman Program Magang Mahasiswa S1 dalam satu tempat.</p>
+      </div>
+      <nav aria-label="Informasi program">
+        <h2>Informasi</h2>
+        <ul>
+          <li><a href="#persyaratan">Persyaratan</a></li>
+          <li><a href="#alur">Alur Seleksi</a></li>
+          <li><a href="#bidang">Bidang Magang</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Akun">
+        <h2>Pelamar</h2>
+        <ul>
+          <li><a href="registrasi.html">Daftar Akun</a></li>
+          <li><a href="login.html">Masuk</a></li>
+          <li><a href="status_pengajuan.html">Status Pendaftaran</a></li>
+        </ul>
+      </nav>
+      <nav aria-label="Tautan lain">
+        <h2>Tautan</h2>
+        <ul>
+          <li><a href="https://www.bi.go.id" target="_blank" rel="noopener">Situs Bank Indonesia<span data-ikon="tautan" data-ikon-ukuran="13"></span></a></li>
+          <li><a href="login_admin.html">Masuk Backoffice</a></li>
+        </ul>
+      </nav>
     </div>
-    <a href="login_admin.html">Masuk Backoffice</a>
+    <div class="bawah">
+      <span>© <span id="tahunKaki">2026</span> Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
+      <span>Program Magang Mahasiswa</span>
+    </div>
   </div>
 </footer>
 
 <script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script>
+  document.getElementById('tahunKaki').textContent = new Date().getFullYear();
   (async () => {
     const data = await api('backend/api/public/info.php');
     const tanggal = document.getElementById('infoTanggal');

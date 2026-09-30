@@ -15,6 +15,9 @@
   table.data td .input{padding:7px 9px;font-size:13px;}
   table.data td.jadwal{min-width:420px;}
   .jadwal-grid{display:grid;grid-template-columns:140px 100px minmax(0,1fr) auto;gap:8px;align-items:center;}
+  /* Tanggal, jam, lokasi, dan tombol simpan setinggi satu sama lain */
+  .jadwal-grid > .input,.jadwal-grid > .btn{height:38px;padding-top:0;padding-bottom:0;}
+  @media(max-width:720px){.jadwal-grid > .input,.jadwal-grid > .btn{height:44px;}}
 </style>
 </head>
 <body data-menu="wawancara">
