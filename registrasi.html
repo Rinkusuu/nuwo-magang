@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Daftar Akun — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
 <meta name="theme-color" content="#0A2A4A">
-<link rel="icon" href="assets/bi-logo-bulat.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
 </head>
@@ -68,6 +69,7 @@
               <input class="input" type="password" id="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
               <button type="button" data-toggle="password">Lihat</button>
             </div>
+            <div class="kekuatan" id="kekuatan" aria-live="polite"></div>
             <span class="err">Kata sandi minimal 8 karakter.</span>
           </div>
           <div class="field" id="confirmField">
@@ -101,6 +103,8 @@
   }));
 
   const $ = id => document.getElementById(id);
+  pasangKekuatanSandi($('password'), $('kekuatan'));
+  pasangCekEmail($('email'), $('emailField'));
   const rules = [
     ['namaField', () => $('nama').value.trim().length >= 3],
     ['emailField', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('email').value.trim())],

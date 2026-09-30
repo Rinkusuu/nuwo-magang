@@ -1,22 +1,29 @@
 <?php
 require '../../config.php';
+require '../../batas_percobaan.php';
 
-$data = json_decode(file_get_contents('php://input'), true);
-$email = trim($data['email'] ?? '');
-$password = $data['password'] ?? '';
+$data = body();
+$email = strtolower(trim((string) ($data['email'] ?? '')));
+$password = (string) ($data['password'] ?? '');
+
+// Backoffice lebih ketat: 5 percobaan gagal per email dan 10 per IP dalam 15 menit
+$kunci = 'admin:' . $email;
+cek_batas($pdo, $kunci, 5, 15, 10);
 
 $stmt = $pdo->prepare("SELECT id, nama, email, password FROM admins WHERE email = ?");
 $stmt->execute([$email]);
 $admin = $stmt->fetch();
 
-if (!$admin || !password_verify($password, $admin['password'])) {
-    http_response_code(401);
-    echo json_encode(['success' => false, 'message' => 'Email atau kata sandi salah.']);
-    exit;
+$hash = $admin['password'] ?? '$2y$12$Rv3ny1DkB0MXm4Pkgn4S9e4dAV/aaULJi1TKq/oVc8DLpN/UtxGK6';
+if (!password_verify($password, $hash) || !$admin) {
+    catat_percobaan($pdo, $kunci);
+    fail('Email atau kata sandi salah.', 401);
 }
+hapus_percobaan($pdo, $kunci);
 
-$_SESSION['admin_id'] = $admin['id'];
+mulai_sesi_baru();
+$_SESSION['admin_id'] = (int) $admin['id'];
 $_SESSION['admin_nama'] = $admin['nama'];
 $_SESSION['admin_email'] = $admin['email'];
 
-echo json_encode(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $admin['nama']]);
+json_out(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $admin['nama'], 'csrf' => csrf_token()]);

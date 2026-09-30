@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Atur Kata Sandi — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="robots" content="noindex">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+</head>
+<body>
+
+<div class="auth">
+  <aside class="auth-side">
+    <div class="pola-titik" aria-hidden="true"></div>
+    <svg class="rute" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-halte="0.3,0.55,0.8">
+      <path class="garis" d="M-20 890 C 210 880 320 800 400 730 S 560 540 600 390 S 650 90 710 -20"/>
+    </svg>
+    <a href="dashboard.html" class="brand">
+      <span class="logo-mark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span>
+      <span><b>Portal Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
+    </a>
+    <div>
+      <div class="kicker">Akun Pelamar</div>
+      <h1 data-muncul style="--urut:1">Buat kata sandi baru.</h1>
+      <p>Setelah kata sandi diubah, masuk kembali untuk melanjutkan pendaftaran atau memantau status seleksi.</p>
+    </div>
+    <div class="foot">Gunakan kata sandi yang belum pernah Anda pakai di situs lain.</div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="dashboard.html" class="auth-mobile-brand"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span><span><b>Portal Magang Mahasiswa</b><span>KPwBI Provinsi Lampung</span></span></a>
+      <a href="login.html" class="back"><span data-ikon="kembali" data-ikon-ukuran="16"></span>Kembali ke halaman masuk</a>
+      <div class="card" data-muncul style="--urut:1">
+        <div class="kicker">Kata sandi baru</div>
+        <h2>Atur kata sandi</h2>
+        <p class="lead" id="lead">Minimal 8 karakter. Gabungkan huruf besar, huruf kecil, angka, dan simbol agar lebih kuat.</p>
+        <form id="aturForm" novalidate>
+          <div class="field" id="passField">
+            <label for="password">Kata sandi baru</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+              <button type="button" data-toggle="password">Lihat</button>
+            </div>
+            <div class="kekuatan" id="kekuatan" aria-live="polite"></div>
+            <span class="err">Kata sandi minimal 8 karakter.</span>
+          </div>
+          <div class="field" id="confirmField">
+            <label for="confirm">Ulangi kata sandi baru</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="confirm" placeholder="Ulangi kata sandi" autocomplete="new-password" required>
+              <button type="button" data-toggle="confirm">Lihat</button>
+            </div>
+            <span class="err">Kata sandi tidak sama.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:8px;">Simpan Kata Sandi</button>
+        </form>
+        <div id="selesai" hidden>
+          <div class="notice green"><b>Kata sandi diperbarui</b><span id="pesan"></span></div>
+          <a href="login.html" class="btn btn-primary btn-block" style="margin-top:16px;">Masuk</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const token = new URLSearchParams(location.search).get('token') || '';
+  // Token tidak perlu tertinggal di riwayat peramban atau terkirim sebagai referrer
+  history.replaceState(null, '', location.pathname);
+  if (!/^[a-f0-9]{64}$/.test(token)) {
+    $('aturForm').hidden = true;
+    $('lead').innerHTML = 'Tautan ini tidak valid atau tidak lengkap. <a class="link" href="lupa_sandi.html">Minta tautan baru</a>.';
+  }
+  document.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => {
+    const input = $(btn.dataset.toggle);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Sembunyikan' : 'Lihat';
+  }));
+  pasangKekuatanSandi($('password'), $('kekuatan'));
+
+  $('aturForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const okPass = $('password').value.length >= 8;
+    const okSama = $('confirm').value === $('password').value;
+    $('passField').classList.toggle('has-error', !okPass);
+    $('confirmField').classList.toggle('has-error', okPass && !okSama);
+    if (!okPass || !okSama) return;
+    $('submitBtn').disabled = true;
+    $('submitBtn').textContent = 'Menyimpan…';
+    const data = await api('backend/api/auth/atur_sandi.php', { json: { token, password: $('password').value } });
+    if (!data.success) {
+      toast(data.message || 'Kata sandi gagal diubah.', true);
+      $('submitBtn').disabled = false;
+      $('submitBtn').textContent = 'Simpan Kata Sandi';
+      return;
+    }
+    $('pesan').textContent = data.message;
+    $('aturForm').hidden = true;
+    $('selesai').hidden = false;
+  });
+</script>
+</body>
+</html>

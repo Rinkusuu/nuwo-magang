@@ -1,6 +1,7 @@
 <?php
 require '../../config.php';
 require '../../app_helpers.php';
+require '../../mailer.php';
 
 $userId = require_user();
 $app = app_by_user($pdo, $userId);
@@ -51,5 +52,7 @@ $pdo->prepare("
 ")->execute([$noPendaftaran, $app['id']]);
 log_status($pdo, (int) $app['id'], $from, 'menunggu', null,
     $from === 'perbaikan' ? 'Perbaikan berkas dikirim' : 'Pendaftaran dikirim');
+
+email_pendaftaran_terkirim(app_by_user($pdo, $userId), $from === 'perbaikan');
 
 json_out(['success' => true, 'message' => 'Pendaftaran berhasil dikirim.', 'no_pendaftaran' => $noPendaftaran]);

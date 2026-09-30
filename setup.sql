@@ -133,11 +133,32 @@ CREATE TABLE application_status_log (
   FOREIGN KEY (changed_by) REFERENCES admins(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
+-- Pembatasan percobaan login, pendaftaran akun, dan lupa kata sandi
+CREATE TABLE IF NOT EXISTS batas_percobaan (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  kunci VARCHAR(190) NOT NULL,
+  ip VARCHAR(45) NOT NULL,
+  waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_kunci_waktu (kunci, waktu),
+  INDEX idx_ip_waktu (ip, waktu)
+) ENGINE=InnoDB;
+
+-- Token atur ulang kata sandi (disimpan sebagai hash SHA-256, berlaku 60 menit)
+CREATE TABLE IF NOT EXISTS reset_sandi (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  user_id INT NOT NULL,
+  token_hash CHAR(64) NOT NULL UNIQUE,
+  kedaluwarsa DATETIME NOT NULL,
+  dibuat TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 -- ============================================
 -- DATA AWAL
 -- ============================================
 
--- Kata sandi admin: AdminBI2026
+-- Kata sandi admin contoh: AdminBI2026 — WAJIB diganti sebelum online:
+--   php backend/atur_password_admin.php admin@bi.go.id
 INSERT INTO admins (nama, email, password) VALUES
 ('Admin Seleksi', 'admin@bi.go.id', '$2y$12$hL5kVeYAwz7HvJOG0jWXmufBCNn5MCbtG2wx0/VMTtC3GnozxXgvW');
 

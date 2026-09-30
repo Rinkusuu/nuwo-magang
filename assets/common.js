@@ -44,7 +44,19 @@ const BERKAS = [
     periksa: 'KTP · NPWP · buku tabungan; nama sesuai dan terbaca jelas.' },
 ];
 
-async function api(url, options = {}) {
+// Token CSRF sesi ini. Diambil sekali sebelum permintaan pertama yang mengubah data,
+// lalu diperbarui dari respons login/daftar (sesi baru = token baru).
+let csrfToken = null;
+async function ambilCsrf(paksa = false) {
+  if (csrfToken && !paksa) return csrfToken;
+  try {
+    const r = await fetch('backend/api/auth/csrf.php', { credentials: 'same-origin' });
+    csrfToken = (await r.json()).token || null;
+  } catch (e) { csrfToken = null; }
+  return csrfToken;
+}
+
+async function api(url, options = {}, ulang = true) {
   const opts = { credentials: 'same-origin', ...options };
   if (opts.json !== undefined) {
     opts.method = opts.method || 'POST';
@@ -52,15 +64,25 @@ async function api(url, options = {}) {
     opts.body = JSON.stringify(opts.json);
     delete opts.json;
   }
+  const method = (opts.method || 'GET').toUpperCase();
+  if (method !== 'GET' && method !== 'HEAD') {
+    opts.headers = { ...(opts.headers || {}), 'X-CSRF-Token': await ambilCsrf() || '' };
+  }
   let res;
   try {
     res = await fetch(url, opts);
   } catch (e) {
-    return { success: false, message: 'Tidak dapat terhubung ke server. Pastikan Apache dan MySQL di XAMPP berjalan.', status: 0 };
+    return { success: false, message: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.', status: 0 };
+  }
+  // Token kedaluwarsa (mis. sesi berakhir): ambil token baru lalu ulangi sekali
+  if (res.status === 419 && ulang) {
+    await ambilCsrf(true);
+    return api(url, options, false);
   }
   let data;
   try { data = await res.json(); }
   catch (e) { data = { success: false, message: 'Respons server tidak valid.' }; }
+  if (typeof data.csrf === 'string') csrfToken = data.csrf;
   data.status = res.status;
   return data;
 }
@@ -108,7 +130,7 @@ function toast(message, isError = false) {
 }
 
 async function logout(target) {
-  await api('backend/api/auth/logout.php');
+  await api('backend/api/auth/logout.php', { method: 'POST' });
   window.location.href = target;
 }
 
@@ -116,4 +138,43 @@ async function logout(target) {
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Indikator kekuatan kata sandi. Skor 1–4 dari panjang dan keragaman karakter;
+// hanya sebagai panduan, syarat minimal tetap 8 karakter (diperiksa server).
+function skorSandi(v) {
+  if (!v) return 0;
+  if (v.length < 8) return 1;
+  let ragam = 0;
+  if (/[a-z]/.test(v)) ragam++;
+  if (/[A-Z]/.test(v)) ragam++;
+  if (/\d/.test(v)) ragam++;
+  if (/[^A-Za-z0-9]/.test(v)) ragam++;
+  let skor = ragam >= 3 ? 3 : 2;
+  if (v.length >= 12 && ragam >= 3) skor = 4;
+  if (/^(.)\1+$/.test(v) || /^(12345678|password|katasandi|qwerty)/i.test(v)) skor = 1;
+  return skor;
+}
+function pasangKekuatanSandi(input, wadah) {
+  const LABEL = ['', 'Terlalu lemah', 'Cukup', 'Kuat', 'Sangat kuat'];
+  wadah.innerHTML = '<span class="ruas"><i></i><i></i><i></i><i></i></span><b></b>';
+  const perbarui = () => {
+    const s = skorSandi(input.value);
+    wadah.classList.toggle('aktif', s > 0);
+    wadah.dataset.skor = s;
+    wadah.querySelector('b').textContent = s === 1 && input.value.length < 8 ? `${input.value.length}/8 karakter` : LABEL[s];
+  };
+  input.addEventListener('input', perbarui);
+  perbarui();
+}
+// Tanda centang saat format email sudah benar (tanpa memeriksa apakah email terdaftar)
+function pasangCekEmail(input, field) {
+  const pola = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+  const cek = () => {
+    const ok = pola.test(input.value.trim());
+    field.classList.toggle('valid', ok);
+    if (ok) field.classList.remove('has-error');
+  };
+  input.addEventListener('input', cek);
+  input.addEventListener('blur', () => { if (input.value.trim()) field.classList.toggle('has-error', !pola.test(input.value.trim())); });
 }

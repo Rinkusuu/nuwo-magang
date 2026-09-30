@@ -1,5 +1,6 @@
 <?php
 require '../../config.php';
+require '../../mailer.php';
 
 $adminId = require_admin();
 $data = body();
@@ -12,7 +13,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal) || !preg_match('/^\d{2}:\d{2}
     fail('Tanggal, jam, dan lokasi wawancara wajib diisi.');
 }
 
-$stmt = $pdo->prepare("SELECT status_admin FROM applications WHERE id = ?");
+$stmt = $pdo->prepare("SELECT status_admin, nama, email, no_pendaftaran, jadwal_tanggal, jadwal_jam, jadwal_lokasi FROM applications WHERE id = ?");
 $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
@@ -21,5 +22,11 @@ if ($app['status_admin'] !== 'memenuhi') fail('Hanya pelamar yang lolos administ
 $pdo->prepare("UPDATE applications SET jadwal_tanggal = ?, jadwal_jam = ?, jadwal_lokasi = ? WHERE id = ?")
     ->execute([$tanggal, $jam, $lokasi, $id]);
 log_status($pdo, $id, 'memenuhi', 'wawancara', $adminId, "$tanggal $jam · " . mb_substr($lokasi, 0, 200));
+
+// Email hanya dikirim bila jadwal baru atau benar-benar berubah
+$lama = [$app['jadwal_tanggal'], substr((string) $app['jadwal_jam'], 0, 5), $app['jadwal_lokasi']];
+if ($lama !== [$tanggal, substr($jam, 0, 5), $lokasi]) {
+    email_jadwal_wawancara($app, $tanggal, $jam, $lokasi, $app['jadwal_tanggal'] !== null);
+}
 
 json_out(['success' => true, 'message' => 'Jadwal wawancara disimpan.']);

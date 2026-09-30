@@ -19,5 +19,8 @@ if (!is_file($path)) fail('Berkas tidak ditemukan di server.', 404);
 
 header('Content-Type: application/pdf');
 header('Content-Length: ' . filesize($path));
-header('Content-Disposition: inline; filename="' . str_replace(['"', "\r", "\n"], '', $f['original_name']) . '"');
+$nama = str_replace(['"', "\r", "\n", '\\'], '', $f['original_name']);
+$ascii = preg_replace('/[^\x20-\x7E]/', '_', $nama);
+header('Content-Disposition: inline; filename="' . $ascii . '"; filename*=UTF-8\'\'' . rawurlencode($nama));
+header('Cache-Control: private, no-store');
 readfile($path);

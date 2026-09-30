@@ -6,10 +6,11 @@
 <title>Portal Magang Mahasiswa — KPwBI Provinsi Lampung</title>
 <meta name="description" content="Pendaftaran Program Magang Mahasiswa S1 di Kantor Perwakilan Bank Indonesia Provinsi Lampung.">
 <meta name="theme-color" content="#0A2A4A">
-<link rel="icon" href="assets/bi-logo-bulat.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
 <style>
@@ -53,6 +54,9 @@
   .period-card b{display:block;font-size:15.5px;font-weight:700;margin-top:1px;}
   .period-card .open{margin-top:10px;}
   .period-card .open:empty{display:none;}
+  .period-card .open{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;}
+  .period-card .sisa{font-size:12.5px;color:var(--ink-2);}
+  .period-card .sisa b{display:inline;font-size:inherit;margin:0;color:var(--ink);}
   @media(max-width:880px){
     .hero{padding:72px 0 80px;}
     .hero .wrap{grid-template-columns:1fr;gap:40px;}
@@ -370,9 +374,19 @@
     if (p.tanggal_buka && p.tanggal_tutup) {
       const today = todayISO();
       const open = today >= p.tanggal_buka && today <= p.tanggal_tutup;
-      document.getElementById('infoOpen').innerHTML = open
+      // Selisih hari kalender antara dua tanggal YYYY-MM-DD
+      const selisih = (a, b) => Math.round((Date.UTC(...b.split('-').map((n, i) => i === 1 ? n - 1 : +n)) - Date.UTC(...a.split('-').map((n, i) => i === 1 ? n - 1 : +n))) / 864e5);
+      let sisa = '';
+      if (open) {
+        const n = selisih(today, p.tanggal_tutup);
+        sisa = n === 0 ? 'Hari ini hari terakhir pendaftaran.' : `Ditutup dalam <b>${n} hari</b>.`;
+      } else if (today < p.tanggal_buka) {
+        sisa = `Dibuka dalam <b>${selisih(today, p.tanggal_buka)} hari</b>.`;
+      }
+      document.getElementById('infoOpen').innerHTML = (open
         ? '<span class="pill green"><span class="live"></span>Pendaftaran sedang dibuka</span>'
-        : `<span class="pill gray">${today < p.tanggal_buka ? 'Belum dibuka' : 'Pendaftaran ditutup'}</span>`;
+        : `<span class="pill gray">${today < p.tanggal_buka ? 'Belum dibuka' : 'Pendaftaran ditutup'}</span>`)
+        + (sisa ? `<span class="sisa">${sisa}</span>` : '');
     }
 
     list.innerHTML = data.bidang.map(b => `

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Halaman tidak ditemukan — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0A2A4A">
+<!-- Path absolut: halaman ini bisa tampil untuk URL bertingkat apa pun -->
+<link rel="icon" href="/assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/fonts.css">
+<link rel="stylesheet" href="/assets/portal.css">
+<script src="/assets/gerak.js"></script>
+<style>
+  body{background:var(--navy-800);color:#fff;}
+  .hilang{position:relative;overflow:hidden;isolation:isolate;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;}
+  .hilang > .pola-titik,.hilang > .rute{z-index:-1;}
+  .hilang header{padding:28px 0;}
+  .hilang header a{display:inline-flex;align-items:center;gap:12px;text-decoration:none;color:#fff;font-weight:700;}
+  .hilang main{flex:1;display:flex;align-items:center;padding:40px 0 140px;}
+  .hilang main > .wrap{width:100%;}
+  @media(max-width:560px){.hilang > .rute{display:none;}}
+  .hilang .kode{font-family:var(--serif);font-size:clamp(72px,12vw,140px);line-height:1;color:var(--sky-soft);opacity:.35;letter-spacing:-.03em;}
+  .hilang h1{color:#fff;font-size:clamp(30px,4vw,46px);line-height:1.1;margin:14px 0 14px;max-width:620px;}
+  .hilang p{color:#C9D8EA;max-width:520px;font-size:16px;}
+  .hilang .actions{display:flex;gap:12px;margin-top:30px;flex-wrap:wrap;}
+</style>
+</head>
+<body>
+<div class="hilang">
+  <div class="pola-titik" aria-hidden="true"></div>
+  <!-- Jalur yang terputus: garis berhenti sebelum sampai tujuan -->
+  <svg class="rute" viewBox="0 0 1440 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-halte="0.2,0.45,0.7">
+    <path class="garis" d="M-40 770 C 220 770 380 720 540 712 S 820 740 980 676 S 1140 560 1200 520"/>
+  </svg>
+  <header>
+    <div class="wrap">
+      <a href="/dashboard.html"><span class="logo-mark"><img src="/assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span>Portal Magang Mahasiswa</a>
+    </div>
+  </header>
+  <main>
+    <div class="wrap">
+      <div class="kode" aria-hidden="true">404</div>
+      <h1 data-muncul>Halaman yang Anda cari tidak ditemukan.</h1>
+      <p data-muncul>Alamatnya mungkin salah ketik, atau halamannya sudah dipindahkan. Kembali ke beranda untuk melihat informasi pendaftaran magang.</p>
+      <div class="actions" data-muncul>
+        <a href="/dashboard.html" class="btn btn-light">Ke beranda</a>
+        <a href="/login.html" class="btn btn-ghost-light">Masuk ke akun pelamar</a>
+      </div>
+    </div>
+  </main>
+</div>
+</body>
+</html>

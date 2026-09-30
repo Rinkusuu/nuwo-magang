@@ -18,7 +18,8 @@ try {
     // Menghapus akun ikut menghapus pendaftaran, berkas, penilaian, dan log (ON DELETE CASCADE)
     $pdo->prepare("DELETE FROM users WHERE id = ?")->execute([$app['user_id']]);
 } catch (PDOException $e) {
-    fail('Gagal menghapus data: ' . $e->getMessage(), 500);
+    error_log('[magang] Hapus pelamar ' . $id . ' gagal: ' . $e->getMessage());
+    fail('Gagal menghapus data pelamar. Coba lagi.', 500);
 }
 
 foreach ($storedNames as $name) {

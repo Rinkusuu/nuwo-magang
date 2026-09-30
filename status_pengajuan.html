@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Status Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
 <meta name="theme-color" content="#0A2A4A">
-<link rel="icon" href="assets/bi-logo-bulat.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
 <style>
@@ -51,6 +52,28 @@
   .files .row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:6px 0;}
   .files .row .st{font-weight:700;white-space:nowrap;}
   .st.green{color:var(--green);} .st.amber{color:var(--amber-text);} .st.red{color:var(--red);} .st.gray{color:var(--ink-3);}
+
+  .head-aksi{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .kop-cetak,.nama-cetak{display:none;}
+
+  /* Cetak / simpan PDF: satu halaman bukti tanpa navigasi, tombol, atau animasi */
+  @media print{
+    @page{size:A4;margin:16mm 14mm;}
+    body{background:#fff !important;font-size:12px;}
+    .topbar,.kaki-ringkas,#cetakBtn,.toast,.timeline .notice .btn{display:none !important;}
+    main.wrap{padding:0 !important;max-width:none;}
+    .kop-cetak{display:flex;align-items:center;gap:16px;padding-bottom:12px;margin-bottom:18px;border-bottom:2px solid #0A2A4A;}
+    .kop-cetak img{height:30px;width:auto;}
+    .kop-cetak b{display:block;font-size:15px;}
+    .kop-cetak span{font-size:11px;color:#46566B;}
+    .nama-cetak{display:block;font-size:12px;color:#46566B;margin-top:4px;}
+    .head h1{font-size:24px;}
+    .cols{grid-template-columns:minmax(0,1fr) 250px !important;gap:14px;}
+    .card{box-shadow:none !important;border-color:#C6D3E2;padding:16px 18px;break-inside:avoid;}
+    .timeline li,.timeline li::before{animation:none !important;opacity:1 !important;transform:none !important;}
+    .timeline li.current .dot::after{display:none;}
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
 
   .empty{max-width:560px;margin:40px auto;text-align:center;}
   .empty h2{font-size:24px;margin-bottom:8px;}
@@ -175,9 +198,16 @@
     const pillTahap = a.status_admin === 'tidak_memenuhi' || a.hasil_akhir === 'tidak_diterima' ? 'red' : a.status_admin === 'perbaikan' ? 'amber' : 'blue';
 
     document.getElementById('main').innerHTML = `
+      <div class="kop-cetak" aria-hidden="true">
+        <img src="assets/bi-logo.png" alt="" width="720" height="130">
+        <div><b>Bukti Pendaftaran Program Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung · dicetak ${fmtTanggal(todayISO())}</span></div>
+      </div>
       <div class="head">
-        <div><div class="meta">No. pendaftaran ${esc(a.no_pendaftaran)}</div><h1>Status Pendaftaran Anda</h1></div>
-        <span class="pill ${pillTahap} lg">Tahap saat ini: ${esc(tahap)}</span>
+        <div><div class="meta">No. pendaftaran ${esc(a.no_pendaftaran)}</div><h1>Status Pendaftaran Anda</h1><div class="nama-cetak">${esc(a.nama)} · ${esc(a.email)}</div></div>
+        <div class="head-aksi">
+          <span class="pill ${pillTahap} lg">Tahap saat ini: ${esc(tahap)}</span>
+          <button type="button" class="btn btn-outline btn-sm" id="cetakBtn"><span data-ikon="unduh" data-ikon-ukuran="15"></span>Cetak bukti pendaftaran</button>
+        </div>
       </div>
       <div class="cols">
         <section class="card">
@@ -204,6 +234,8 @@
         </div>
       </div>`;
   }
+
+  document.addEventListener('click', e => { if (e.target.closest('#cetakBtn')) window.print(); });
 
   // "Fakultas Ekonomi dan Bisnis / Ekonomi Pembangunan" → "Ekonomi Pembangunan"
   function prodi(s) { const parts = String(s || '').split('/'); return parts[parts.length - 1].trim(); }

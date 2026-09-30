@@ -1,12 +1,13 @@
 <?php
 require '../../config.php';
 require '../../app_helpers.php';
+require '../../mailer.php';
 
 $adminId = require_admin();
 $data = body();
 $id = (int) ($data['id'] ?? 0);
 
-$stmt = $pdo->prepare("SELECT status_admin FROM applications WHERE id = ? AND submitted_at IS NOT NULL");
+$stmt = $pdo->prepare("SELECT status_admin, nama, email, no_pendaftaran FROM applications WHERE id = ? AND submitted_at IS NOT NULL");
 $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
@@ -51,5 +52,7 @@ foreach ($berkas as $jenis => $status) $upd->execute([$status, $id, $jenis]);
 
 log_status($pdo, $id, $app['status_admin'], $hasil, $adminId, $catatan ? mb_substr($catatan, 0, 255) : null);
 $pdo->commit();
+
+email_hasil_verifikasi($app, $hasil, $catatan, $batas);
 
 json_out(['success' => true, 'message' => 'Hasil verifikasi disimpan.', 'hasil' => $hasil, 'batas_perbaikan' => $batas]);

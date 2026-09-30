@@ -234,6 +234,26 @@ body:has(> .kaki-ringkas) > .wrap{width:100%;}
 .auth-card .alt{text-align:center;font-size:13.5px;color:var(--ink-2);margin-top:20px;}
 .auth-card .alt a{color:var(--navy-700);font-weight:700;}
 .auth-mobile-brand{display:none;}
+/* Label dengan tautan di sisi kanan (mis. "Lupa kata sandi?") */
+.label-baris{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:7px;}
+.label-baris label{margin-bottom:0;}
+.link-kecil{font-size:12.5px;font-weight:600;color:var(--navy-700);text-decoration:none;}
+.link-kecil:hover{text-decoration:underline;text-underline-offset:3px;}
+/* Indikator kekuatan kata sandi: empat ruas yang terisi sesuai skor */
+.kekuatan{display:none;align-items:center;gap:10px;margin-top:8px;font-size:12px;font-weight:600;color:var(--ink-3);}
+.kekuatan.aktif{display:flex;}
+.kekuatan .ruas{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;flex:1;max-width:180px;}
+.kekuatan .ruas i{height:4px;border-radius:2px;background:var(--line);transition:background-color .3s;}
+.kekuatan[data-skor="1"] .ruas i:nth-child(-n+1){background:var(--red);}
+.kekuatan[data-skor="2"] .ruas i:nth-child(-n+2){background:#C98A10;}
+.kekuatan[data-skor="3"] .ruas i:nth-child(-n+3){background:var(--navy-600);}
+.kekuatan[data-skor="4"] .ruas i{background:var(--green);}
+.kekuatan[data-skor="1"] b{color:var(--red);}
+.kekuatan[data-skor="2"] b{color:var(--amber-text);}
+.kekuatan[data-skor="3"] b{color:var(--navy-700);}
+.kekuatan[data-skor="4"] b{color:var(--green);}
+/* Tanda valid di sisi kanan input email yang formatnya sudah benar */
+.field.valid .input{border-color:#9CCDB3;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%231C7A4B' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 13px center;padding-right:38px;}
 .pass-wrap{position:relative;}
 .pass-wrap .input{padding-right:104px;}
 .pass-wrap button{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--navy-700);font-weight:700;font-size:12.5px;cursor:pointer;padding:6px 8px;border-radius:6px;}
