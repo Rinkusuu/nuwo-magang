@@ -30,8 +30,8 @@ $sudahSaya = array_flip($mine->fetchAll(PDO::FETCH_COLUMN));
 
 $bidang = bidang_map($pdo);
 foreach ($rows as &$r) {
-    $r['bidang_utama'] = $bidang[$r['bidang_utama_id']]['singkat'] ?? '-';
-    $r['bidang_penempatan'] = $bidang[$r['bidang_penempatan_id']]['singkat'] ?? null;
+    $r['bidang_utama'] = $bidang[$r['bidang_utama_id'] ?? '']['singkat'] ?? '-';
+    $r['bidang_penempatan'] = $bidang[$r['bidang_penempatan_id'] ?? '']['singkat'] ?? null;
     $n = $nilai[$r['id']] ?? null;
     $r['nilai'] = $n ? round((float) $n['rata'], 2) : null;
     $r['jumlah_penilai'] = $n ? (int) $n['jumlah'] : 0;

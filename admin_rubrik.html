@@ -4,13 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Rubrik Penilaian Seleksi — Backoffice Magang KPwBI Provinsi Lampung</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/bi-logo-bulat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
 <style>
   .head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--navy-800);padding-bottom:14px;margin-bottom:20px;flex-wrap:wrap;}
   .head h1{font-size:clamp(26px,3vw,32px);margin-top:4px;}
   .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px;}
   @media(max-width:900px){.stages{grid-template-columns:1fr;}}
-  .stages div{background:#EDEFF2;border-radius:12px;padding:16px 18px;}
+  .stages div{background:var(--navy-50);border:1px solid var(--navy-100);border-radius:12px;padding:16px 18px;}
   .stages b{display:block;font-size:14px;margin-bottom:4px;}
   .stages p{font-size:12.5px;color:var(--ink-2);}
   table.rubrik{width:100%;border-collapse:collapse;font-size:12.5px;min-width:960px;background:#fff;}
@@ -28,10 +34,10 @@
 <div class="bo">
   <aside class="bo-side" id="sidebar"></aside>
   <main class="bo-main">
-    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="head">
       <div><div class="kicker">Program Magang Mahasiswa · KPwBI Provinsi Lampung</div><h1>Rubrik Penilaian Seleksi</h1></div>
-      <a class="link" id="formLink" href="admin_wawancara.html" style="font-size:13px;">Buka formulir penilaian →</a>
+      <a class="link" id="formLink" href="admin_wawancara.html" style="font-size:13px;">Buka formulir penilaian<span data-ikon="lanjut" data-ikon-ukuran="15"></span></a>
     </div>
 
     <div class="stages">
@@ -50,6 +56,7 @@
   </main>
 </div>
 
+<script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script src="assets/admin.js"></script>
 <script src="assets/rubrik.js"></script>

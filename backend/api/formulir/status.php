@@ -8,9 +8,9 @@ $app = app_by_user($pdo, $userId);
 if (!$app) json_out(['success' => true, 'has_application' => false, 'periode' => get_periode($pdo)]);
 
 $bidang = bidang_map($pdo);
-$app['bidang_utama'] = $bidang[$app['bidang_utama_id']]['nama'] ?? null;
-$app['bidang_alternatif'] = $bidang[$app['bidang_alternatif_id']]['nama'] ?? null;
-$app['bidang_penempatan'] = $bidang[$app['bidang_penempatan_id']]['nama'] ?? null;
+$app['bidang_utama'] = $bidang[$app['bidang_utama_id'] ?? '']['nama'] ?? null;
+$app['bidang_alternatif'] = $bidang[$app['bidang_alternatif_id'] ?? '']['nama'] ?? null;
+$app['bidang_penempatan'] = $bidang[$app['bidang_penempatan_id'] ?? '']['nama'] ?? null;
 $app['editable'] = app_editable($app);
 unset($app['verified_by']);
 

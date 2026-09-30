@@ -29,11 +29,11 @@ foreach ($rows as $r) {
     fputcsv($out, [
         $r['no_pendaftaran'], $r['nama'], $r['email'], $r['no_wa'], $r['domisili'], $r['universitas'], $r['fakultas_prodi'],
         $r['nim'], str_replace('.', ',', (string) $r['ipk']), $r['jenjang'], $r['semester'],
-        $bidang[$r['bidang_utama_id']]['nama'] ?? '', $bidang[$r['bidang_alternatif_id']]['nama'] ?? '',
+        $bidang[$r['bidang_utama_id'] ?? '']['nama'] ?? '', $bidang[$r['bidang_alternatif_id'] ?? '']['nama'] ?? '',
         $r['tanggal_mulai'], $r['tanggal_selesai'], $label[$r['status_admin']] ?? $r['status_admin'],
         $r['jadwal_tanggal'] ? trim($r['jadwal_tanggal'] . ' ' . substr((string) $r['jadwal_jam'], 0, 5)) : '',
         $r['nilai'] !== null ? str_replace('.', ',', (string) $r['nilai']) : '',
-        $label[$r['hasil_akhir']] ?? '', $bidang[$r['bidang_penempatan_id']]['nama'] ?? '', $r['submitted_at'],
+        $label[$r['hasil_akhir'] ?? ''] ?? '', $bidang[$r['bidang_penempatan_id'] ?? '']['nama'] ?? '', $r['submitted_at'],
     ], $sep, '"', '');
 }
 fclose($out);

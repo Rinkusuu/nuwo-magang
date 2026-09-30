@@ -4,30 +4,44 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Formulir Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/bi-logo-bulat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
 <style>
-  .layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start;padding-top:32px;padding-bottom:64px;}
-  @media(max-width:900px){.layout{grid-template-columns:1fr;}.steps-card{display:none;}}
-  .steps-card{position:sticky;top:84px;padding:18px 16px;}
-  .steps-card .kicker{color:var(--ink-2);margin-bottom:10px;}
-  .steps-card a{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:13.5px;text-decoration:none;color:var(--ink-2);}
+  .layout{display:grid;grid-template-columns:236px minmax(0,1fr);gap:24px;align-items:start;padding-top:40px;padding-bottom:72px;}
+  @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);}.steps-card{display:none;}}
+  /* Langkah pendaftaran sebagai halte pada satu jalur vertikal */
+  .steps-card{position:sticky;top:92px;padding:20px 18px;}
+  .steps-card .kicker{color:var(--ink-2);margin-bottom:12px;}
+  .steps-card .jalur{position:relative;}
+  .steps-card .jalur::before{content:"";position:absolute;left:12px;top:18px;bottom:18px;width:2px;background:var(--line);border-radius:2px;}
+  .steps-card .jalur::after{content:"";position:absolute;left:12px;top:18px;width:2px;height:calc((100% - 36px) * var(--progres,0));background:var(--navy-700);border-radius:2px;transition:height .6s var(--ease);}
+  .steps-card a{position:relative;z-index:1;display:flex;align-items:center;gap:12px;padding:9px 4px;font-size:13.5px;text-decoration:none;color:var(--ink-2);border-radius:8px;transition:color .2s;}
+  .steps-card a:hover{color:var(--navy-700);}
   .steps-card a.done{color:var(--ink);font-weight:600;}
-  .steps-card .c{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex-shrink:0;}
+  .steps-card .c{width:26px;height:26px;border-radius:50%;border:1.5px solid var(--line-strong);background:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;transition:background-color .3s,border-color .3s,color .3s,transform .3s var(--ease);}
   .steps-card a.done .c{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
-  h1.title{font-size:clamp(26px,3vw,32px);}
-  .lead{color:var(--ink-2);margin:4px 0 18px;}
-  .card{scroll-margin-top:84px;}
+  .steps-card a.done .c svg{animation:centang-masuk .35s var(--ease);}
+  .steps-card a.aktif .c{border-color:var(--navy-700);color:var(--navy-700);box-shadow:0 0 0 4px rgba(0,87,163,.1);}
+  h1.title{font-size:clamp(28px,3.2vw,38px);line-height:1.12;}
+  .lead{color:var(--ink-2);margin:8px 0 22px;max-width:640px;}
+  .card{scroll-margin-top:92px;}
   .card-title{margin-bottom:14px;}
   .card .grid-2{margin-bottom:0;}
   #eligibility{margin-top:16px;}
 
   .upload-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
   .upload-head .count{font-size:13px;color:var(--ink-2);}
-  .file-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:10px;padding:14px 14px;}
+  .file-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:12px;padding:14px 16px;transition:border-color .3s,background-color .3s;}
+  .file-row.has{border-color:#CFE0F1;background:var(--navy-50);}
   .file-row + .file-row{margin-top:10px;}
   .file-row.flag{border-color:#E7C27A;background:#FFFBF1;}
-  .file-row .no{width:30px;height:30px;border-radius:7px;background:var(--navy-100);color:var(--navy-700);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-  .file-row.has .no{background:var(--navy-700);color:#fff;}
+  .file-row .no{width:32px;height:32px;border-radius:50%;background:#fff;border:1.5px solid var(--navy-100);color:var(--navy-700);font-family:var(--serif);font-weight:600;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background-color .3s,border-color .3s,color .3s;}
+  .file-row.has .no{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
   .file-row .txt{flex:1;min-width:0;}
   .file-row .txt b{display:block;font-size:14px;}
   .file-row .txt p{font-size:12.5px;color:var(--ink-2);}
@@ -48,7 +62,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title">Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="" width="30" height="30"></span>Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <span class="autosave" id="autosave">Tersimpan otomatis sebagai draf</span>
       <a href="status_pengajuan.html" class="nav-link">Status</a>
@@ -61,11 +75,13 @@
 <div class="wrap layout">
   <nav class="card steps-card" aria-label="Langkah pendaftaran">
     <div class="kicker">Langkah Pendaftaran</div>
+    <div class="jalur" id="jalur">
     <a href="#s1" data-step="1"><span class="c">1</span>Data Diri</a>
     <a href="#s2" data-step="2"><span class="c">2</span>Data Akademik</a>
     <a href="#s3" data-step="3"><span class="c">3</span>Bidang dan Periode</a>
     <a href="#s4" data-step="4"><span class="c">4</span>Unggah Berkas</a>
     <a href="#s5" data-step="5"><span class="c">5</span>Pernyataan dan Kirim</a>
+    </div>
   </nav>
 
   <main>
@@ -142,6 +158,7 @@
   </main>
 </div>
 
+<script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script>
   const $ = id => document.getElementById(id);
@@ -218,11 +235,20 @@
 
   function refresh() {
     const s = stepStatus();
+    let pertamaBelum = null;
     document.querySelectorAll('.steps-card a').forEach(a => {
       const n = a.dataset.step;
-      a.classList.toggle('done', s[n]);
-      a.querySelector('.c').textContent = s[n] ? '✓' : n;
+      const c = a.querySelector('.c');
+      const sudah = !!s[n];
+      if (a.classList.contains('done') !== sudah || !c.innerHTML) c.innerHTML = sudah ? ikon('centang', 13) : n;
+      a.classList.toggle('done', sudah);
+      if (!sudah && !pertamaBelum) pertamaBelum = a;
+      a.classList.toggle('aktif', a === pertamaBelum);
     });
+    // Garis jalur terisi sampai langkah terakhir yang berurutan selesai
+    let beruntun = 0;
+    while (beruntun < 5 && s[beruntun + 1]) beruntun++;
+    $('jalur').style.setProperty('--progres', Math.max(0, beruntun - 1) / 4);
 
     // Cek syarat akademik
     const el = $('eligibility');
@@ -249,6 +275,7 @@
   function queueSave() {
     if (!editable) return;
     $('autosave').textContent = 'Menyimpan draf…';
+    $('autosave').classList.add('is-saving');
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveDraft, 700);
   }
@@ -258,6 +285,7 @@
     payload.pernyataan = $('pernyataan').checked;
     const res = await api('backend/api/formulir/save.php', { json: payload });
     $('autosave').textContent = res.success ? 'Tersimpan otomatis sebagai draf' : 'Draf gagal disimpan';
+    $('autosave').classList.remove('is-saving');
     return res.success;
   }
   form.addEventListener('input', () => { refresh(); queueSave(); });

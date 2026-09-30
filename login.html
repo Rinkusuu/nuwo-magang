@@ -4,19 +4,29 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Masuk — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/bi-logo-bulat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
 </head>
 <body>
 
 <div class="auth">
   <aside class="auth-side">
+    <div class="pola-titik" aria-hidden="true"></div>
+    <svg class="rute" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-halte="0.3,0.55,0.8">
+      <path class="garis" d="M-20 890 C 210 880 320 800 400 730 S 560 540 600 390 S 650 90 710 -20"/>
+    </svg>
     <a href="dashboard.html" class="brand">
-      <span class="logo-mark" aria-hidden="true">BI</span>
+      <span class="logo-mark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span>
       <span><b>Portal Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
     </a>
     <div>
       <div class="kicker">Program Magang Mahasiswa</div>
-      <h1>Lanjutkan pendaftaran magang Anda.</h1>
+      <h1 data-muncul style="--urut:1">Lanjutkan pendaftaran magang Anda.</h1>
       <p>Masuk untuk melengkapi formulir, mengunggah berkas administrasi, dan memantau status seleksi Anda.</p>
     </div>
     <div class="foot">Isian formulir tersimpan otomatis sebagai draf.</div>
@@ -24,8 +34,9 @@
 
   <main class="auth-main">
     <div class="auth-card">
-      <a href="dashboard.html" class="back">← Kembali ke beranda</a>
-      <div class="card">
+      <a href="dashboard.html" class="auth-mobile-brand"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span><span><b>Portal Magang Mahasiswa</b><span>KPwBI Provinsi Lampung</span></span></a>
+      <a href="dashboard.html" class="back"><span data-ikon="kembali" data-ikon-ukuran="16"></span>Kembali ke beranda</a>
+      <div class="card" data-muncul style="--urut:1">
         <div class="kicker">Masuk</div>
         <h2>Selamat datang kembali</h2>
         <p class="lead">Gunakan email dan kata sandi akun pelamar Anda.</p>
@@ -52,6 +63,7 @@
   </main>
 </div>
 
+<script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script>
   document.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => {

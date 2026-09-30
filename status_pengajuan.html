@@ -4,14 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Status Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/bi-logo-bulat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
 <style>
   main.wrap{padding:40px 24px 64px;}
   .head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
   .head .meta{font-size:13.5px;color:var(--ink-2);margin-bottom:4px;}
-  .head h1{font-size:clamp(26px,3.2vw,34px);}
+  .head h1{font-size:clamp(28px,3.4vw,40px);line-height:1.1;}
   .cols{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start;}
-  @media(max-width:960px){.cols{grid-template-columns:1fr;}}
+  @media(max-width:960px){.cols{grid-template-columns:minmax(0,1fr);}}
   .side{display:flex;flex-direction:column;gap:20px;}
   .side .card + .card{margin-top:0;}
 
@@ -20,8 +26,11 @@
   .timeline li:last-child{padding-bottom:0;}
   .timeline li::before{content:"";position:absolute;left:14px;top:30px;bottom:0;width:2px;background:var(--line-strong);}
   .timeline li:last-child::before{display:none;}
-  .timeline li.done::before{background:var(--green);}
-  .timeline .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink-2);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
+  .timeline li.done::before{background:var(--green);transform-origin:top;}
+  .gerak .timeline li{animation:naik .6s var(--ease) both;animation-delay:calc(var(--i,0) * 120ms + 80ms);}
+  .gerak .timeline li.done::before{animation:isi-garis .7s var(--ease-in-out) both;animation-delay:calc(var(--i,0) * 120ms + 300ms);}
+  .timeline li.current .dot::after{content:"";position:absolute;inset:-1.5px;border-radius:50%;border:1.5px solid var(--navy-700);animation:cincin-halte 2.4s var(--ease) infinite;}
+  .timeline .dot{width:30px;height:30px;box-sizing:border-box;border-radius:50%;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink-2);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
   .timeline li.done .dot{background:var(--green);border-color:var(--green);color:#fff;}
   .timeline li.current .dot{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
   .timeline li.warn .dot{background:var(--amber);border-color:var(--amber);color:#fff;}
@@ -30,7 +39,7 @@
   .timeline .body b{display:block;font-size:14.5px;}
   .timeline li.pending .body b{font-weight:600;color:var(--ink-2);}
   .timeline .body p{font-size:13px;color:var(--ink-2);}
-  .timeline .box{margin-top:10px;background:#F4F5F7;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .timeline .box{margin-top:10px;background:var(--navy-50);border:1px solid var(--navy-100);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
   .timeline .box span{display:block;font-size:12px;color:var(--ink-2);}
   .timeline .box strong{font-size:14px;}
   @media(max-width:600px){.timeline .box{grid-template-columns:1fr;}}
@@ -52,7 +61,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title">Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="" width="30" height="30"></span>Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <a href="formulir.html" class="nav-link">Formulir</a>
       <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
@@ -63,6 +72,7 @@
 
 <main class="wrap" id="main"><div class="loading">Memuat status pendaftaran…</div></main>
 
+<script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script>
   document.getElementById('logoutBtn').addEventListener('click', () => logout('login.html'));
@@ -101,13 +111,13 @@
       steps.push({ cls: 'current', n: 2, title: 'Verifikasi administrasi sedang diproses', text: 'Tim memeriksa kelengkapan berkas dan syarat akademik Anda.' });
     } else if (a.status_admin === 'perbaikan') {
       tahap = 'Perbaikan Berkas';
-      steps.push({ cls: 'warn', n: '!', title: 'Verifikasi administrasi: Perlu perbaikan', text: '',
+      steps.push({ cls: 'warn', n: ikon('peringatan', 14), title: 'Verifikasi administrasi: Perlu perbaikan', text: '',
         extra: `<div class="notice amber">${esc(a.catatan_verifikasi || '')}
           ${a.batas_perbaikan ? `<br>Batas waktu perbaikan: <strong>${fmtTanggal(a.batas_perbaikan)}</strong>.` : ''}
           <div style="margin-top:10px;"><a href="formulir.html#s4" class="btn btn-primary btn-sm">Perbaiki berkas</a></div></div>` });
     } else if (a.status_admin === 'tidak_memenuhi') {
       tahap = 'Selesai';
-      steps.push({ cls: 'fail', n: '✕', title: 'Verifikasi administrasi: Tidak memenuhi syarat',
+      steps.push({ cls: 'fail', n: ikon('tutup', 13), title: 'Verifikasi administrasi: Tidak memenuhi syarat',
         extra: a.catatan_verifikasi ? `<div class="notice red">${esc(a.catatan_verifikasi)}</div>` : '' });
     } else {
       steps.push({ cls: 'done', title: 'Verifikasi administrasi: Memenuhi syarat', text: `${sm}, dan seluruh berkas dinyatakan sesuai.` });
@@ -140,7 +150,7 @@
       steps.push({ cls: 'warn', n: 4, title: 'Pengumuman: Cadangan', text: 'Anda masuk daftar cadangan. Kami akan menghubungi Anda bila kuota tersedia.' });
     } else if (a.hasil_akhir === 'tidak_diterima') {
       tahap = 'Selesai';
-      steps.push({ cls: 'fail', n: '✕', title: 'Pengumuman: Tidak diterima', text: 'Terima kasih telah mengikuti seleksi Program Magang Mahasiswa.' });
+      steps.push({ cls: 'fail', n: ikon('tutup', 13), title: 'Pengumuman: Tidak diterima', text: 'Terima kasih telah mengikuti seleksi Program Magang Mahasiswa.' });
     } else {
       steps.push({ cls: 'pending', n: 4, title: 'Pengumuman dan penempatan', text: 'Hasil diumumkan melalui dasbor ini dan email.' });
     }
@@ -165,8 +175,8 @@
         <section class="card">
           <h2 class="card-title">Perjalanan Seleksi</h2>
           <ol class="timeline">
-            ${steps.map(s => `<li class="${s.cls}">
-              <span class="dot">${s.cls === 'done' ? '✓' : s.n}</span>
+            ${steps.map((s, i) => `<li class="${s.cls}" style="--i:${i}">
+              <span class="dot">${s.cls === 'done' ? ikon('centang', 14) : s.n}</span>
               <div class="body"><b>${s.title}</b>${s.text ? `<p>${s.text}</p>` : ''}${s.extra || ''}</div></li>`).join('')}
           </ol>
         </section>

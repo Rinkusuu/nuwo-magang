@@ -4,7 +4,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Verifikasi Administrasi — Backoffice Magang KPwBI Provinsi Lampung</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/bi-logo-bulat.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Source+Serif+4:opsz,wght@8..60,500;8..60,600;8..60,700&display=swap">
 <link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
 <style>
   .row-item .seg{flex-shrink:0;}
   .row-item .seg button{min-width:108px;}
@@ -34,11 +40,12 @@
 <div class="bo">
   <aside class="bo-side" id="sidebar"></aside>
   <main class="bo-main" id="main">
-    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="loading">Memuat data pelamar…</div>
   </main>
 </div>
 
+<script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script src="assets/admin.js"></script>
 <script>
@@ -77,8 +84,8 @@
   function render() {
     const prodi = String(app.fakultas_prodi || '').split('/').pop().trim();
     document.getElementById('main').innerHTML = `
-      <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
-      <a href="dashboard_admin.html" class="back-link">← Daftar Pelamar</a>
+      <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
+      <a href="dashboard_admin.html" class="back-link"><span data-ikon="kembali" data-ikon-ukuran="15"></span>Daftar Pelamar</a>
       <div class="page-head" style="margin-bottom:18px;"><div>
         <h1>Verifikasi Administrasi</h1>
         <div class="sub">${esc(app.nama)} · ${esc(app.no_pendaftaran)} · ${esc(app.universitas)} · ${esc(app.jenjang)} ${esc(prodi)} · Semester ${esc(app.semester)}</div>
