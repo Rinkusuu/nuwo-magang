@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Akun — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body>
+
+<div class="auth">
+  <aside class="auth-side">
+    <a href="dashboard.html" class="brand">
+      <span class="logo-mark" aria-hidden="true">BI</span>
+      <span><b>Portal Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
+    </a>
+    <div>
+      <div class="kicker">Registrasi Akun</div>
+      <h1>Mulai pendaftaran magang di KPwBI Provinsi Lampung.</h1>
+      <p>Satu akun untuk seluruh tahapan seleksi, dari pengisian formulir hingga pengumuman penempatan.</p>
+      <div class="auth-steps">
+        <div><span class="n">01</span><span>Buat akun dengan email aktif.</span></div>
+        <div><span class="n">02</span><span>Isi data diri, data akademik, bidang, dan periode magang.</span></div>
+        <div><span class="n">03</span><span>Unggah lima berkas administrasi (PDF, maks. 2 MB), lalu kirim pendaftaran.</span></div>
+      </div>
+    </div>
+    <div class="foot">Khusus mahasiswa aktif jenjang S1, minimal semester 4.</div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="login.html" class="back">← Sudah punya akun? Masuk</a>
+      <div class="card">
+        <div class="kicker">Registrasi Akun</div>
+        <h2>Buat akun pelamar</h2>
+        <p class="lead">Gunakan email aktif; seluruh informasi seleksi dikirim ke alamat ini.</p>
+
+        <form id="regForm" novalidate>
+          <div class="field" id="namaField">
+            <label for="nama">Nama lengkap sesuai KTP</label>
+            <input class="input" type="text" id="nama" placeholder="Nama lengkap" autocomplete="name" required>
+            <span class="err">Nama lengkap wajib diisi.</span>
+          </div>
+          <div class="field" id="emailField">
+            <label for="email">Email aktif</label>
+            <input class="input" type="email" id="email" placeholder="nama@email.com" autocomplete="email" required>
+            <span class="err">Email tidak valid.</span>
+          </div>
+          <div class="field" id="waField">
+            <label for="wa">Nomor HP/WhatsApp</label>
+            <input class="input" type="tel" id="wa" placeholder="08xxxxxxxxxx" autocomplete="tel" required>
+            <span class="err">Nomor HP wajib diisi.</span>
+          </div>
+          <div class="field" id="passField">
+            <label for="password">Kata sandi</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+              <button type="button" data-toggle="password">Lihat</button>
+            </div>
+            <span class="err">Kata sandi minimal 8 karakter.</span>
+          </div>
+          <div class="field" id="confirmField">
+            <label for="confirm">Ulangi kata sandi</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="confirm" placeholder="Ulangi kata sandi" autocomplete="new-password" required>
+              <button type="button" data-toggle="confirm">Lihat</button>
+            </div>
+            <span class="err">Kata sandi tidak sama.</span>
+          </div>
+          <label class="check" id="agreeWrap" style="margin:6px 0 18px;">
+            <input type="checkbox" id="agree">
+            <span>Saya menyetujui penggunaan data pribadi untuk keperluan seleksi Program Magang Mahasiswa KPwBI Provinsi Lampung.</span>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Buat Akun</button>
+        </form>
+        <p class="alt">Sudah punya akun? <a href="login.html">Masuk</a></p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.toggle);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Sembunyikan' : 'Lihat';
+  }));
+
+  const $ = id => document.getElementById(id);
+  const rules = [
+    ['namaField', () => $('nama').value.trim().length >= 3],
+    ['emailField', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('email').value.trim())],
+    ['waField', () => $('wa').value.replace(/\D/g, '').length >= 9],
+    ['passField', () => $('password').value.length >= 8],
+    ['confirmField', () => $('confirm').value === $('password').value && $('confirm').value.length >= 8],
+  ];
+
+  $('regForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    let valid = true;
+    rules.forEach(([id, ok]) => { const pass = ok(); $(id).classList.toggle('has-error', !pass); if (!pass) valid = false; });
+    $('agreeWrap').style.color = $('agree').checked ? '' : 'var(--red)';
+    if (!$('agree').checked) valid = false;
+    if (!valid) return;
+
+    const btn = $('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Memproses…';
+    const data = await api('backend/api/auth/register.php', { json: {
+      nama: $('nama').value.trim(),
+      email: $('email').value.trim().toLowerCase(),
+      no_wa: $('wa').value.trim(),
+      password: $('password').value,
+    }});
+    if (!data.success) {
+      toast(data.message || 'Gagal membuat akun.', true);
+      btn.disabled = false;
+      btn.textContent = 'Buat Akun';
+      return;
+    }
+    toast('Akun berhasil dibuat. Mengarahkan ke formulir…');
+    setTimeout(() => { window.location.href = 'formulir.html'; }, 800);
+  });
+</script>
+</body>
+</html>

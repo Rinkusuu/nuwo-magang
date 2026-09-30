@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rubrik Penilaian Seleksi — Backoffice Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;border-bottom:2px solid var(--navy-800);padding-bottom:14px;margin-bottom:20px;flex-wrap:wrap;}
+  .head h1{font-size:clamp(26px,3vw,32px);margin-top:4px;}
+  .stages{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px;}
+  @media(max-width:900px){.stages{grid-template-columns:1fr;}}
+  .stages div{background:#EDEFF2;border-radius:12px;padding:16px 18px;}
+  .stages b{display:block;font-size:14px;margin-bottom:4px;}
+  .stages p{font-size:12.5px;color:var(--ink-2);}
+  table.rubrik{width:100%;border-collapse:collapse;font-size:12.5px;min-width:960px;background:#fff;}
+  table.rubrik th{background:var(--navy-800);color:#fff;text-align:left;padding:12px 12px;font-weight:700;}
+  table.rubrik td{padding:14px 12px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2);}
+  table.rubrik tbody tr:nth-child(even) td{background:#F7F8FA;}
+  table.rubrik td:first-child{width:21%;color:var(--ink);}
+  table.rubrik td:first-child b{display:block;font-size:13px;}
+  table.rubrik td:first-child .w{color:var(--navy-700);font-weight:700;display:block;margin:4px 0;}
+  table.rubrik td:first-child p{color:var(--ink-2);}
+  table.rubrik tfoot td{background:var(--navy-100);font-weight:700;color:var(--ink);border-top:2px solid var(--navy-800);}
+</style>
+</head>
+<body data-menu="rubrik">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <div class="head">
+      <div><div class="kicker">Program Magang Mahasiswa · KPwBI Provinsi Lampung</div><h1>Rubrik Penilaian Seleksi</h1></div>
+      <a class="link" id="formLink" href="admin_wawancara.html" style="font-size:13px;">Buka formulir penilaian →</a>
+    </div>
+
+    <div class="stages">
+      <div><b>Tahap 1 · Verifikasi administrasi</b><p>Bersifat gugur (memenuhi/tidak), tanpa skor: jenjang S1, minimal semester 4, mahasiswa aktif, serta kelima berkas lengkap dan sesuai.</p></div>
+      <div><b>Tahap 2 · Wawancara</b><p>Tujuh aspek berskala 1–5 dengan bobot total 100%. Nilai akhir = Σ(skor × bobot); nilai pelamar = rata-rata seluruh pewawancara.</p></div>
+      <div><b>Kategori hasil</b><p id="kategori"></p></div>
+    </div>
+
+    <div class="table-card"><div class="table-scroll">
+      <table class="rubrik">
+        <thead><tr><th>Aspek (bobot)</th><th>5 · Sangat baik</th><th>4 · Baik</th><th>3 · Cukup</th><th>2 · Kurang</th><th>1 · Sangat kurang</th></tr></thead>
+        <tbody id="rows"></tbody>
+        <tfoot><tr><td>Total bobot</td><td colspan="5" id="totalBobot"></td></tr></tfoot>
+      </table>
+    </div></div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script src="assets/rubrik.js"></script>
+<script>
+  requireAdmin();
+  const id = new URLSearchParams(location.search).get('id');
+  if (id) document.getElementById('formLink').href = `admin_penilaian.html?id=${encodeURIComponent(id)}`;
+  document.getElementById('kategori').textContent = KETENTUAN_NILAI + ' Skor 1 pada aspek integritas otomatis tidak direkomendasikan.';
+  document.getElementById('rows').innerHTML = ASPEK.map((a, i) => `
+    <tr><td><b>${i + 1}. ${esc(a.nama)}</b><span class="w">Bobot ${a.bobot}%</span><p>${esc(a.ketRubrik)}</p></td>
+    ${[5, 4, 3, 2, 1].map(n => `<td>${esc(a.d[n])}</td>`).join('')}</tr>`).join('');
+  document.getElementById('totalBobot').textContent = ASPEK.reduce((t, a) => t + a.bobot, 0) + '%';
+</script>
+</body>
+</html>

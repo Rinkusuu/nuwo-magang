@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Periode dan Kuota — Backoffice Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+</head>
+<body data-menu="periode">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <div class="page-head">
+      <div>
+        <h1>Periode dan Kuota</h1>
+        <div class="sub">Informasi ini tampil di beranda portal dan menentukan kapan pendaftaran dapat dikirim.</div>
+      </div>
+    </div>
+
+    <form class="card" id="form" style="max-width:760px;" novalidate>
+      <div class="grid-2">
+        <div class="field"><label for="tahun">Tahun program</label><input class="input" id="tahun" type="number" min="2000" max="2100"></div>
+        <div class="field"><label for="kuota">Kuota peserta (orang)</label><input class="input" id="kuota" type="number" min="0" placeholder="Contoh: 20"></div>
+        <div class="field"><label for="tanggal_buka">Pendaftaran dibuka</label><input class="input" id="tanggal_buka" type="date"></div>
+        <div class="field"><label for="tanggal_tutup">Pendaftaran ditutup</label><input class="input" id="tanggal_tutup" type="date"></div>
+        <div class="field"><label for="durasi">Durasi magang</label><input class="input" id="durasi" placeholder="Contoh: 3 bulan (Januari–Maret 2027)"></div>
+        <div class="field"><label for="hari_perbaikan">Batas perbaikan berkas (hari kerja)</label><input class="input" id="hari_perbaikan" type="number" min="1" max="30"></div>
+      </div>
+      <p class="muted" style="font-size:12.5px;margin-top:12px;">Kosongkan tanggal bila jadwal belum ditetapkan; beranda akan menampilkan “Akan diumumkan”.</p>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
+        <button type="submit" class="btn btn-primary" id="saveBtn">Simpan</button>
+      </div>
+    </form>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+  const FIELDS = ['tahun', 'kuota', 'tanggal_buka', 'tanggal_tutup', 'durasi', 'hari_perbaikan'];
+
+  (async () => {
+    if (!await requireAdmin()) return;
+    const data = await api('backend/api/admin/periode.php');
+    if (!data.success) { toast(data.message, true); return; }
+    const p = data.periode || {};
+    FIELDS.forEach(f => document.getElementById(f).value = p[f] ?? '');
+    if (!p.tahun) document.getElementById('tahun').value = new Date().getFullYear();
+    if (!p.hari_perbaikan) document.getElementById('hari_perbaikan').value = 3;
+  })();
+
+  document.getElementById('form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const payload = {};
+    FIELDS.forEach(f => payload[f] = document.getElementById(f).value);
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    const res = await api('backend/api/admin/periode.php', { json: payload });
+    btn.disabled = false;
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+  });
+</script>
+</body>
+</html>

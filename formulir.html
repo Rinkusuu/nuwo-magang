@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Formulir Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  .layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:20px;align-items:start;padding-top:32px;padding-bottom:64px;}
+  @media(max-width:900px){.layout{grid-template-columns:1fr;}.steps-card{display:none;}}
+  .steps-card{position:sticky;top:84px;padding:18px 16px;}
+  .steps-card .kicker{color:var(--ink-2);margin-bottom:10px;}
+  .steps-card a{display:flex;align-items:center;gap:10px;padding:8px 2px;font-size:13.5px;text-decoration:none;color:var(--ink-2);}
+  .steps-card a.done{color:var(--ink);font-weight:600;}
+  .steps-card .c{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-strong);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;flex-shrink:0;}
+  .steps-card a.done .c{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  h1.title{font-size:clamp(26px,3vw,32px);}
+  .lead{color:var(--ink-2);margin:4px 0 18px;}
+  .card{scroll-margin-top:84px;}
+  .card-title{margin-bottom:14px;}
+  .card .grid-2{margin-bottom:0;}
+  #eligibility{margin-top:16px;}
+
+  .upload-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+  .upload-head .count{font-size:13px;color:var(--ink-2);}
+  .file-row{display:flex;align-items:center;gap:14px;border:1px solid var(--line);border-radius:10px;padding:14px 14px;}
+  .file-row + .file-row{margin-top:10px;}
+  .file-row.flag{border-color:#E7C27A;background:#FFFBF1;}
+  .file-row .no{width:30px;height:30px;border-radius:7px;background:var(--navy-100);color:var(--navy-700);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .file-row.has .no{background:var(--navy-700);color:#fff;}
+  .file-row .txt{flex:1;min-width:0;}
+  .file-row .txt b{display:block;font-size:14px;}
+  .file-row .txt p{font-size:12.5px;color:var(--ink-2);}
+  .file-row .txt a{font-size:12px;color:var(--navy-700);font-weight:600;word-break:break-all;}
+  .file-row .act{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .file-row .btn{min-width:96px;}
+  @media(max-width:640px){.file-row{flex-wrap:wrap;}.file-row .act{width:100%;justify-content:flex-end;}}
+  .upload-foot{font-size:12.5px;color:var(--ink-2);margin-top:12px;}
+
+  .statement{display:flex;flex-direction:column;gap:12px;}
+  .missing{margin-top:14px;font-size:13px;color:var(--ink-2);}
+  .missing ul{margin:6px 0 0 18px;}
+  .submit-row{display:flex;justify-content:flex-end;gap:12px;margin-top:18px;flex-wrap:wrap;}
+  #banner{margin-bottom:18px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a href="dashboard.html" class="title">Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <div class="right">
+      <span class="autosave" id="autosave">Tersimpan otomatis sebagai draf</span>
+      <a href="status_pengajuan.html" class="nav-link">Status</a>
+      <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
+      <button type="button" class="link" id="logoutBtn">Keluar</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap layout">
+  <nav class="card steps-card" aria-label="Langkah pendaftaran">
+    <div class="kicker">Langkah Pendaftaran</div>
+    <a href="#s1" data-step="1"><span class="c">1</span>Data Diri</a>
+    <a href="#s2" data-step="2"><span class="c">2</span>Data Akademik</a>
+    <a href="#s3" data-step="3"><span class="c">3</span>Bidang dan Periode</a>
+    <a href="#s4" data-step="4"><span class="c">4</span>Unggah Berkas</a>
+    <a href="#s5" data-step="5"><span class="c">5</span>Pernyataan dan Kirim</a>
+  </nav>
+
+  <main>
+    <h1 class="title">Formulir Pendaftaran Magang</h1>
+    <p class="lead">Lengkapi data berikut. Pendaftaran dapat dikirim setelah syarat akademik terpenuhi dan kelima berkas terunggah.</p>
+    <div id="banner"></div>
+
+    <form id="form" novalidate>
+      <section class="card" id="s1">
+        <h2 class="card-title">1. Data Diri</h2>
+        <div class="grid-2">
+          <div class="field"><label for="nama">Nama lengkap sesuai KTP</label><input class="input" id="nama" name="nama" placeholder="Nama lengkap" autocomplete="name"></div>
+          <div class="field"><label for="email">Email aktif</label><input class="input" id="email" name="email" type="email" placeholder="nama@email.com" autocomplete="email"></div>
+          <div class="field"><label for="no_wa">Nomor HP/WhatsApp</label><input class="input" id="no_wa" name="no_wa" type="tel" placeholder="08xxxxxxxxxx" autocomplete="tel"></div>
+          <div class="field"><label for="domisili">Domisili (kabupaten/kota)</label><input class="input" id="domisili" name="domisili" placeholder="Bandar Lampung"></div>
+        </div>
+      </section>
+
+      <section class="card" id="s2">
+        <h2 class="card-title">2. Data Akademik</h2>
+        <div class="grid-2">
+          <div class="field"><label for="universitas">Perguruan tinggi</label><input class="input" id="universitas" name="universitas" placeholder="Nama perguruan tinggi"></div>
+          <div class="field"><label for="fakultas_prodi">Fakultas / Program studi</label><input class="input" id="fakultas_prodi" name="fakultas_prodi" placeholder="Fakultas Ekonomi dan Bisnis / Akuntansi"></div>
+          <div class="field"><label for="nim">NIM</label><input class="input" id="nim" name="nim" placeholder="Nomor induk mahasiswa"></div>
+          <div class="field"><label for="ipk">IPK terakhir</label><input class="input" id="ipk" name="ipk" inputmode="decimal" placeholder="3,45"></div>
+          <div class="field"><label for="jenjang">Jenjang pendidikan</label>
+            <select class="select" id="jenjang" name="jenjang">
+              <option value="">Pilih jenjang</option>
+              <option value="S1">Strata Satu (S1)</option>
+              <option value="D3">Diploma Tiga (D3)</option>
+              <option value="D4">Diploma Empat (D4)</option>
+              <option value="S2">Strata Dua (S2)</option>
+            </select>
+          </div>
+          <div class="field"><label for="semester">Semester saat ini</label><input class="input" id="semester" name="semester" type="number" min="1" max="14" placeholder="5"></div>
+        </div>
+        <div id="eligibility"></div>
+      </section>
+
+      <section class="card" id="s3">
+        <h2 class="card-title">3. Bidang dan Periode Magang</h2>
+        <div class="grid-2">
+          <div class="field"><label for="bidang_utama_id">Bidang utama</label><select class="select" id="bidang_utama_id" name="bidang_utama_id"><option value="">Pilih bidang</option></select></div>
+          <div class="field"><label for="bidang_alternatif_id">Bidang alternatif</label><select class="select" id="bidang_alternatif_id" name="bidang_alternatif_id"><option value="">Pilih bidang</option></select></div>
+          <div class="field"><label for="tanggal_mulai">Tanggal mulai yang diajukan</label><input class="input" id="tanggal_mulai" name="tanggal_mulai" type="date"></div>
+          <div class="field" id="selesaiField"><label for="tanggal_selesai">Tanggal selesai yang diajukan</label><input class="input" id="tanggal_selesai" name="tanggal_selesai" type="date"><span class="err">Tanggal selesai harus setelah tanggal mulai.</span></div>
+        </div>
+        <p class="hint muted" id="durasiHint" style="font-size:12.5px;margin-top:10px;"></p>
+      </section>
+
+      <section class="card" id="s4">
+        <div class="upload-head">
+          <h2 class="card-title" style="margin:0;">4. Unggah Berkas Administrasi</h2>
+          <span class="count" id="fileCount">0 dari 5 berkas terunggah</span>
+        </div>
+        <div id="fileList"></div>
+        <p class="upload-foot">Format PDF, maksimal 2 MB per berkas. Dokumen pendukung (KTP, NPWP, Buku Tabungan) digabung dalam satu PDF.</p>
+        <input type="file" id="fileInput" accept="application/pdf,.pdf" hidden>
+      </section>
+
+      <section class="card" id="s5">
+        <h2 class="card-title">5. Pernyataan dan Kirim</h2>
+        <div class="statement">
+          <label class="check"><input type="checkbox" id="pernyataan" name="pernyataan">
+            <span>Saya menyatakan bahwa seluruh data dan berkas yang saya sampaikan adalah benar dan dapat dipertanggungjawabkan. Saya bersedia didiskualifikasi apabila di kemudian hari ditemukan ketidaksesuaian, serta bersedia menjaga kerahasiaan informasi selama mengikuti program magang.</span>
+          </label>
+        </div>
+        <div class="missing" id="missing"></div>
+        <div class="submit-row">
+          <button type="submit" class="btn btn-primary" id="submitBtn">Kirim Pendaftaran</button>
+        </div>
+      </section>
+    </form>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const form = $('form');
+  const FIELDS = ['nama','email','no_wa','domisili','universitas','fakultas_prodi','nim','ipk','jenjang','semester',
+                  'bidang_utama_id','bidang_alternatif_id','tanggal_mulai','tanggal_selesai'];
+  let app = null;
+  let files = {};
+  let editable = true;
+  let uploadingJenis = null;
+
+  $('logoutBtn').addEventListener('click', () => logout('login.html'));
+
+  // ---------- Muat data ----------
+  (async () => {
+    const me = await api('backend/api/auth/me.php');
+    if (!me.success) { window.location.href = 'login.html'; return; }
+    $('avatar').textContent = initials(me.user.nama);
+    $('userName').textContent = me.user.nama;
+
+    const [info, st] = await Promise.all([api('backend/api/public/info.php'), api('backend/api/formulir/status.php')]);
+    const opts = (info.bidang || []).map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join('');
+    $('bidang_utama_id').insertAdjacentHTML('beforeend', opts);
+    $('bidang_alternatif_id').insertAdjacentHTML('beforeend', opts);
+    if (info.periode?.durasi) $('durasiHint').textContent = `Durasi magang periode ini: ${info.periode.durasi}.`;
+
+    if (st.has_application) {
+      app = st.application;
+      files = st.files || {};
+      editable = app.editable;
+      FIELDS.forEach(f => { if (app[f] !== null && app[f] !== undefined) $(f).value = f === 'ipk' ? String(app[f]).replace('.', ',') : app[f]; });
+      $('pernyataan').checked = !!Number(app.pernyataan);
+    } else {
+      $('nama').value = me.user.nama;
+      $('email').value = me.user.email;
+      $('no_wa').value = me.user.no_wa || '';
+    }
+
+    renderBanner();
+    if (!editable) form.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
+    renderFiles();
+    refresh();
+  })();
+
+  function renderBanner() {
+    const b = $('banner');
+    if (!app || !app.submitted_at) { b.innerHTML = ''; return; }
+    if (app.status_admin === 'perbaikan') {
+      $('submitBtn').textContent = 'Kirim Perbaikan';
+      b.innerHTML = `<div class="notice amber"><b>Berkas perlu diperbaiki</b>${esc(app.catatan_verifikasi || '')}
+        ${app.batas_perbaikan ? `<br>Batas waktu perbaikan: <strong>${fmtTanggal(app.batas_perbaikan)}</strong>.` : ''}
+        Unggah ulang berkas yang ditandai, lalu kirim kembali pendaftaran Anda.</div>`;
+    } else {
+      $('autosave').textContent = 'Pendaftaran terkirim';
+      b.innerHTML = `<div class="notice blue"><b>Pendaftaran Anda sudah dikirim (${esc(app.no_pendaftaran)})</b>
+        Data di bawah hanya dapat dilihat. Pantau perkembangan seleksi di <a href="status_pengajuan.html" class="link">halaman status</a>.</div>`;
+    }
+  }
+
+  // ---------- Validasi & langkah ----------
+  const val = id => $(id).value.trim();
+  const eligible = () => val('jenjang') === 'S1' && Number(val('semester')) >= 4;
+  const datesOk = () => val('tanggal_mulai') && val('tanggal_selesai') && val('tanggal_selesai') > val('tanggal_mulai');
+
+  function stepStatus() {
+    return {
+      1: val('nama').length >= 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')) && val('no_wa').replace(/\D/g, '').length >= 9 && !!val('domisili'),
+      2: ['universitas','fakultas_prodi','nim','ipk','jenjang','semester'].every(val) && eligible(),
+      3: !!val('bidang_utama_id') && datesOk() && val('bidang_utama_id') !== val('bidang_alternatif_id'),
+      4: BERKAS.every(b => files[b.jenis]),
+      5: $('pernyataan').checked,
+    };
+  }
+
+  function refresh() {
+    const s = stepStatus();
+    document.querySelectorAll('.steps-card a').forEach(a => {
+      const n = a.dataset.step;
+      a.classList.toggle('done', s[n]);
+      a.querySelector('.c').textContent = s[n] ? '✓' : n;
+    });
+
+    // Cek syarat akademik
+    const el = $('eligibility');
+    if (val('jenjang') && val('semester')) {
+      el.innerHTML = eligible()
+        ? `<div class="notice green"><b>Memenuhi syarat akademik</b>Jenjang S1 dan semester ${esc(val('semester'))} memenuhi ketentuan minimal semester 4. Semester akan dicocokkan dengan surat pengantar pada tahap verifikasi.</div>`
+        : `<div class="notice red"><b>Belum memenuhi syarat akademik</b>Program ini khusus mahasiswa jenjang S1 yang sedang menempuh minimal semester 4.</div>`;
+    } else el.innerHTML = '';
+
+    $('selesaiField').classList.toggle('has-error', !!(val('tanggal_mulai') && val('tanggal_selesai') && !datesOk()));
+
+    const missing = [];
+    if (!s[1]) missing.push('Lengkapi data diri');
+    if (!s[2]) missing.push(eligible() || !val('jenjang') ? 'Lengkapi data akademik' : 'Syarat akademik belum terpenuhi');
+    if (!s[3]) missing.push(val('bidang_utama_id') && val('bidang_utama_id') === val('bidang_alternatif_id') ? 'Bidang alternatif harus berbeda dari bidang utama' : 'Pilih bidang utama dan periode magang');
+    if (!s[4]) missing.push(`Unggah ${BERKAS.filter(b => !files[b.jenis]).length} berkas lagi`);
+    if (!s[5]) missing.push('Centang pernyataan');
+    $('missing').innerHTML = editable && missing.length ? `Sebelum mengirim:<ul>${missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : '';
+    if (editable) $('submitBtn').disabled = missing.length > 0;
+  }
+
+  // ---------- Draf otomatis ----------
+  let saveTimer;
+  function queueSave() {
+    if (!editable) return;
+    $('autosave').textContent = 'Menyimpan draf…';
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveDraft, 700);
+  }
+  async function saveDraft() {
+    const payload = {};
+    FIELDS.forEach(f => payload[f] = $(f).value);
+    payload.pernyataan = $('pernyataan').checked;
+    const res = await api('backend/api/formulir/save.php', { json: payload });
+    $('autosave').textContent = res.success ? 'Tersimpan otomatis sebagai draf' : 'Draf gagal disimpan';
+    return res.success;
+  }
+  form.addEventListener('input', () => { refresh(); queueSave(); });
+  form.addEventListener('change', () => { refresh(); queueSave(); });
+
+  // ---------- Berkas ----------
+  function renderFiles() {
+    const flagged = app && app.status_admin === 'perbaikan';
+    $('fileList').innerHTML = BERKAS.map((b, i) => {
+      const f = files[b.jenis];
+      let status;
+      if (uploadingJenis === b.jenis) status = '<span class="pill blue"><span class="spinner"></span> Mengunggah</span>';
+      else if (!f) status = '<span class="pill amber">Belum diunggah</span>';
+      else if (f.status_verifikasi) status = pill(LABEL.berkas, f.status_verifikasi);
+      else status = '<span class="pill green">Terunggah</span>';
+      const flag = flagged && f && f.status_verifikasi && f.status_verifikasi !== 'sesuai';
+      return `<div class="file-row ${f ? 'has' : ''} ${flag ? 'flag' : ''}">
+        <span class="no">${i + 1}</span>
+        <div class="txt"><b>${esc(b.judul)}</b><p>${esc(b.ket)}</p>
+          ${f ? `<a href="backend/api/file.php?id=${f.id}" target="_blank" rel="noopener">${esc(f.original_name)}</a>` : ''}</div>
+        <div class="act">${status}
+          ${editable ? `<button type="button" class="btn btn-outline btn-sm" data-upload="${b.jenis}" ${uploadingJenis ? 'disabled' : ''}>${f ? 'Ganti berkas' : 'Unggah PDF'}</button>` : ''}
+        </div></div>`;
+    }).join('');
+    const n = BERKAS.filter(b => files[b.jenis]).length;
+    $('fileCount').textContent = `${n} dari 5 berkas terunggah`;
+    $('fileList').querySelectorAll('[data-upload]').forEach(btn => btn.addEventListener('click', () => {
+      $('fileInput').dataset.jenis = btn.dataset.upload;
+      $('fileInput').value = '';
+      $('fileInput').click();
+    }));
+  }
+
+  $('fileInput').addEventListener('change', async e => {
+    const file = e.target.files[0];
+    const jenis = e.target.dataset.jenis;
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { toast('Ukuran berkas melebihi 2 MB.', true); return; }
+    if (!/\.pdf$/i.test(file.name)) { toast('Berkas harus berformat PDF.', true); return; }
+
+    uploadingJenis = jenis;
+    renderFiles();
+    const fd = new FormData();
+    fd.append('jenis', jenis);
+    fd.append('file', file);
+    const res = await api('backend/api/formulir/upload.php', { method: 'POST', body: fd });
+    uploadingJenis = null;
+    if (res.success) { files = res.files; toast('Berkas terunggah.'); }
+    else toast(res.message || 'Berkas gagal diunggah.', true);
+    renderFiles();
+    refresh();
+  });
+
+  // ---------- Kirim ----------
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!editable) return;
+    const btn = $('submitBtn');
+    const label = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Mengirim…';
+    clearTimeout(saveTimer);
+    if (!await saveDraft()) { toast('Draf gagal disimpan. Coba lagi.', true); btn.disabled = false; btn.textContent = label; return; }
+    const res = await api('backend/api/formulir/submit.php', { method: 'POST' });
+    if (!res.success) { toast(res.message || 'Pendaftaran gagal dikirim.', true); btn.disabled = false; btn.textContent = label; return; }
+    toast(`Pendaftaran terkirim · ${res.no_pendaftaran}`);
+    setTimeout(() => { window.location.href = 'status_pengajuan.html'; }, 900);
+  });
+</script>
+</body>
+</html>

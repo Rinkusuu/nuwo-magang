@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Magang Mahasiswa — KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  body{background:#fff;}
+  header.nav{position:sticky;top:0;z-index:50;background:#fff;border-bottom:1px solid var(--line);}
+  header.nav .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:64px;}
+  .brand{display:flex;align-items:center;gap:12px;text-decoration:none;}
+  .brand b{display:block;font-size:14.5px;line-height:1.25;}
+  .brand > span:not(.logo-mark) span{display:block;font-size:12px;color:var(--ink-2);}
+  .nav-links{display:flex;align-items:center;gap:26px;font-size:13.5px;font-weight:600;}
+  .nav-links a{text-decoration:none;color:var(--ink);}
+  .nav-links a:hover{color:var(--navy-700);}
+  .nav-cta{display:flex;gap:10px;}
+  @media(max-width:980px){.nav-links{display:none;}}
+  @media(max-width:560px){.brand > span:not(.logo-mark) span{display:none;}.nav-cta .btn-outline{display:none;}}
+
+  .hero{background:var(--navy-800);color:#fff;padding:72px 0 80px;}
+  .hero .wrap{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:48px;align-items:center;}
+  .hero .kicker{color:var(--gold);}
+  .hero h1{color:#fff;font-size:clamp(32px,4.2vw,48px);line-height:1.12;margin:18px 0 22px;max-width:620px;}
+  .hero p{color:#D5DEEC;max-width:540px;font-size:15.5px;}
+  .hero .actions{display:flex;gap:12px;margin-top:28px;flex-wrap:wrap;}
+  .period-card{background:#fff;color:var(--ink);border-radius:var(--radius);padding:22px 24px;max-width:360px;justify-self:end;width:100%;}
+  .period-card .kicker{color:var(--ink-2);margin-bottom:12px;}
+  .period-card .item{padding:12px 0;border-top:1px solid var(--line);}
+  .period-card .item:first-of-type{border-top:none;padding-top:4px;}
+  .period-card .item > span{display:block;font-size:12.5px;color:var(--ink-2);}
+  .period-card b{display:block;font-size:15px;font-weight:700;}
+  .period-card .open{margin-top:10px;}
+  @media(max-width:880px){.hero .wrap{grid-template-columns:1fr;}.period-card{justify-self:start;}}
+
+  section.block{padding:72px 0;}
+  section.alt{background:var(--bg);}
+  .section-head{margin-bottom:28px;display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;}
+  .section-head .kicker{width:100%;margin-bottom:6px;}
+  .section-head h2{font-size:clamp(24px,2.8vw,30px);}
+
+  .req{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr);gap:16px;}
+  @media(max-width:880px){.req{grid-template-columns:1fr;}}
+  .req h3{font-size:16px;font-weight:700;margin-bottom:14px;}
+  .req ol.num-list{list-style:none;display:flex;flex-direction:column;gap:14px;}
+  .req ol.num-list li{display:flex;gap:12px;font-size:14px;color:var(--ink-2);}
+  .req ol.num-list li strong{color:var(--ink);}
+  .req .n{width:22px;height:22px;border-radius:5px;background:var(--navy-100);color:var(--navy-700);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;}
+  .docs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 14px;}
+  .docs .doc{border:1px solid var(--line);border-radius:10px;padding:14px 16px;}
+  .docs .doc.wide{grid-column:1 / -1;}
+  .docs .doc b{display:block;font-size:14px;margin-bottom:3px;}
+  .docs .doc p{font-size:12.5px;color:var(--ink-2);}
+  @media(max-width:620px){.docs{grid-template-columns:1fr;}}
+  .req .foot{font-size:12.5px;color:var(--ink-2);}
+
+  .flow{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:18px;}
+  @media(max-width:980px){.flow{grid-template-columns:repeat(3,minmax(0,1fr));}}
+  @media(max-width:560px){.flow{grid-template-columns:1fr 1fr;}}
+  .flow .step{border-top:2px solid var(--navy-700);padding-top:16px;}
+  .flow .step .no{font-family:var(--serif);font-weight:700;font-size:22px;color:var(--navy-800);}
+  .flow .step h3{font-size:14px;font-weight:700;margin:8px 0 6px;}
+  .flow .step p{font-size:12.5px;color:var(--ink-2);}
+
+  .bidang{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;}
+  @media(max-width:900px){.bidang{grid-template-columns:1fr 1fr;}}
+  @media(max-width:600px){.bidang{grid-template-columns:1fr;}}
+  .bidang .card{padding:20px 20px;margin:0;}
+  .bidang .card h3{font-size:15px;font-weight:700;margin-bottom:6px;}
+  .bidang .card p{font-size:13px;color:var(--ink-2);}
+
+  .faq{max-width:820px;display:flex;flex-direction:column;gap:10px;}
+  .faq details{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px 20px;}
+  .faq summary{cursor:pointer;font-weight:700;font-size:14.5px;list-style:none;display:flex;justify-content:space-between;gap:16px;}
+  .faq summary::-webkit-details-marker{display:none;}
+  .faq summary::after{content:"+";color:var(--navy-700);font-size:18px;line-height:1;}
+  .faq details[open] summary::after{content:"–";}
+  .faq details p{margin-top:10px;font-size:14px;color:var(--ink-2);}
+
+  .cta-band{background:var(--navy-800);color:#fff;border-radius:18px;padding:40px 40px;display:flex;justify-content:space-between;align-items:center;gap:24px;flex-wrap:wrap;}
+  .cta-band h2{color:#fff;font-size:26px;}
+  .cta-band p{color:#D5DEEC;margin-top:6px;}
+  footer{border-top:1px solid var(--line);padding:28px 0;font-size:12.5px;color:var(--ink-2);}
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  footer a{color:var(--navy-700);font-weight:600;}
+</style>
+</head>
+<body>
+
+<header class="nav">
+  <div class="wrap">
+    <a href="dashboard.html" class="brand">
+      <span class="logo-mark dark" aria-hidden="true">BI</span>
+      <span><b>Portal Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
+    </a>
+    <nav class="nav-links" aria-label="Navigasi utama">
+      <a href="#persyaratan">Persyaratan</a>
+      <a href="#alur">Alur Seleksi</a>
+      <a href="#bidang">Bidang Magang</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-cta">
+      <a href="login.html" class="btn btn-outline btn-sm">Masuk</a>
+      <a href="registrasi.html" class="btn btn-primary btn-sm">Daftar Sekarang</a>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="wrap">
+    <div>
+      <div class="kicker">Program Magang Mahasiswa <span id="heroTahun"></span></div>
+      <h1>Mengenal tugas bank sentral langsung dari Kantor Perwakilan Bank Indonesia Provinsi Lampung.</h1>
+      <p>Program magang bagi mahasiswa jenjang Strata Satu (S1) untuk memperoleh pengalaman kerja pada unit kerja KPwBI Provinsi Lampung sesuai bidang yang diminati.</p>
+      <div class="actions">
+        <a href="registrasi.html" class="btn btn-light">Daftar Sekarang</a>
+        <a href="#persyaratan" class="btn btn-ghost-light">Lihat Persyaratan</a>
+      </div>
+    </div>
+    <aside class="period-card" aria-label="Informasi periode">
+      <div class="kicker">Informasi Periode</div>
+      <div class="item"><span>Pendaftaran dibuka</span><b id="infoTanggal">Memuat…</b><div class="open" id="infoOpen"></div></div>
+      <div class="item"><span>Durasi magang</span><b id="infoDurasi">–</b></div>
+      <div class="item"><span>Kuota peserta</span><b id="infoKuota">–</b></div>
+    </aside>
+  </div>
+</section>
+
+<section class="block alt" id="persyaratan">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Persyaratan</div>
+      <h2>Siapa yang dapat mendaftar</h2>
+    </div>
+    <div class="req">
+      <div class="card">
+        <h3>A. Persyaratan Umum</h3>
+        <ol class="num-list">
+          <li><span class="n">1</span><span>Mahasiswa aktif jenjang <strong>Strata Satu (S1)</strong>.</span></li>
+          <li><span class="n">2</span><span>Sedang menempuh <strong>minimal semester 4</strong> pada saat mendaftar, dibuktikan dengan surat pengantar dari perguruan tinggi.</span></li>
+          <li><span class="n">3</span><span>Bersedia mengikuti seluruh rangkaian seleksi dan menjalani magang sesuai periode yang diajukan.</span></li>
+        </ol>
+      </div>
+      <div class="card">
+        <h3>B. Persyaratan Administrasi</h3>
+        <p class="muted" style="font-size:13px;">Persyaratan administrasi Program Magang Mahasiswa paling tidak meliputi:</p>
+        <div class="docs">
+          <div class="doc"><b>1. Data Diri Lengkap</b><p><em>Curriculum Vitae</em> (CV).</p></div>
+          <div class="doc"><b>2. <em>Motivation Letter</em></b><p>Menjelaskan maksud dan tujuan, bidang/sektor yang diminati, jangka waktu, serta harapan atau target yang akan dicapai.</p></div>
+          <div class="doc"><b>3. Surat Pengantar dari Perguruan Tinggi</b><p>Mencakup Nama, NIM, Fakultas/Program Studi, dan Semester.</p></div>
+          <div class="doc"><b>4. Transkrip Nilai Terakhir</b><p>Transkrip resmi sampai semester terakhir yang telah ditempuh.</p></div>
+          <div class="doc wide"><b>5. Dokumen Pendukung</b><p>KTP, NPWP, dan Buku Tabungan.</p></div>
+        </div>
+        <p class="foot">Seluruh berkas diunggah dalam format PDF (maksimal 2 MB per berkas) melalui formulir pendaftaran daring.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="block" id="alur">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Alur Seleksi</div>
+      <h2>Enam tahap dari pendaftaran hingga penempatan</h2>
+    </div>
+    <div class="flow">
+      <div class="step"><div class="no">01</div><h3>Registrasi Akun</h3><p>Pelamar membuat akun dan mengisi data diri serta data akademik.</p></div>
+      <div class="step"><div class="no">02</div><h3>Unggah Berkas</h3><p>Pelamar memilih bidang dan periode, lalu mengunggah lima berkas administrasi.</p></div>
+      <div class="step"><div class="no">03</div><h3>Verifikasi Administrasi</h3><p>Tim memeriksa kelengkapan berkas dan syarat minimal semester 4 S1.</p></div>
+      <div class="step"><div class="no">04</div><h3>Wawancara</h3><p>Pelamar yang lolos administrasi mengikuti wawancara dengan unit kerja terkait.</p></div>
+      <div class="step"><div class="no">05</div><h3>Pengumuman</h3><p>Hasil seleksi dan penempatan diumumkan melalui dasbor pelamar dan email.</p></div>
+      <div class="step"><div class="no">06</div><h3>Pelaksanaan Magang</h3><p>Peserta menjalani magang, menyusun laporan, dan menerima evaluasi serta sertifikat.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block alt" id="bidang">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">Bidang Magang</div>
+      <h2>Pilih bidang sesuai minat dan latar belakang studi</h2>
+    </div>
+    <div class="bidang" id="bidangList"><p class="muted">Memuat bidang…</p></div>
+  </div>
+</section>
+
+<section class="block" id="faq">
+  <div class="wrap">
+    <div class="section-head">
+      <div class="kicker">FAQ</div>
+      <h2>Pertanyaan yang sering diajukan</h2>
+    </div>
+    <div class="faq">
+      <details><summary>Apakah mahasiswa D3 atau D4 dapat mendaftar?</summary><p>Tidak. Program ini khusus untuk mahasiswa aktif jenjang Strata Satu (S1) yang sedang menempuh minimal semester 4.</p></details>
+      <details><summary>Bagaimana jika salah satu berkas saya dinyatakan perlu perbaikan?</summary><p>Anda akan menerima catatan dan batas waktu perbaikan pada dasbor pelamar. Unggah ulang berkas yang diminta lalu kirim kembali pendaftaran sebelum batas waktu berakhir.</p></details>
+      <details><summary>Bolehkah dokumen KTP, NPWP, dan Buku Tabungan diunggah terpisah?</summary><p>Ketiganya digabung dalam satu berkas PDF dengan ukuran maksimal 2 MB.</p></details>
+      <details><summary>Apakah formulir bisa diisi bertahap?</summary><p>Bisa. Isian formulir tersimpan otomatis sebagai draf, sehingga Anda dapat melanjutkannya kapan saja sebelum mengirim pendaftaran.</p></details>
+      <details><summary>Bagaimana saya mengetahui hasil seleksi?</summary><p>Jadwal wawancara, hasil seleksi, dan bidang penempatan diumumkan melalui halaman Status Pendaftaran di dasbor pelamar.</p></details>
+    </div>
+
+    <div class="cta-band" style="margin-top:48px;">
+      <div>
+        <h2>Siap mendaftar?</h2>
+        <p>Buat akun, lengkapi formulir, dan unggah lima berkas administrasi Anda.</p>
+      </div>
+      <a href="registrasi.html" class="btn btn-light">Daftar Sekarang</a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span>Program Magang Mahasiswa · Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
+    <a href="login_admin.html">Masuk Backoffice</a>
+  </div>
+</footer>
+
+<script src="assets/common.js"></script>
+<script>
+  (async () => {
+    const data = await api('backend/api/public/info.php');
+    const tanggal = document.getElementById('infoTanggal');
+    const list = document.getElementById('bidangList');
+    if (!data.success) {
+      tanggal.textContent = 'Akan diumumkan';
+      list.innerHTML = '<p class="muted">Daftar bidang belum dapat dimuat.</p>';
+      return;
+    }
+    const p = data.periode || {};
+    document.getElementById('heroTahun').textContent = p.tahun || '';
+    tanggal.textContent = p.tanggal_buka && p.tanggal_tutup
+      ? `${fmtTanggal(p.tanggal_buka)} – ${fmtTanggal(p.tanggal_tutup)}` : 'Akan diumumkan';
+    document.getElementById('infoDurasi').textContent = p.durasi || 'Akan diumumkan';
+    document.getElementById('infoKuota').textContent = p.kuota ? `${p.kuota} orang` : 'Akan diumumkan';
+
+    if (p.tanggal_buka && p.tanggal_tutup) {
+      const today = todayISO();
+      const open = today >= p.tanggal_buka && today <= p.tanggal_tutup;
+      document.getElementById('infoOpen').innerHTML = open
+        ? '<span class="pill green">Pendaftaran sedang dibuka</span>'
+        : `<span class="pill gray">${today < p.tanggal_buka ? 'Belum dibuka' : 'Pendaftaran ditutup'}</span>`;
+    }
+
+    list.innerHTML = data.bidang.map(b => `
+      <div class="card"><h3>${esc(b.nama)}</h3><p>${esc(b.deskripsi || '')}</p></div>
+    `).join('') || '<p class="muted">Belum ada bidang.</p>';
+  })();
+</script>
+</body>
+</html>

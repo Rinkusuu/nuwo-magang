@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Status Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  main.wrap{padding:40px 24px 64px;}
+  .head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:22px;}
+  .head .meta{font-size:13.5px;color:var(--ink-2);margin-bottom:4px;}
+  .head h1{font-size:clamp(26px,3.2vw,34px);}
+  .cols{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:20px;align-items:start;}
+  @media(max-width:960px){.cols{grid-template-columns:1fr;}}
+  .side{display:flex;flex-direction:column;gap:20px;}
+  .side .card + .card{margin-top:0;}
+
+  .timeline{list-style:none;margin-top:14px;}
+  .timeline li{position:relative;display:flex;gap:16px;padding-bottom:22px;}
+  .timeline li:last-child{padding-bottom:0;}
+  .timeline li::before{content:"";position:absolute;left:14px;top:30px;bottom:0;width:2px;background:var(--line-strong);}
+  .timeline li:last-child::before{display:none;}
+  .timeline li.done::before{background:var(--green);}
+  .timeline .dot{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--line-strong);background:#fff;color:var(--ink-2);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
+  .timeline li.done .dot{background:var(--green);border-color:var(--green);color:#fff;}
+  .timeline li.current .dot{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  .timeline li.warn .dot{background:var(--amber);border-color:var(--amber);color:#fff;}
+  .timeline li.fail .dot{background:var(--red);border-color:var(--red);color:#fff;}
+  .timeline .body{flex:1;min-width:0;padding-top:3px;}
+  .timeline .body b{display:block;font-size:14.5px;}
+  .timeline li.pending .body b{font-weight:600;color:var(--ink-2);}
+  .timeline .body p{font-size:13px;color:var(--ink-2);}
+  .timeline .box{margin-top:10px;background:#F4F5F7;border-radius:10px;padding:12px 14px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+  .timeline .box span{display:block;font-size:12px;color:var(--ink-2);}
+  .timeline .box strong{font-size:14px;}
+  @media(max-width:600px){.timeline .box{grid-template-columns:1fr;}}
+  .timeline .notice{margin-top:10px;}
+
+  .summary .item{margin-top:10px;}
+  .summary .item span{display:block;font-size:12.5px;color:var(--ink-2);}
+  .summary .item b{font-size:14.5px;font-weight:600;}
+  .files .row{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;padding:6px 0;}
+  .files .row .st{font-weight:700;white-space:nowrap;}
+  .st.green{color:var(--green);} .st.amber{color:var(--amber-text);} .st.red{color:var(--red);} .st.gray{color:var(--ink-3);}
+
+  .empty{max-width:560px;margin:40px auto;text-align:center;}
+  .empty h2{font-size:24px;margin-bottom:8px;}
+  .empty p{color:var(--ink-2);margin-bottom:18px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a href="dashboard.html" class="title">Portal Magang Mahasiswa <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <div class="right">
+      <a href="formulir.html" class="nav-link">Formulir</a>
+      <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
+      <button type="button" class="link" id="logoutBtn">Keluar</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main"><div class="loading">Memuat status pendaftaran…</div></main>
+
+<script src="assets/common.js"></script>
+<script>
+  document.getElementById('logoutBtn').addEventListener('click', () => logout('login.html'));
+
+  (async () => {
+    const me = await api('backend/api/auth/me.php');
+    if (!me.success) { window.location.href = 'login.html'; return; }
+    document.getElementById('avatar').textContent = initials(me.user.nama);
+    document.getElementById('userName').textContent = me.user.nama;
+
+    const st = await api('backend/api/formulir/status.php');
+    const main = document.getElementById('main');
+    if (!st.success) { main.innerHTML = `<div class="notice red">${esc(st.message)}</div>`; return; }
+
+    if (!st.has_application || !st.application.submitted_at) {
+      main.innerHTML = `<div class="card empty">
+        <h2>Pendaftaran belum dikirim</h2>
+        <p>Lengkapi formulir, unggah lima berkas administrasi, lalu kirim pendaftaran agar dapat diproses oleh tim seleksi.</p>
+        <a href="formulir.html" class="btn btn-primary">${st.has_application ? 'Lanjutkan Formulir' : 'Isi Formulir'}</a></div>`;
+      return;
+    }
+    render(st.application, st.files || {});
+  })();
+
+  function render(a, files) {
+    const steps = [];
+    let tahap;
+
+    // 1. Pendaftaran dikirim
+    steps.push({ cls: 'done', title: 'Pendaftaran dikirim', text: `Lima berkas administrasi terunggah lengkap · ${fmtTanggal(a.submitted_at)}.` });
+
+    // 2. Verifikasi administrasi
+    const sm = `Jenjang ${esc(a.jenjang)}, semester ${esc(a.semester)}`;
+    if (a.status_admin === 'menunggu') {
+      tahap = 'Verifikasi Administrasi';
+      steps.push({ cls: 'current', n: 2, title: 'Verifikasi administrasi sedang diproses', text: 'Tim memeriksa kelengkapan berkas dan syarat akademik Anda.' });
+    } else if (a.status_admin === 'perbaikan') {
+      tahap = 'Perbaikan Berkas';
+      steps.push({ cls: 'warn', n: '!', title: 'Verifikasi administrasi: Perlu perbaikan', text: '',
+        extra: `<div class="notice amber">${esc(a.catatan_verifikasi || '')}
+          ${a.batas_perbaikan ? `<br>Batas waktu perbaikan: <strong>${fmtTanggal(a.batas_perbaikan)}</strong>.` : ''}
+          <div style="margin-top:10px;"><a href="formulir.html#s4" class="btn btn-primary btn-sm">Perbaiki berkas</a></div></div>` });
+    } else if (a.status_admin === 'tidak_memenuhi') {
+      tahap = 'Selesai';
+      steps.push({ cls: 'fail', n: '✕', title: 'Verifikasi administrasi: Tidak memenuhi syarat',
+        extra: a.catatan_verifikasi ? `<div class="notice red">${esc(a.catatan_verifikasi)}</div>` : '' });
+    } else {
+      steps.push({ cls: 'done', title: 'Verifikasi administrasi: Memenuhi syarat', text: `${sm}, dan seluruh berkas dinyatakan sesuai.` });
+    }
+
+    // 3. Wawancara
+    const lolos = a.status_admin === 'memenuhi';
+    if (!lolos) {
+      steps.push({ cls: 'pending', n: 3, title: 'Wawancara', text: 'Untuk pelamar yang lolos verifikasi administrasi.' });
+    } else if (!a.jadwal_tanggal) {
+      tahap = 'Wawancara';
+      steps.push({ cls: 'current', n: 3, title: 'Menunggu jadwal wawancara', text: 'Jadwal wawancara akan ditampilkan di sini dan dikirim melalui email.' });
+    } else {
+      const box = `<div class="box">
+        <div><span>Tanggal</span><strong>${fmtTanggal(a.jadwal_tanggal)}</strong></div>
+        <div><span>Waktu</span><strong>${esc(String(a.jadwal_jam).slice(0, 5))} WIB</strong></div>
+        <div><span>Lokasi</span><strong>${/^https?:\/\//.test(a.jadwal_lokasi)
+          ? `<a class="link" href="${esc(a.jadwal_lokasi)}" target="_blank" rel="noopener">${esc(a.jadwal_lokasi)}</a>` : esc(a.jadwal_lokasi)}</strong></div></div>`;
+      if (a.hasil_akhir) steps.push({ cls: 'done', title: 'Wawancara selesai', extra: box });
+      else { tahap = 'Wawancara'; steps.push({ cls: 'current', n: 3, title: 'Wawancara terjadwal', extra: box }); }
+    }
+
+    // 4. Pengumuman
+    if (a.hasil_akhir === 'diterima') {
+      tahap = 'Pelaksanaan Magang';
+      steps.push({ cls: 'done', title: 'Pengumuman: Diterima', text: '',
+        extra: `<div class="notice green"><b>Selamat, Anda diterima sebagai peserta magang.</b>Penempatan: ${esc(a.bidang_penempatan || '-')}. Informasi administrasi lanjutan dikirim melalui email.</div>` });
+    } else if (a.hasil_akhir === 'cadangan') {
+      tahap = 'Pengumuman';
+      steps.push({ cls: 'warn', n: 4, title: 'Pengumuman: Cadangan', text: 'Anda masuk daftar cadangan. Kami akan menghubungi Anda bila kuota tersedia.' });
+    } else if (a.hasil_akhir === 'tidak_diterima') {
+      tahap = 'Selesai';
+      steps.push({ cls: 'fail', n: '✕', title: 'Pengumuman: Tidak diterima', text: 'Terima kasih telah mengikuti seleksi Program Magang Mahasiswa.' });
+    } else {
+      steps.push({ cls: 'pending', n: 4, title: 'Pengumuman dan penempatan', text: 'Hasil diumumkan melalui dasbor ini dan email.' });
+    }
+
+    // 5. Pelaksanaan
+    steps.push({ cls: a.hasil_akhir === 'diterima' ? 'current' : 'pending', n: 5, title: 'Pelaksanaan magang', text: 'Presensi, logbook kegiatan, laporan akhir, dan sertifikat.' });
+
+    const berkasRows = BERKAS.map(b => {
+      const f = files[b.jenis];
+      const [label, color] = !f ? ['Belum diunggah', 'gray'] : (LABEL.berkas[f.status_verifikasi] || ['Menunggu', 'gray']);
+      return `<div class="row"><span>${esc(b.singkat)}</span><span class="st ${color}">${label}</span></div>`;
+    }).join('');
+
+    const pillTahap = a.status_admin === 'tidak_memenuhi' || a.hasil_akhir === 'tidak_diterima' ? 'red' : a.status_admin === 'perbaikan' ? 'amber' : 'blue';
+
+    document.getElementById('main').innerHTML = `
+      <div class="head">
+        <div><div class="meta">No. pendaftaran ${esc(a.no_pendaftaran)}</div><h1>Status Pendaftaran Anda</h1></div>
+        <span class="pill ${pillTahap} lg">Tahap saat ini: ${esc(tahap)}</span>
+      </div>
+      <div class="cols">
+        <section class="card">
+          <h2 class="card-title">Perjalanan Seleksi</h2>
+          <ol class="timeline">
+            ${steps.map(s => `<li class="${s.cls}">
+              <span class="dot">${s.cls === 'done' ? '✓' : s.n}</span>
+              <div class="body"><b>${s.title}</b>${s.text ? `<p>${s.text}</p>` : ''}${s.extra || ''}</div></li>`).join('')}
+          </ol>
+        </section>
+        <div class="side">
+          <section class="card summary">
+            <h2 class="card-title">Ringkasan Pendaftaran</h2>
+            <div class="item"><span>Perguruan tinggi</span><b>${esc(a.universitas)}</b></div>
+            <div class="item"><span>Program studi / Semester</span><b>${esc(a.jenjang)} ${esc(prodi(a.fakultas_prodi))} · Semester ${esc(a.semester)}</b></div>
+            <div class="item"><span>Bidang utama</span><b>${esc(a.bidang_utama || '-')}</b></div>
+            ${a.bidang_alternatif ? `<div class="item"><span>Bidang alternatif</span><b>${esc(a.bidang_alternatif)}</b></div>` : ''}
+            <div class="item"><span>Periode diajukan</span><b>${fmtTanggal(a.tanggal_mulai)} – ${fmtTanggal(a.tanggal_selesai)}</b></div>
+          </section>
+          <section class="card files">
+            <h2 class="card-title">Berkas</h2>
+            ${berkasRows}
+          </section>
+        </div>
+      </div>`;
+  }
+
+  // "Fakultas Ekonomi dan Bisnis / Ekonomi Pembangunan" → "Ekonomi Pembangunan"
+  function prodi(s) { const parts = String(s || '').split('/'); return parts[parts.length - 1].trim(); }
+</script>
+</body>
+</html>

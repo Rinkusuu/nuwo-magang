@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Pelamar — Backoffice Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  td .score b{font-variant-numeric:tabular-nums;}
+  td .score span{color:var(--ink-2);}
+  td .reason{color:var(--ink-2);}
+</style>
+</head>
+<body data-menu="pelamar">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <div class="page-head">
+      <div>
+        <div class="meta">Periode <span id="tahun">–</span></div>
+        <h1>Daftar Pelamar</h1>
+      </div>
+      <a href="backend/api/admin/export.php" class="btn btn-outline">Ekspor ke Excel</a>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span>Total pendaftar</span><b id="stTotal">–</b></div>
+      <div class="stat"><span>Menunggu verifikasi</span><b id="stMenunggu">–</b></div>
+      <div class="stat"><span>Lolos administrasi</span><b id="stLolos">–</b></div>
+      <div class="stat"><span>Sudah dinilai</span><b id="stDinilai">–</b></div>
+      <div class="stat"><span>Diterima / kuota</span><b id="stDiterima">–</b></div>
+    </div>
+
+    <div class="filters">
+      <div class="field"><label for="q">Cari</label><input class="input" id="q" placeholder="Nama, NIM, atau nomor pendaftaran"></div>
+      <div class="field"><label for="fPt">Perguruan tinggi</label><select class="select" id="fPt"><option value="">Semua</option></select></div>
+      <div class="field"><label for="fBidang">Bidang</label><select class="select" id="fBidang"><option value="">Semua bidang</option></select></div>
+      <div class="field"><label for="fStatus">Status</label>
+        <select class="select" id="fStatus">
+          <option value="">Semua status</option>
+          <option value="menunggu">Menunggu verifikasi</option>
+          <option value="perbaikan">Perlu perbaikan</option>
+          <option value="memenuhi">Memenuhi</option>
+          <option value="tidak_memenuhi">Tidak memenuhi</option>
+          <option value="dinilai">Sudah dinilai</option>
+          <option value="diterima">Diterima</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Pelamar</th><th>Perguruan tinggi</th><th>Prodi · Smt</th><th>Bidang utama</th><th>Administrasi</th><th>Nilai wawancara</th><th>Aksi</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="7" class="empty">Memuat data…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+  const params = new URLSearchParams(location.search);
+  if (params.get('status')) {
+    document.getElementById('fStatus').value = params.get('status');
+    if (params.get('status') === 'menunggu') document.body.dataset.menu = 'verifikasi';
+  }
+
+  let rows = [];
+
+  (async () => {
+    if (!await requireAdmin()) return;
+    const data = await api('backend/api/admin/applications.php');
+    if (!data.success) { toast(data.message, true); return; }
+    rows = data.data;
+    const p = data.periode || {};
+    document.getElementById('tahun').textContent = p.tahun || '–';
+
+    document.getElementById('stTotal').textContent = rows.length;
+    document.getElementById('stMenunggu').textContent = rows.filter(r => r.status_admin === 'menunggu').length;
+    document.getElementById('stLolos').textContent = rows.filter(r => r.status_admin === 'memenuhi').length;
+    document.getElementById('stDinilai').textContent = rows.filter(r => r.nilai !== null).length;
+    document.getElementById('stDiterima').textContent = `${rows.filter(r => r.hasil_akhir === 'diterima').length} / ${p.kuota ?? '–'}`;
+
+    const pts = [...new Set(rows.map(r => r.universitas).filter(Boolean))].sort();
+    document.getElementById('fPt').insertAdjacentHTML('beforeend', pts.map(u => `<option>${esc(u)}</option>`).join(''));
+    document.getElementById('fBidang').insertAdjacentHTML('beforeend', data.bidang.map(b => `<option value="${b.id}">${esc(b.singkat)}</option>`).join(''));
+    render();
+  })();
+
+  ['q', 'fPt', 'fBidang', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', render));
+
+  function prodi(s) { const parts = String(s || '').split('/'); return parts[parts.length - 1].trim(); }
+
+  function nilaiCell(r) {
+    if (r.status_admin === 'tidak_memenuhi') return `<span class="reason">${esc(r.alasan)}</span>`;
+    if (r.status_admin !== 'memenuhi') return '<span class="muted">—</span>';
+    if (r.nilai === null) return '<span class="reason">Belum dinilai</span>';
+    return `<span class="score"><b>${fmtAngka(r.nilai)}</b> · <span>${esc(LABEL.rekomendasi[r.kategori])}</span></span>`;
+  }
+
+  function aksi(r) {
+    if (r.status_admin === 'menunggu') return `<a class="link" href="admin_verifikasi.html?id=${r.id}">Verifikasi</a>`;
+    if (r.status_admin === 'memenuhi' && !r.sudah_saya_nilai) return `<a class="link" href="admin_penilaian.html?id=${r.id}">Nilai</a>`;
+    if (r.status_admin === 'memenuhi') return `<a class="link" href="admin_penilaian.html?id=${r.id}">Lihat</a>`;
+    return `<a class="link" href="admin_verifikasi.html?id=${r.id}">Lihat</a>`;
+  }
+
+  function render() {
+    const q = document.getElementById('q').value.trim().toLowerCase();
+    const pt = document.getElementById('fPt').value;
+    const bidang = document.getElementById('fBidang').value;
+    const status = document.getElementById('fStatus').value;
+    const list = rows.filter(r =>
+      (!q || [r.nama, r.nim, r.no_pendaftaran].join(' ').toLowerCase().includes(q)) &&
+      (!pt || r.universitas === pt) &&
+      (!bidang || String(r.bidang_utama_id) === bidang) &&
+      (!status || (status === 'dinilai' ? r.nilai !== null : status === 'diterima' ? r.hasil_akhir === 'diterima' : r.status_admin === status))
+    );
+    document.getElementById('rows').innerHTML = list.length ? list.map(r => `
+      <tr>
+        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)}</span></td>
+        <td>${esc(r.universitas)}</td>
+        <td>${esc(prodi(r.fakultas_prodi))} · ${esc(r.semester)}${r.jenjang !== 'S1' ? ` (${esc(r.jenjang)})` : ''}</td>
+        <td>${esc(r.bidang_utama)}</td>
+        <td>${pill(LABEL.admin, r.status_admin)}</td>
+        <td>${nilaiCell(r)}</td>
+        <td>${aksi(r)}</td>
+      </tr>`).join('') : `<tr><td colspan="7" class="empty">${rows.length ? 'Tidak ada pelamar yang cocok dengan filter.' : 'Belum ada pendaftaran yang masuk.'}</td></tr>`;
+  }
+</script>
+</body>
+</html>

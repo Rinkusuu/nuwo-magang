@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Masuk Backoffice — Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>.auth-side{background:var(--navy-900);}</style>
+</head>
+<body>
+
+<div class="auth">
+  <aside class="auth-side">
+    <div class="brand">
+      <span class="logo-mark" aria-hidden="true">BI</span>
+      <span><b>Backoffice Magang</b><span>KPwBI Provinsi Lampung</span></span>
+    </div>
+    <div>
+      <div class="kicker">Khusus Tim Seleksi</div>
+      <h1>Kelola seleksi Program Magang Mahasiswa.</h1>
+      <p>Verifikasi administrasi, jadwalkan dan nilai wawancara dengan rubrik, lalu tetapkan hasil serta penempatan peserta.</p>
+    </div>
+    <div class="foot">Akses terbatas untuk pegawai yang ditugaskan dalam proses seleksi.</div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="dashboard.html" class="back">← Kembali ke portal pelamar</a>
+      <div class="card">
+        <div class="kicker">Backoffice</div>
+        <h2>Masuk ke Backoffice</h2>
+        <p class="lead">Gunakan akun admin yang diberikan kepada Anda.</p>
+
+        <form id="adminForm" novalidate>
+          <div class="field" id="emailField">
+            <label for="email">Email admin</label>
+            <input class="input" type="email" id="email" placeholder="admin@bi.go.id" autocomplete="username" required>
+            <span class="err">Masukkan alamat email yang valid.</span>
+          </div>
+          <div class="field" id="passField">
+            <label for="password">Kata sandi</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="password" placeholder="Kata sandi" autocomplete="current-password" required>
+              <button type="button" data-toggle="password">Lihat</button>
+            </div>
+            <span class="err">Kata sandi wajib diisi.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:8px;">Masuk</button>
+        </form>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script>
+  document.querySelector('[data-toggle]').addEventListener('click', e => {
+    const input = document.getElementById('password');
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    e.target.textContent = show ? 'Sembunyikan' : 'Lihat';
+  });
+
+  document.getElementById('adminForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const okEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    document.getElementById('emailField').classList.toggle('has-error', !okEmail);
+    document.getElementById('passField').classList.toggle('has-error', !password);
+    if (!okEmail || !password) return;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Memeriksa…';
+    const data = await api('backend/api/auth/admin_login.php', { json: { email, password } });
+    if (!data.success) {
+      toast(data.message || 'Email atau kata sandi salah.', true);
+      btn.disabled = false;
+      btn.textContent = 'Masuk';
+      return;
+    }
+    window.location.href = 'dashboard_admin.html';
+  });
+</script>
+</body>
+</html>

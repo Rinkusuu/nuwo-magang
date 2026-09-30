@@ -1,0 +1,6 @@
+.DS_Store
+.playwright-mcp/
+backend/uploads/*
+!backend/uploads/.htaccess
+!backend/uploads/contoh.pdf
+backend/config.local.php

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Penilaian Wawancara — Backoffice Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  .applicant{display:flex;gap:16px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;margin-bottom:22px;}
+  .applicant .who{display:flex;gap:14px;align-items:flex-start;min-width:0;flex:1;}
+  .applicant .who b{font-size:16px;}
+  .applicant .who p{font-size:13px;color:var(--ink-2);}
+  .applicant .docs{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;}
+  .applicant .aside{text-align:right;font-size:12.5px;color:var(--ink-2);display:flex;flex-direction:column;gap:6px;align-items:flex-end;}
+  @media(max-width:640px){.applicant .aside{text-align:left;align-items:flex-start;}}
+
+  .aspects-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;gap:12px;flex-wrap:wrap;}
+  .aspects-head h2{font-family:var(--sans);font-size:17px;}
+  .aspects-head span{font-size:12.5px;color:var(--ink-2);}
+  .aspect{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:20px 22px;}
+  .aspect.unscored{border-style:dashed;border-color:var(--line-strong);}
+  .aspect + .aspect{margin-top:14px;}
+  .aspect .top{display:flex;gap:12px;align-items:flex-start;}
+  .aspect .no{width:26px;height:26px;border-radius:6px;background:var(--navy-100);color:var(--navy-700);font-weight:700;font-size:13px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .aspect .top div{flex:1;}
+  .aspect h3{font-size:15px;font-weight:700;}
+  .aspect .top p{font-size:12.5px;color:var(--ink-2);}
+  .aspect .q{background:#F4F5F7;border-radius:8px;padding:10px 14px;font-size:13px;margin:14px 0;}
+  .aspect .scoring{display:grid;grid-template-columns:auto minmax(0,1fr);gap:16px;align-items:start;}
+  @media(max-width:720px){.aspect .scoring{grid-template-columns:1fr;}}
+  .scale{display:flex;gap:8px;}
+  .scale label{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:10.5px;color:var(--ink-2);width:52px;text-align:center;line-height:1.2;cursor:pointer;}
+  .scale input{position:absolute;opacity:0;pointer-events:none;}
+  .scale .box{width:44px;height:40px;border:1px solid var(--line-strong);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;color:var(--ink);background:#fff;transition:.15s;}
+  .scale label:hover .box{border-color:var(--navy-600);}
+  .scale input:checked + .box{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  .scale input:focus-visible + .box{outline:2px solid var(--navy-600);outline-offset:2px;}
+  .desc{background:var(--navy-50);border-radius:8px;padding:10px 14px;font-size:13px;min-height:58px;}
+  .desc .k{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--navy-700);margin-bottom:2px;}
+  .desc.empty{background:#F4F5F7;color:var(--ink-2);}
+  .desc.empty .k{color:var(--ink-2);}
+  .aspect .note{margin-top:14px;}
+
+  .score-card{background:var(--navy-800);color:#fff;border-radius:var(--radius);padding:20px 22px;}
+  .score-card .row{display:flex;justify-content:space-between;align-items:baseline;font-size:12px;color:#C7D3E6;}
+  .score-card .row .kicker{color:#C7D3E6;}
+  .score-card .big{display:flex;align-items:baseline;gap:8px;margin:6px 0 10px;}
+  .score-card .big b{font-family:var(--serif);font-size:44px;line-height:1;}
+  .score-card .big span{font-size:13px;color:#C7D3E6;}
+  .score-card .bar{height:6px;border-radius:3px;background:rgba(255,255,255,.18);overflow:hidden;}
+  .score-card .bar i{display:block;height:100%;background:#fff;border-radius:3px;transition:width .2s;}
+  .score-card .tag{display:inline-block;background:#fff;color:var(--navy-800);font-weight:700;font-size:12.5px;border-radius:999px;padding:4px 12px;margin:12px 0 10px;}
+  .score-card ul{list-style:none;border-top:1px solid rgba(255,255,255,.14);padding-top:8px;}
+  .score-card li{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:#DCE4F1;}
+  .score-card li b{font-variant-numeric:tabular-nums;}
+
+  .reco button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:9px 12px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:8px;}
+  .reco button:hover{border-color:var(--navy-600);}
+  .reco button.on{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+  .reco button:disabled{opacity:.45;cursor:not-allowed;}
+  .small{font-size:12.5px;color:var(--ink-2);}
+  .others div{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;gap:10px;}
+</style>
+</head>
+<body data-menu="wawancara">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main" id="main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <div class="loading">Memuat data pelamar…</div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script src="assets/rubrik.js"></script>
+<script>
+  const id = Number(new URLSearchParams(location.search).get('id'));
+  const DOC_LABEL = { cv: 'CV', motivation: 'Motivation Letter', pengantar: 'Surat Pengantar', transkrip: 'Transkrip', pendukung: 'Dokumen Pendukung' };
+  let app, skor = Array(7).fill(null), catatanAspek = Array(7).fill(''), rekomendasi = null, catatan = '';
+
+  (async () => {
+    const admin = await requireAdmin();
+    if (!admin) return;
+    const data = await api(`backend/api/admin/application.php?id=${id}`);
+    const main = document.getElementById('main');
+    if (!data.success) { main.innerHTML = `<div class="notice red">${esc(data.message)}</div>`; return; }
+    app = data.application;
+    const mine = data.penilaian.find(p => p.milik_saya);
+    if (mine) {
+      skor = mine.skor.map(s => s === null ? null : Number(s));
+      catatanAspek = mine.catatan_aspek.length ? mine.catatan_aspek : catatanAspek;
+      rekomendasi = mine.rekomendasi;
+      catatan = mine.catatan || '';
+    }
+    const others = data.penilaian.filter(p => !p.milik_saya && Number(p.lengkap));
+    const prodi = String(app.fakultas_prodi || '').split('/').pop().trim();
+    const lolos = app.status_admin === 'memenuhi';
+
+    main.innerHTML = `
+      <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+      <a href="dashboard_admin.html" class="back-link">← Daftar Pelamar</a>
+      <div class="page-head" style="margin-bottom:16px;"><h1>Penilaian Wawancara</h1></div>
+
+      <section class="card applicant">
+        <div class="who">
+          <span class="avatar lg">${esc(initials(app.nama))}</span>
+          <div>
+            <b>${esc(app.nama)}</b> <span class="muted">· ${esc(app.no_pendaftaran)}</span>
+            <p>${esc(app.universitas)} · ${esc(app.jenjang)} ${esc(prodi)} · Semester ${esc(app.semester)} · IPK ${fmtAngka(app.ipk)} · Bidang: ${esc(app.bidang_utama || '-')}</p>
+            <div class="docs">${BERKAS.map(b => data.files[b.jenis]
+              ? `<a class="link" href="backend/api/file.php?id=${data.files[b.jenis].id}" target="_blank" rel="noopener">${DOC_LABEL[b.jenis]}</a>` : '').join('')}</div>
+          </div>
+        </div>
+        <div class="aside">
+          ${lolos ? '<span class="pill green">Administrasi: Memenuhi syarat</span>' : `<span class="pill amber">Administrasi: ${esc(LABEL.admin[app.status_admin][0])}</span>`}
+          <span>Pewawancara: ${esc(admin.nama)}${others.length ? ` · ${others.length} penilaian lain masuk` : ''}</span>
+          ${app.jadwal_tanggal ? `<span>Jadwal: ${fmtTanggal(app.jadwal_tanggal)}, ${esc(String(app.jadwal_jam).slice(0, 5))} WIB</span>` : ''}
+        </div>
+      </section>
+
+      ${lolos ? '' : '<div class="notice amber" style="margin-bottom:18px;"><b>Belum dapat dinilai</b>Penilaian wawancara hanya untuk pelamar yang lolos verifikasi administrasi.</div>'}
+
+      <div class="two-col">
+        <div>
+          <div class="aspects-head"><h2>Aspek Penilaian</h2><span>Skala 1–5 · total bobot 100%</span></div>
+          <div id="aspects"></div>
+        </div>
+        <div class="sticky">
+          <div class="score-card" id="scoreCard"></div>
+          <section class="card reco">
+            <h3 style="font-size:16px;">Rekomendasi Pewawancara</h3>
+            <p class="small" id="saran" style="margin-top:4px;"></p>
+            <div id="recoBtns"></div>
+            <label class="label" for="catatan" style="margin-top:14px;">Catatan keseluruhan</label>
+            <textarea class="textarea" id="catatan" placeholder="Kekuatan, hal yang perlu dibina, dan kesesuaian dengan bidang yang dilamar.">${esc(catatan)}</textarea>
+            <p class="small" id="saveHint" style="margin:8px 0 10px;">Semua aspek wajib diberi skor.</p>
+            <button type="button" class="btn btn-primary btn-block" id="saveBtn">Simpan Penilaian</button>
+          </section>
+          ${others.length ? `<section class="card others">
+            <h3 style="font-size:14px;margin-bottom:6px;">Penilaian pewawancara lain</h3>
+            ${others.map(o => `<div><span>${esc(o.pewawancara)}</span><b>${fmtAngka(o.nilai_akhir)} · ${esc(LABEL.rekomendasi[o.rekomendasi] || '')}</b></div>`).join('')}
+          </section>` : ''}
+          <section class="card">
+            <h3 style="font-size:14px;margin-bottom:6px;">Ketentuan nilai</h3>
+            <p class="small">Nilai akhir = Σ(skor × bobot). Nilai pelamar = rata-rata seluruh pewawancara.</p>
+            <p class="small" style="margin-top:6px;">${KETENTUAN_NILAI}</p>
+            <p class="small" style="margin-top:6px;">Skor 1 pada aspek Sikap, Integritas, dan Profesionalisme otomatis tidak direkomendasikan.</p>
+            <a href="admin_rubrik.html?id=${id}" class="link" style="font-size:13px;display:inline-block;margin-top:8px;">Lihat rubrik lengkap</a>
+          </section>
+        </div>
+      </div>`;
+
+    document.getElementById('menuBtn').addEventListener('click', e => { e.stopPropagation(); document.getElementById('sidebar').classList.toggle('open'); });
+    document.getElementById('catatan').addEventListener('input', e => catatan = e.target.value);
+    document.getElementById('saveBtn').addEventListener('click', save);
+    renderAspects(lolos);
+    update(lolos);
+  })();
+
+  function renderAspects(enabled) {
+    document.getElementById('aspects').innerHTML = ASPEK.map((a, i) => `
+      <article class="aspect" id="aspect${i}">
+        <div class="top"><span class="no">${i + 1}</span>
+          <div><h3>${esc(a.nama)}</h3><p>${esc(a.ket)}</p></div>
+          <span class="pill blue">Bobot ${a.bobot}%</span></div>
+        <div class="q"><b>Pertanyaan panduan:</b> ${esc(a.tanya)}</div>
+        <div class="scoring">
+          <div class="scale" role="radiogroup" aria-label="Skor ${esc(a.nama)}">
+            ${[1, 2, 3, 4, 5].map(n => `<label><input type="radio" name="s${i}" value="${n}" ${skor[i] === n ? 'checked' : ''} ${enabled ? '' : 'disabled'}><span class="box">${n}</span>${SKALA[n]}</label>`).join('')}
+          </div>
+          <div class="desc" id="desc${i}"></div>
+        </div>
+        <input class="input note" id="note${i}" placeholder="Catatan singkat / bukti jawaban (opsional)" value="${esc(catatanAspek[i] || '')}" ${enabled ? '' : 'disabled'}>
+      </article>`).join('');
+
+    ASPEK.forEach((a, i) => {
+      document.querySelectorAll(`input[name="s${i}"]`).forEach(r => r.addEventListener('change', () => { skor[i] = Number(r.value); update(enabled); }));
+      document.getElementById(`note${i}`).addEventListener('input', e => catatanAspek[i] = e.target.value);
+    });
+  }
+
+  function update(enabled) {
+    let total = 0, n = 0;
+    ASPEK.forEach((a, i) => {
+      const s = skor[i];
+      const el = document.getElementById(`desc${i}`);
+      document.getElementById(`aspect${i}`).classList.toggle('unscored', !s);
+      if (s) { total += s * a.bobot / 100; n++; }
+      el.className = s ? 'desc' : 'desc empty';
+      el.innerHTML = s ? `<div class="k">Skor ${s} · ${SKALA[s]}</div>${esc(a.d[s])}` : '<div class="k">Belum dinilai</div>Pilih skor untuk menampilkan deskriptor rubrik.';
+    });
+    total = Math.round(total * 100) / 100;
+    const complete = n === ASPEK.length;
+    const saran = complete ? kategoriNilai(total, skor[6]) : null;
+
+    document.getElementById('scoreCard').innerHTML = `
+      <div class="row"><span class="kicker">Nilai akhir</span><span>${n} dari 7 aspek</span></div>
+      <div class="big"><b>${fmtAngka(total)}</b><span>dari 5,00 · setara ${Math.round(total / 5 * 100)}/100</span></div>
+      <div class="bar"><i style="width:${total / 5 * 100}%"></i></div>
+      <span class="tag">${complete ? esc(LABEL.rekomendasi[saran]) : `Lengkapi ${7 - n} aspek lagi`}</span>
+      <ul>${ASPEK.map((a, i) => `<li><span>${esc(a.singkat)} (${a.bobot}%)</span><b>${skor[i] ? `${skor[i]} → ${fmtAngka(skor[i] * a.bobot / 100)}` : '– → –'}</b></li>`).join('')}</ul>`;
+
+    document.getElementById('saran').innerHTML = `Saran sistem berdasarkan nilai: <b>${complete ? esc(LABEL.rekomendasi[saran]) : 'menunggu semua aspek dinilai'}</b>`;
+    const lockTidak = skor[6] === 1;
+    if (lockTidak) rekomendasi = 'tidak';
+    document.getElementById('recoBtns').innerHTML = Object.entries(LABEL.rekomendasi).map(([k, label]) =>
+      `<button type="button" data-reco="${k}" class="${rekomendasi === k ? 'on' : ''}" aria-pressed="${rekomendasi === k}" ${!enabled || (lockTidak && k !== 'tidak') ? 'disabled' : ''}>${esc(label)}</button>`).join('');
+    document.querySelectorAll('[data-reco]').forEach(b => b.addEventListener('click', () => { rekomendasi = b.dataset.reco; update(enabled); }));
+
+    document.getElementById('saveHint').textContent = !complete ? 'Semua aspek wajib diberi skor.' : !rekomendasi ? 'Pilih rekomendasi pewawancara.' : 'Siap disimpan.';
+    document.getElementById('saveBtn').disabled = !enabled || !complete || !rekomendasi;
+  }
+
+  async function save() {
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    const res = await api('backend/api/admin/assess.php', { json: { id, skor, catatan_aspek: catatanAspek, rekomendasi, catatan } });
+    if (!res.success) { toast(res.message, true); btn.disabled = false; return; }
+    toast(`Penilaian disimpan · nilai ${fmtAngka(res.nilai_akhir)}`);
+    setTimeout(() => { location.href = 'admin_wawancara.html'; }, 800);
+  }
+</script>
+</body>
+</html>

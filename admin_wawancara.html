@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wawancara dan Penilaian — Backoffice Magang KPwBI Provinsi Lampung</title>
+<link rel="stylesheet" href="assets/portal.css">
+<style>
+  table.data td .input{padding:7px 9px;font-size:13px;}
+  table.data td.jadwal{min-width:420px;}
+  .jadwal-grid{display:grid;grid-template-columns:140px 100px minmax(0,1fr) auto;gap:8px;align-items:center;}
+</style>
+</head>
+<body data-menu="wawancara">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn">☰ Menu</button>
+    <div class="page-head">
+      <div>
+        <div class="meta">Tahap 2 · Pelamar yang lolos administrasi</div>
+        <h1>Wawancara dan Penilaian</h1>
+        <div class="sub">Tetapkan jadwal wawancara (tampil di dasbor pelamar), lalu nilai dengan rubrik tujuh aspek.</div>
+      </div>
+      <a href="admin_rubrik.html" class="btn btn-outline">Lihat Rubrik</a>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Pelamar</th><th>Bidang utama</th><th>Jadwal wawancara (tanggal · jam · ruang/tautan)</th><th>Nilai</th><th>Aksi</th></tr></thead>
+          <tbody id="rows"><tr><td colspan="5" class="empty">Memuat data…</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+  let rows = [];
+
+  (async () => {
+    if (!await requireAdmin()) return;
+    await load();
+  })();
+
+  async function load() {
+    const data = await api('backend/api/admin/applications.php');
+    if (!data.success) { toast(data.message, true); return; }
+    rows = data.data.filter(r => r.status_admin === 'memenuhi');
+    render();
+  }
+
+  function render() {
+    document.getElementById('rows').innerHTML = rows.length ? rows.map(r => `
+      <tr data-id="${r.id}">
+        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
+        <td>${esc(r.bidang_utama)}</td>
+        <td class="jadwal"><div class="jadwal-grid">
+          <input class="input" type="date" data-f="tanggal" value="${esc(r.jadwal_tanggal || '')}" aria-label="Tanggal">
+          <input class="input" type="time" data-f="jam" value="${esc(String(r.jadwal_jam || '').slice(0, 5))}" aria-label="Jam">
+          <input class="input" data-f="lokasi" value="${esc(r.jadwal_lokasi || '')}" placeholder="Ruang / tautan daring" aria-label="Lokasi">
+          <button type="button" class="btn btn-outline btn-sm" data-save>${r.jadwal_tanggal ? 'Ubah' : 'Simpan'}</button>
+        </div></td>
+        <td>${r.nilai !== null
+          ? `<b class="num">${fmtAngka(r.nilai)}</b> <span class="muted">· ${r.jumlah_penilai} pewawancara</span><br><span style="font-size:12.5px;">${esc(LABEL.rekomendasi[r.kategori])}</span>`
+          : '<span class="muted">Belum dinilai</span>'}</td>
+        <td><a class="link" href="admin_penilaian.html?id=${r.id}">${r.sudah_saya_nilai ? 'Lihat / ubah' : 'Nilai'}</a></td>
+      </tr>`).join('') : '<tr><td colspan="5" class="empty">Belum ada pelamar yang lolos verifikasi administrasi.</td></tr>';
+
+    document.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', async () => {
+      const tr = btn.closest('tr');
+      const v = f => tr.querySelector(`[data-f="${f}"]`).value.trim();
+      btn.disabled = true;
+      const res = await api('backend/api/admin/schedule.php', { json: { id: Number(tr.dataset.id), tanggal: v('tanggal'), jam: v('jam'), lokasi: v('lokasi') } });
+      btn.disabled = false;
+      if (!res.success) { toast(res.message, true); return; }
+      toast('Jadwal wawancara disimpan dan tampil di dasbor pelamar.');
+      btn.textContent = 'Ubah';
+    }));
+  }
+</script>
+</body>
+</html>
