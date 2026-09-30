@@ -6,6 +6,8 @@ return [
     // Alamat publik portal, dipakai untuk tautan di email (tanpa garis miring di akhir)
     'APP_URL'  => 'https://magang.contoh.go.id',
     'DEBUG'    => false,
+    // Batas percobaan login/daftar/lupa sandi. JANGAN dimatikan di server; false hanya untuk demo di laptop
+    'BATAS_PERCOBAAN' => true,
 
     // Database: buat user khusus, jangan pakai root
     'DB_HOST'  => 'localhost',

@@ -16,6 +16,8 @@ function cfg(array $lokal, string $kunci, $bawaan = null) {
 
 define('APP_URL', rtrim((string) cfg($lokal, 'APP_URL', ''), '/'));   // mis. https://magang.contoh.go.id
 define('APP_DEBUG', (bool) cfg($lokal, 'DEBUG', false));
+// Batas percobaan login dan sejenisnya; hanya boleh dimatikan di laptop untuk demo
+define('BATAS_PERCOBAAN_AKTIF', (bool) cfg($lokal, 'BATAS_PERCOBAAN', true));
 
 // Seluruh tanggal (periode pendaftaran, batas perbaikan) dihitung dalam WIB
 date_default_timezone_set('Asia/Jakarta');

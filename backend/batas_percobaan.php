@@ -8,6 +8,7 @@ function ip_klien(): string {
 
 // Hentikan permintaan bila percobaan untuk kunci ini atau dari IP ini sudah melewati batas
 function cek_batas(PDO $pdo, string $kunci, int $maks, int $menit, int $maksIp = 0): void {
+    if (!BATAS_PERCOBAAN_AKTIF) return;
     $pdo->prepare("DELETE FROM batas_percobaan WHERE waktu < NOW() - INTERVAL 1 DAY")->execute();
     $q = $pdo->prepare("SELECT COUNT(*) FROM batas_percobaan WHERE kunci = ? AND waktu > NOW() - INTERVAL ? MINUTE");
     $q->execute([$kunci, $menit]);
