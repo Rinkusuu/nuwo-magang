@@ -71,6 +71,12 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
 - Keamanan: CSRF, pembatasan percobaan login / daftar / lupa sandi, sesi baru setelah
   login, cookie HttpOnly + SameSite (+ Secure di HTTPS), pesan galat umum, kredensial di
   `config.local.php`, pemblokiran berkas sensitif, header keamanan, zona waktu WIB.
+- Performa: font judul dipangkas 122 KB → 35 KB, logo WebP (31,7 KB → 13 KB), judul hero
+  langsung terlihat (LCP tidak lagi tertunda animasi), data periode di-preload.
+- Interaktivitas: menu HP, penanda bagian aktif, tombol Daftar menempel di HP, unggah
+  seret-dan-lepas dengan bilah progres, pratinjau PDF dalam dialog, validasi per kolom,
+  dialog konfirmasi bergaya portal, tabel pelamar bisa diurutkan dan dibagi halaman,
+  kerangka saat memuat, kartu bidang seimbang dengan ikon.
 - Hitung mundur penutupan pendaftaran, halaman 404, ikon layar utama, bukti
   pendaftaran siap cetak, indikator kekuatan kata sandi, cek format email,
   peringatan draf belum tersimpan, font disimpan di server sendiri.

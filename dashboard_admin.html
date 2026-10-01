@@ -9,6 +9,7 @@
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
@@ -59,10 +60,11 @@
     <div class="table-card">
       <div class="table-scroll">
         <table class="data">
-          <thead><tr><th>Pelamar</th><th>Perguruan tinggi</th><th>Prodi · Smt</th><th>Bidang utama</th><th>Administrasi</th><th>Nilai wawancara</th><th>Aksi</th></tr></thead>
-          <tbody id="rows"><tr><td colspan="7" class="empty">Memuat data…</td></tr></tbody>
+          <thead><tr><th data-urut="nama"><button type="button" class="urut">Pelamar</button></th><th data-urut="universitas"><button type="button" class="urut">Perguruan tinggi</button></th><th data-urut="semester"><button type="button" class="urut">Prodi · Smt</button></th><th data-urut="bidang_utama"><button type="button" class="urut">Bidang utama</button></th><th data-urut="status_admin"><button type="button" class="urut">Administrasi</button></th><th data-urut="nilai"><button type="button" class="urut">Nilai wawancara</button></th><th>Aksi</th></tr></thead>
+          <tbody id="rows" data-kerangka-tabel="7"></tbody>
         </table>
       </div>
+      <div class="halaman-tabel" id="halaman" aria-label="Halaman tabel"></div>
     </div>
   </main>
 </div>
@@ -78,6 +80,11 @@
   }
 
   let rows = [];
+  const PER_HALAMAN = 20;
+  let halaman = 1;
+  let urut = { kunci: null, arah: 1 };   // arah 1 = naik, -1 = turun
+  // Urutan status mengikuti alur kerja, bukan abjad
+  const URUTAN_STATUS = { menunggu: 0, perbaikan: 1, memenuhi: 2, tidak_memenuhi: 3 };
 
   (async () => {
     if (!await requireAdmin()) return;
@@ -99,7 +106,52 @@
     render();
   })();
 
-  ['q', 'fPt', 'fBidang', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', render));
+  ['q', 'fPt', 'fBidang', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', () => { halaman = 1; render(); }));
+
+  // Klik judul kolom: urut naik, klik lagi: turun, klik ketiga: kembali ke urutan masuk
+  document.querySelectorAll('th[data-urut] button').forEach(btn => btn.addEventListener('click', () => {
+    const kunci = btn.parentElement.dataset.urut;
+    if (urut.kunci !== kunci) urut = { kunci, arah: 1 };
+    else if (urut.arah === 1) urut.arah = -1;
+    else urut = { kunci: null, arah: 1 };
+    document.querySelectorAll('th[data-urut]').forEach(th => {
+      if (th.dataset.urut === urut.kunci) th.setAttribute('aria-sort', urut.arah === 1 ? 'ascending' : 'descending');
+      else th.removeAttribute('aria-sort');
+    });
+    halaman = 1;
+    render();
+  }));
+
+  function nilaiUrut(r, kunci) {
+    if (kunci === 'status_admin') return URUTAN_STATUS[r.status_admin] ?? 9;
+    if (kunci === 'nilai' || kunci === 'semester') return r[kunci] === null ? null : Number(r[kunci]);
+    return String(r[kunci] ?? '').toLowerCase();
+  }
+
+  function renderHalaman(total) {
+    const el = document.getElementById('halaman');
+    const jumlahHalaman = Math.ceil(total / PER_HALAMAN);
+    if (jumlahHalaman <= 1) { el.innerHTML = ''; return; }
+    const awal = (halaman - 1) * PER_HALAMAN + 1;
+    const akhir = Math.min(total, halaman * PER_HALAMAN);
+    const nomor = [];
+    for (let i = 1; i <= jumlahHalaman; i++) {
+      if (i === 1 || i === jumlahHalaman || Math.abs(i - halaman) <= 1) nomor.push(i);
+      else if (nomor[nomor.length - 1] !== '…') nomor.push('…');
+    }
+    el.innerHTML = `<span>Menampilkan ${awal}–${akhir} dari ${total} pelamar</span>
+      <div class="nomor">
+        <button type="button" data-ke="${halaman - 1}" ${halaman === 1 ? 'disabled' : ''} aria-label="Halaman sebelumnya">${ikon('kembali', 14)}</button>
+        ${nomor.map(n => n === '…' ? '<button type="button" disabled>…</button>'
+          : `<button type="button" data-ke="${n}" ${n === halaman ? 'aria-current="page"' : ''}>${n}</button>`).join('')}
+        <button type="button" data-ke="${halaman + 1}" ${halaman === jumlahHalaman ? 'disabled' : ''} aria-label="Halaman berikutnya">${ikon('lanjut', 14)}</button>
+      </div>`;
+    el.querySelectorAll('[data-ke]').forEach(b => b.addEventListener('click', () => {
+      halaman = +b.dataset.ke;
+      render();
+      document.querySelector('.table-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+  }
 
   function prodi(s) { const parts = String(s || '').split('/'); return parts[parts.length - 1].trim(); }
 
@@ -128,7 +180,22 @@
       (!bidang || String(r.bidang_utama_id) === bidang) &&
       (!status || (status === 'dinilai' ? r.nilai !== null : status === 'diterima' ? r.hasil_akhir === 'diterima' : r.status_admin === status))
     );
-    document.getElementById('rows').innerHTML = list.length ? list.map(r => `
+    if (urut.kunci) {
+      // Nilai kosong (mis. belum dinilai) selalu di bawah, apa pun arahnya
+      list.sort((a, b) => {
+        const x = nilaiUrut(a, urut.kunci), y = nilaiUrut(b, urut.kunci);
+        if (x === null && y === null) return 0;
+        if (x === null) return 1;
+        if (y === null) return -1;
+        return (x < y ? -1 : x > y ? 1 : 0) * urut.arah;
+      });
+    }
+    const jumlahHalaman = Math.max(1, Math.ceil(list.length / PER_HALAMAN));
+    halaman = Math.min(halaman, jumlahHalaman);
+    const tampil = list.slice((halaman - 1) * PER_HALAMAN, halaman * PER_HALAMAN);
+    renderHalaman(list.length);
+    document.getElementById('rows').removeAttribute('aria-busy');
+    document.getElementById('rows').innerHTML = tampil.length ? tampil.map(r => `
       <tr>
         <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)}</span></td>
         <td>${esc(r.universitas)}</td>

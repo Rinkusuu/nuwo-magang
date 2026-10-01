@@ -24,7 +24,7 @@ function renderSidebar() {
   const active = document.body.dataset.menu;
   const side = document.getElementById('sidebar');
   side.innerHTML = `
-    <div class="brand"><span class="logo-mark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="32" height="32"></span><span><b>Backoffice Magang</b><span>KPwBI Provinsi Lampung</span></span></div>
+    <div class="brand"><span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="32" height="32"></span><span><b>Backoffice Magang</b><span>KPwBI Provinsi Lampung</span></span></div>
     ${MENU_ADMIN.map(([group, items]) => `
       <div class="group">${group}</div>
       ${items.map(([key, label, href]) => href

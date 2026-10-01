@@ -77,6 +77,7 @@
     peringatan:  '<path d="M12 3.6 21.4 19.8H2.6L12 3.6Z"/><path d="M12 9.8v4.4"/><path d="M12 17.4h.01"/>',
 
     /* navigasi portal magang */
+    grafik:      '<path d="M3.6 20.4h16.8"/><path d="M5.4 16.2 9.6 11l3.6 3 5.4-7.2"/><path d="M15 6.8h3.6v3.6"/>',
     menu:        '<path d="M4 6.6h16M4 12h16M4 17.4h16"/>',
     kembali:     '<path d="M19.2 12H4.8"/><path d="m10.8 6-6 6 6 6"/>',
     lanjut:      '<path d="M4.8 12h14.4"/><path d="m13.2 6 6 6-6 6"/>',

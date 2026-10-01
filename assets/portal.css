@@ -323,7 +323,8 @@ table.data td{padding:15px 16px;border-bottom:1px solid var(--line);vertical-ali
 table.data tbody tr:hover td{background:#FAFCFE;}
 table.data tr:last-child td{border-bottom:none;}
 table.data td.name b{display:block;}
-table.data td.name span{font-size:12.5px;color:var(--ink-3);}
+table.data td.name{min-width:190px;}
+table.data td.name span{font-size:12.5px;color:var(--ink-3);white-space:nowrap;}
 table.data .empty{text-align:center;color:var(--ink-3);padding:40px 16px;}
 .num{font-variant-numeric:tabular-nums;}
 
@@ -350,6 +351,71 @@ table.data .empty{text-align:center;color:var(--ink-3);padding:40px 16px;}
 .loading{padding:56px;text-align:center;color:var(--ink-3);}
 .loading::before{content:"";display:block;width:22px;height:22px;margin:0 auto 12px;border:2px solid var(--line-strong);border-top-color:var(--navy-700);border-radius:50%;animation:spin .8s linear infinite;}
 
+/* ---------- Kerangka saat memuat ----------
+   Menggantikan teks "Memuat…": bentuknya menyerupai isi yang akan datang,
+   sehingga tata letak tidak meloncat saat data tiba. */
+.kerangka{display:block;height:.85em;border-radius:6px;max-width:100%;
+  background:linear-gradient(90deg,#E8EEF5 25%,#F3F6FA 40%,#E8EEF5 60%);background-size:300% 100%;animation:kilau 1.5s ease-in-out infinite;}
+.kerangka.terang{background:linear-gradient(90deg,rgba(255,255,255,.12) 25%,rgba(255,255,255,.24) 40%,rgba(255,255,255,.12) 60%);background-size:300% 100%;}
+.kerangka-baris td{padding:18px 16px;}
+.kerangka-halaman{display:flex;flex-direction:column;gap:18px;padding:8px 0;}
+.kerangka-halaman .kartu{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:24px 26px;display:flex;flex-direction:column;gap:14px;}
+.kerangka-halaman .dua{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:20px;}
+@media(max-width:960px){.kerangka-halaman .dua{grid-template-columns:minmax(0,1fr);}}
+@keyframes kilau{from{background-position:100% 0;}to{background-position:0 0;}}
+
+/* ---------- Dialog (konfirmasi, pratinjau berkas) ---------- */
+/* margin:auto dikembalikan: reset *{margin:0} menghapus pemusatan bawaan <dialog> */
+dialog.dialog{margin:auto;border:none;padding:0;border-radius:var(--radius-lg);box-shadow:var(--shadow-lg);width:min(460px,calc(100% - 32px));color:var(--ink);background:#fff;}
+dialog.dialog::backdrop{background:rgba(5,22,41,.5);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
+dialog.dialog[open]{animation:dialog-masuk .3s var(--ease);}
+dialog.dialog[open]::backdrop{animation:pudar .3s ease;}
+@keyframes dialog-masuk{from{opacity:0;transform:translateY(10px) scale(.98);}to{opacity:1;transform:none;}}
+.dialog .isi{padding:26px 26px 8px;}
+.dialog .ikon-dialog{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--navy-50);color:var(--navy-700);margin-bottom:14px;}
+.dialog.bahaya .ikon-dialog{background:var(--red-bg);color:var(--red);}
+.dialog h2{font-size:22px;line-height:1.2;margin-bottom:8px;}
+.dialog p{font-size:14.5px;color:var(--ink-2);}
+.dialog .aksi{display:flex;justify-content:flex-end;gap:10px;padding:18px 26px 24px;flex-wrap:wrap;}
+.dialog.bahaya .btn-primary{background:var(--red);box-shadow:none;}
+.dialog.bahaya .btn-primary:hover{background:#8A1F22;}
+dialog.dialog.lebar{width:min(960px,calc(100% - 32px));height:min(88vh,1100px);display:none;}
+dialog.dialog.lebar[open]{display:flex;flex-direction:column;}
+.dialog .kepala{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 16px 14px 22px;border-bottom:1px solid var(--line);}
+.dialog .kepala b{font-size:14.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.dialog .kepala .tindakan{display:flex;gap:8px;flex-shrink:0;}
+.dialog iframe{flex:1;width:100%;border:0;background:#525659;border-radius:0 0 var(--radius-lg) var(--radius-lg);}
+.btn-ikon{width:36px;height:36px;padding:0;border-radius:9px;}
+
+/* ---------- Bilah progres unggah ---------- */
+.progres{height:4px;border-radius:2px;background:var(--navy-100);overflow:hidden;margin-top:8px;}
+.progres i{display:block;height:100%;width:0;background:var(--navy-700);border-radius:2px;transition:width .2s linear;}
+
+/* ---------- Tabel yang bisa diurutkan dan dibagi halaman ---------- */
+table.data th button.urut{all:unset;cursor:pointer;display:inline-flex;align-items:center;gap:6px;border-radius:4px;}
+table.data th button.urut:hover{color:var(--navy-700);}
+table.data th button.urut:focus-visible{outline:2px solid var(--navy-600);outline-offset:2px;}
+table.data th button.urut::after{content:"";width:8px;height:8px;opacity:.35;background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 0 7 3H1zM4 8 1 5h6z'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 0 7 3H1zM4 8 1 5h6z'/%3E%3C/svg%3E") center/contain no-repeat;}
+table.data th[aria-sort="ascending"] button.urut::after{opacity:1;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 1 7 5H1z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 1 7 5H1z'/%3E%3C/svg%3E");}
+table.data th[aria-sort="descending"] button.urut::after{opacity:1;-webkit-mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 7 1 3h6z'/%3E%3C/svg%3E");mask-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 8'%3E%3Cpath d='M4 7 1 3h6z'/%3E%3C/svg%3E");}
+table.data th[aria-sort] {color:var(--navy-800);}
+.halaman-tabel{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-2);flex-wrap:wrap;}
+.halaman-tabel:empty{display:none;}
+.halaman-tabel .nomor{display:flex;gap:4px;flex-wrap:wrap;}
+.halaman-tabel .nomor button{min-width:34px;height:34px;padding:0 8px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;font-weight:600;font-size:13px;cursor:pointer;transition:background-color .2s,border-color .2s,color .2s;}
+.halaman-tabel .nomor button:hover:not(:disabled){border-color:var(--navy-700);color:var(--navy-700);}
+.halaman-tabel .nomor button[aria-current="page"]{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
+.halaman-tabel .nomor button:disabled{opacity:.4;cursor:default;}
+
+/* ---------- Umpan balik kecil ---------- */
+.toast{display:flex;align-items:center;gap:10px;}
+.toast svg{flex-shrink:0;}
+/* Pill yang baru berubah statusnya "meletup" sekali supaya perubahan terlihat */
+.pill.baru{animation:pill-letup .5s var(--ease);}
+@keyframes pill-letup{0%{transform:scale(.85);opacity:0;}60%{transform:scale(1.06);opacity:1;}100%{transform:none;}}
+
 /* ==========================================================
    Gerak
    Semua animasi masuk hanya berlaku saat gerak.js menandai
@@ -372,9 +438,11 @@ table.data .empty{text-align:center;color:var(--ink-3);padding:40px 16px;}
 .gerak [data-muncul].tampil{opacity:1;transform:none;}
 
 /* Kata judul hero naik dari balik garis */
-.gerak .kata{display:inline-block;overflow:hidden;vertical-align:top;padding-bottom:.08em;margin-bottom:-.08em;}
-.gerak .kata > span{display:inline-block;transform:translateY(105%);animation:kata-naik .9s var(--ease) forwards;animation-delay:calc(180ms + var(--k,0) * 45ms);}
-@keyframes kata-naik{to{transform:none;}}
+/* Teks tetap terlihat sejak gambar pertama (judul hero adalah elemen LCP); kata-katanya
+   hanya naik sedikit dan menajam bergiliran, tanpa disembunyikan atau dipotong. */
+.gerak .kata{display:inline-block;vertical-align:top;}
+.gerak .kata > span{display:inline-block;animation:kata-naik .7s var(--ease) both;animation-delay:calc(var(--k,0) * 28ms);}
+@keyframes kata-naik{from{transform:translateY(.28em);opacity:.35;}to{transform:none;opacity:1;}}
 
 /* Garis rute tergambar sekali saat halaman dimuat */
 .gerak .rute .garis,.gerak .rute .garis-terang{stroke-dasharray:var(--panjang,2400);stroke-dashoffset:var(--panjang,2400);animation:tarik-garis 2.4s var(--ease-in-out) .3s forwards;}

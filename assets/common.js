@@ -122,7 +122,8 @@ function toast(message, isError = false) {
     el.setAttribute('role', 'status');
     document.body.appendChild(el);
   }
-  el.textContent = message;
+  // Ikon membedakan berhasil dan gagal selain lewat warna
+  el.innerHTML = (window.ikon ? ikon(isError ? 'peringatan' : 'centang', 16) : '') + `<span>${esc(message)}</span>`;
   el.classList.toggle('error', isError);
   el.classList.add('show');
   clearTimeout(toastTimer);
@@ -178,3 +179,81 @@ function pasangCekEmail(input, field) {
   input.addEventListener('input', cek);
   input.addEventListener('blur', () => { if (input.value.trim()) field.classList.toggle('has-error', !pola.test(input.value.trim())); });
 }
+
+// ---------- Kerangka saat memuat ----------
+function kerangkaTabel(kolom, baris = 5) {
+  const lebar = [62, 48, 70, 40, 55, 35, 28];
+  return Array.from({ length: baris }, (_, r) => `<tr class="kerangka-baris" aria-hidden="true">${
+    Array.from({ length: kolom }, (_, c) => `<td><span class="kerangka" style="width:${lebar[(c + r) % lebar.length]}%"></span></td>`).join('')
+  }</tr>`).join('');
+}
+function kerangkaHalaman() {
+  const garis = (lebar) => lebar.map(w => `<span class="kerangka" style="width:${w}%"></span>`).join('');
+  return `<div class="kerangka-halaman" aria-busy="true" aria-label="Memuat">
+    <div>${garis([18])}<div style="height:12px"></div><span class="kerangka" style="width:42%;height:1.8em"></span></div>
+    <div class="dua">
+      <div class="kartu">${garis([30, 90, 75, 85, 60, 80, 50])}</div>
+      <div class="kartu">${garis([45, 70, 60, 80, 55])}</div>
+    </div>
+  </div>`;
+}
+
+// ---------- Dialog konfirmasi ----------
+// Pengganti confirm() bawaan peramban: tampil sesuai gaya portal, bisa diberi
+// penanda bahaya, dan menunggu jawaban lewat Promise.
+function konfirmasi({ judul, pesan, ya = 'Lanjutkan', batal = 'Batal', bahaya = false }) {
+  return new Promise(selesai => {
+    const d = document.createElement('dialog');
+    d.className = 'dialog' + (bahaya ? ' bahaya' : '');
+    d.setAttribute('aria-labelledby', 'dialogJudul');
+    d.innerHTML = `<div class="isi">
+        <div class="ikon-dialog">${window.ikon ? ikon(bahaya ? 'peringatan' : 'centang', 20) : ''}</div>
+        <h2 id="dialogJudul">${esc(judul)}</h2><p>${esc(pesan)}</p></div>
+      <div class="aksi"><button type="button" class="btn btn-outline" value="batal">${esc(batal)}</button>
+        <button type="button" class="btn btn-primary" value="ya">${esc(ya)}</button></div>`;
+    document.body.appendChild(d);
+    const tutup = (hasil) => { d.close(); d.remove(); selesai(hasil); };
+    d.querySelector('[value="batal"]').addEventListener('click', () => tutup(false));
+    d.querySelector('[value="ya"]').addEventListener('click', () => tutup(true));
+    d.addEventListener('cancel', e => { e.preventDefault(); tutup(false); });
+    d.addEventListener('click', e => { if (e.target === d) tutup(false); });
+    d.showModal();
+    // Tindakan berbahaya: fokus awal di "Batal" supaya Enter tidak langsung menghapus
+    d.querySelector(bahaya ? '[value="batal"]' : '[value="ya"]').focus();
+  });
+}
+
+// ---------- Pratinjau PDF ----------
+// Di layar lebar berkas dibuka dalam dialog tanpa meninggalkan halaman. Di HP
+// (peramban seluler umumnya tidak menampilkan PDF di dalam iframe) dibuka di tab baru.
+function pratinjauPdf(url, judul) {
+  const seluler = window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
+  if (seluler) { window.open(url, '_blank', 'noopener'); return; }
+  const d = document.createElement('dialog');
+  d.className = 'dialog lebar';
+  d.setAttribute('aria-label', 'Pratinjau ' + judul);
+  d.innerHTML = `<div class="kepala"><b>${esc(judul)}</b><div class="tindakan">
+      <a class="btn btn-outline btn-sm" href="${esc(url)}" target="_blank" rel="noopener">Buka di tab baru</a>
+      <button type="button" class="btn btn-outline btn-ikon" aria-label="Tutup pratinjau">${window.ikon ? ikon('tutup', 16) : '×'}</button></div></div>
+    <iframe src="${esc(url)}" title="${esc(judul)}"></iframe>`;
+  document.body.appendChild(d);
+  const tutup = () => { d.close(); d.remove(); };
+  d.querySelector('.btn-ikon').addEventListener('click', tutup);
+  d.addEventListener('close', () => d.remove());
+  d.addEventListener('click', e => { if (e.target === d) tutup(); });
+  d.showModal();
+}
+// Tautan berkas cukup diberi atribut data-pratinjau
+document.addEventListener('click', e => {
+  const a = e.target.closest('a[data-pratinjau]');
+  if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+  e.preventDefault();
+  pratinjauPdf(a.getAttribute('href'), a.dataset.pratinjau || a.textContent.trim());
+});
+
+// Placeholder "Memuat…" bertanda data-kerangka langsung diganti kerangka halaman
+document.querySelectorAll('[data-kerangka]').forEach(el => { el.outerHTML = kerangkaHalaman(); });
+document.querySelectorAll('[data-kerangka-tabel]').forEach(tb => {
+  tb.innerHTML = kerangkaTabel(+tb.dataset.kerangkaTabel);
+  tb.setAttribute('aria-busy', 'true');
+});

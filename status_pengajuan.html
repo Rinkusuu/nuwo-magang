@@ -9,6 +9,7 @@
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
@@ -84,7 +85,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <a href="formulir.html" class="nav-link">Formulir</a>
       <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
@@ -93,11 +94,11 @@
   </div>
 </header>
 
-<main class="wrap" id="main"><div class="loading">Memuat status pendaftaran…</div></main>
+<main class="wrap" id="main"><div class="loading" data-kerangka>Memuat status pendaftaran…</div></main>
 
 <footer class="kaki-ringkas">
   <div class="wrap">
-    <img src="assets/bi-logo.png" alt="Bank Indonesia" width="720" height="130">
+    <img src="assets/bi-logo.webp" alt="Bank Indonesia" width="360" height="65">
     <span>Program Magang Mahasiswa · Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
     <a href="https://www.bi.go.id" target="_blank" rel="noopener">bi.go.id</a>
   </div>
@@ -199,7 +200,7 @@
 
     document.getElementById('main').innerHTML = `
       <div class="kop-cetak" aria-hidden="true">
-        <img src="assets/bi-logo.png" alt="" width="720" height="130">
+        <img src="assets/bi-logo.webp" alt="" width="360" height="65">
         <div><b>Bukti Pendaftaran Program Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung · dicetak ${fmtTanggal(todayISO())}</span></div>
       </div>
       <div class="head">

@@ -10,8 +10,10 @@
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
+<link rel="preload" href="backend/api/public/info.php" as="fetch" crossorigin>
 <script src="assets/gerak.js"></script>
 <style>
   body{background:#fff;}
@@ -29,8 +31,34 @@
   .nav-links a:hover{color:var(--navy-700);}
   .nav-links a:hover::after{transform:scaleX(1);}
   .nav-cta{display:flex;gap:10px;flex-shrink:0;}
-  @media(max-width:980px){.nav-links{display:none;}}
-  @media(max-width:560px){.brand > span:not(.logo-mark) span{display:none;}.nav-cta .btn-outline{display:none;}.brand b{font-size:14px;}}
+  .nav-links a.aktif{color:var(--navy-700);}
+  .nav-links a.aktif::after{transform:scaleX(1);}
+  .menu-btn{display:none;}
+  @media(max-width:420px){.menu-btn > span:last-child{display:none;}.menu-btn{padding:8px 10px;}}
+  @media(max-width:980px){.nav-links{display:none;}.menu-btn{display:inline-flex;}}
+
+  /* Menu HP: panel turun dari bawah header */
+  .menu-hp{position:fixed;left:0;right:0;top:72px;z-index:49;background:#fff;border-bottom:1px solid var(--line);box-shadow:0 24px 40px -24px rgba(10,42,74,.45);
+    padding:10px 16px 18px;transform:translateY(-8px);opacity:0;visibility:hidden;transition:transform .3s var(--ease),opacity .25s,visibility 0s .3s;}
+  .menu-hp.buka{transform:none;opacity:1;visibility:visible;transition:transform .35s var(--ease),opacity .25s,visibility 0s;}
+  .menu-hp nav{display:flex;flex-direction:column;}
+  .menu-hp nav a{display:flex;align-items:center;justify-content:space-between;padding:14px 4px;border-bottom:1px solid var(--line);text-decoration:none;font-weight:600;font-size:15.5px;color:var(--ink);}
+  .menu-hp nav a.aktif{color:var(--navy-700);}
+  .menu-hp nav a.aktif::after{content:"";width:7px;height:7px;border-radius:50%;background:var(--gold);}
+  .menu-hp .tombol{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;}
+  .menu-tirai{position:fixed;inset:72px 0 0;z-index:48;background:rgba(5,22,41,.35);opacity:0;visibility:hidden;transition:opacity .25s,visibility 0s .25s;}
+  .menu-tirai.buka{opacity:1;visibility:visible;transition:opacity .25s;}
+  @media(min-width:981px){.menu-hp,.menu-tirai{display:none;}}
+
+  /* Tombol daftar yang menempel di bawah layar HP selama pendaftaran dibuka */
+  .cta-lekat{position:fixed;left:12px;right:12px;bottom:12px;z-index:45;display:none;align-items:center;justify-content:space-between;gap:12px;
+    background:var(--navy-900);color:#fff;border-radius:16px;padding:12px 12px 12px 18px;box-shadow:var(--shadow-lg);
+    transform:translateY(140%);transition:transform .45s var(--ease);}
+  .cta-lekat.tampil{transform:none;}
+  .cta-lekat b{display:block;font-size:14px;}
+  .cta-lekat span{display:block;font-size:12px;color:#9FB4CF;}
+  @media(max-width:720px){.cta-lekat.aktif{display:flex;}}
+  @media(max-width:560px){.brand > span:not(.logo-mark) span{display:none;}.nav-cta > a.btn-outline{display:none;}.brand b{font-size:14px;}}
 
   /* ---------- Hero ---------- */
   .hero{position:relative;overflow:hidden;isolation:isolate;background:
@@ -130,9 +158,21 @@
   }
 
   /* ---------- Bidang ---------- */
-  .bidang{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;}
-  @media(max-width:900px){.bidang{grid-template-columns:1fr 1fr;}}
-  @media(max-width:600px){.bidang{grid-template-columns:1fr;}}
+  /* Grid 6 kolom: tiap kartu 2 kolom (3 per baris). Sisa 2 kartu dibagi rata satu baris,
+     sisa 1 kartu diletakkan di tengah, sehingga tidak ada slot kosong yang menggantung. */
+  .bidang{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;}
+  .bidang > *{grid-column:span 2;}
+  .bidang > p{grid-column:1 / -1;}
+  .bidang > .card:nth-last-child(2):nth-child(3n+1),.bidang > .card:last-child:nth-child(3n+2){grid-column:span 3;}
+  .bidang > .card:last-child:nth-child(3n+1){grid-column:3 / span 2;}
+  @media(max-width:900px){
+    .bidang{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .bidang > *,.bidang > .card:nth-last-child(2):nth-child(3n+1),.bidang > .card:last-child:nth-child(3n+2),.bidang > .card:last-child:nth-child(3n+1){grid-column:span 1;}
+    .bidang > .card:last-child:nth-child(odd){grid-column:1 / -1;}
+  }
+  @media(max-width:600px){.bidang{grid-template-columns:minmax(0,1fr);}.bidang > .card:last-child:nth-child(odd){grid-column:auto;}}
+  .bidang .card > [data-ikon],.bidang .card > .ikon-bidang{width:42px;height:42px;border-radius:12px;background:var(--navy-50);color:var(--navy-700);margin-bottom:16px;transition:background-color .3s,color .3s;}
+  .bidang .card:hover > .ikon-bidang{background:var(--navy-700);color:#fff;}
   .bidang .card{position:relative;padding:24px 24px 22px;margin:0;overflow:hidden;transition:border-color .25s,box-shadow .35s var(--ease),transform .35s var(--ease);}
   .bidang .card::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;background:var(--navy-700);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease);}
   .bidang .card:hover{border-color:var(--navy-100);box-shadow:var(--shadow-lg);transform:translateY(-3px);}
@@ -182,7 +222,7 @@
 <header class="nav">
   <div class="wrap">
     <a href="dashboard.html" class="brand">
-      <span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="Bank Indonesia" width="36" height="36"></span>
+      <span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="36" height="36"></span>
       <span><b>Portal Magang Mahasiswa</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
     </a>
     <nav class="nav-links" aria-label="Navigasi utama">
@@ -194,9 +234,23 @@
     <div class="nav-cta">
       <a href="login.html" class="btn btn-outline btn-sm">Masuk</a>
       <a href="registrasi.html" class="btn btn-primary btn-sm">Daftar Sekarang</a>
+      <button type="button" class="btn btn-outline btn-sm menu-btn" id="menuBtn" aria-expanded="false" aria-controls="menuHp"><span data-ikon="menu" data-ikon-ukuran="16"></span><span>Menu</span></button>
     </div>
   </div>
 </header>
+<div class="menu-tirai" id="menuTirai" aria-hidden="true"></div>
+<div class="menu-hp" id="menuHp">
+  <nav aria-label="Navigasi utama (HP)">
+    <a href="#persyaratan">Persyaratan</a>
+    <a href="#alur">Alur Seleksi</a>
+    <a href="#bidang">Bidang Magang</a>
+    <a href="#faq">FAQ</a>
+  </nav>
+  <div class="tombol">
+    <a href="login.html" class="btn btn-outline">Masuk</a>
+    <a href="registrasi.html" class="btn btn-primary">Daftar Sekarang</a>
+  </div>
+</div>
 
 <section class="hero">
   <div class="pola-titik" aria-hidden="true"></div>
@@ -215,9 +269,9 @@
     </div>
     <aside class="period-card" aria-label="Informasi periode" data-muncul style="--urut:7">
       <div class="kicker">Informasi Periode</div>
-      <div class="item"><span data-ikon="kalender"></span><div><span>Pendaftaran dibuka</span><b id="infoTanggal">Memuat…</b><div class="open" id="infoOpen"></div></div></div>
-      <div class="item"><span data-ikon="umur"></span><div><span>Durasi magang</span><b id="infoDurasi">–</b></div></div>
-      <div class="item"><span data-ikon="kelompok"></span><div><span>Kuota peserta</span><b id="infoKuota">–</b></div></div>
+      <div class="item"><span data-ikon="kalender"></span><div><span>Pendaftaran dibuka</span><b id="infoTanggal"><span class="kerangka" style="width:88%;margin-top:4px"></span></b><div class="open" id="infoOpen"></div></div></div>
+      <div class="item"><span data-ikon="umur"></span><div><span>Durasi magang</span><b id="infoDurasi"><span class="kerangka" style="width:40%;margin-top:4px"></span></b></div></div>
+      <div class="item"><span data-ikon="kelompok"></span><div><span>Kuota peserta</span><b id="infoKuota"><span class="kerangka" style="width:45%;margin-top:4px"></span></b></div></div>
     </aside>
   </div>
 </section>
@@ -276,7 +330,7 @@
       <div class="kicker">Bidang Magang</div>
       <h2>Pilih bidang sesuai minat dan latar belakang studi</h2>
     </div>
-    <div class="bidang" id="bidangList"><p class="muted">Memuat bidang…</p></div>
+    <div class="bidang" id="bidangList" aria-busy="true"><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div></div>
   </div>
 </section>
 
@@ -308,6 +362,11 @@
   </div>
 </section>
 
+<div class="cta-lekat" id="ctaLekat" aria-label="Pendaftaran dibuka">
+  <div><b>Pendaftaran dibuka</b><span id="ctaSisa"></span></div>
+  <a href="registrasi.html" class="btn btn-light btn-sm">Daftar Sekarang</a>
+</div>
+
 <footer class="kaki">
   <svg class="rute" viewBox="0 0 1440 420" preserveAspectRatio="xMaxYMax slice" aria-hidden="true" focusable="false">
     <path class="garis" d="M1500 -20 C 1380 60 1330 150 1210 190 S 1010 250 930 330 S 820 430 760 460"/>
@@ -315,7 +374,7 @@
   <div class="wrap">
     <div class="atas">
       <div class="identitas">
-        <span class="logo-putih"><img src="assets/bi-logo.png" alt="Bank Indonesia" width="720" height="130"></span>
+        <span class="logo-putih"><img src="assets/bi-logo.webp" alt="Bank Indonesia" width="360" height="65"></span>
         <b>Portal Magang Mahasiswa</b>
         <p>Kantor Perwakilan Bank Indonesia Provinsi Lampung. Pendaftaran, seleksi, dan pengumuman Program Magang Mahasiswa S1 dalam satu tempat.</p>
       </div>
@@ -355,12 +414,75 @@
 <script src="assets/common.js"></script>
 <script>
   document.getElementById('tahunKaki').textContent = new Date().getFullYear();
+  // Ikon tiap bidang ditentukan dari kata kunci namanya (bidang diatur di database)
+  function ikonBidang(nama) {
+    const n = String(nama).toLowerCase();
+    if (/asesmen|ekonomi dan keuangan|statistik|riset/.test(n)) return 'grafik';
+    if (/pembayaran|rupiah|uang/.test(n)) return 'uang';
+    if (/umkm|syariah/.test(n)) return 'pasar';
+    if (/komunikasi|humas|masyarakat|publikasi/.test(n)) return 'obrolan';
+    if (/manajemen|intern|sdm|logistik|administrasi/.test(n)) return 'gedung';
+    return 'dokumen';
+  }
+
+  // ---------- Menu HP ----------
+  const menuBtn = document.getElementById('menuBtn');
+  const menuHp = document.getElementById('menuHp');
+  const tirai = document.getElementById('menuTirai');
+  function aturMenu(buka) {
+    menuHp.classList.toggle('buka', buka);
+    tirai.classList.toggle('buka', buka);
+    menuBtn.setAttribute('aria-expanded', String(buka));
+    menuBtn.querySelector('span:last-child').textContent = buka ? 'Tutup' : 'Menu';
+    menuBtn.querySelector('[data-ikon]').innerHTML = ikon(buka ? 'tutup' : 'menu', 16);
+    if (buka) menuHp.querySelector('a').focus();
+  }
+  menuBtn.addEventListener('click', () => aturMenu(!menuHp.classList.contains('buka')));
+  tirai.addEventListener('click', () => aturMenu(false));
+  menuHp.querySelectorAll('a').forEach(a => a.addEventListener('click', () => aturMenu(false)));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && menuHp.classList.contains('buka')) { aturMenu(false); menuBtn.focus(); }
+  });
+  window.matchMedia('(min-width: 981px)').addEventListener('change', e => { if (e.matches) aturMenu(false); });
+
+  // ---------- Penanda bagian yang sedang dibaca ----------
+  const tautanBagian = [...document.querySelectorAll('.nav-links a, .menu-hp nav a')];
+  const bagian = ['persyaratan', 'alur', 'bidang', 'faq'].map(id => document.getElementById(id));
+  if ('IntersectionObserver' in window) {
+    const pengamatBagian = new IntersectionObserver(entri => {
+      entri.forEach(e => {
+        if (!e.isIntersecting) return;
+        tautanBagian.forEach(a => {
+          const cocok = a.getAttribute('href') === '#' + e.target.id;
+          a.classList.toggle('aktif', cocok);
+          if (cocok) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current');
+        });
+      });
+    }, { rootMargin: '-45% 0px -50% 0px' });
+    bagian.forEach(b => pengamatBagian.observe(b));
+    // Di atas bagian pertama (hero) tidak ada yang ditandai
+    new IntersectionObserver(([e]) => {
+      if (e.isIntersecting) tautanBagian.forEach(a => { a.classList.remove('aktif'); a.removeAttribute('aria-current'); });
+    }, { threshold: 0.4 }).observe(document.querySelector('.hero'));
+
+    // Tombol daftar menempel: muncul setelah hero terlewati, sembunyi saat ajakan daftar atau footer terlihat
+    const cta = document.getElementById('ctaLekat');
+    const terlihat = new Set();
+    const pengamatCta = new IntersectionObserver(entri => {
+      entri.forEach(e => e.isIntersecting ? terlihat.add(e.target) : terlihat.delete(e.target));
+      cta.classList.toggle('tampil', terlihat.size === 0);
+    });
+    [document.querySelector('.hero'), document.querySelector('.cta-band'), document.querySelector('footer.kaki')].forEach(el => pengamatCta.observe(el));
+  }
+
   (async () => {
     const data = await api('backend/api/public/info.php');
     const tanggal = document.getElementById('infoTanggal');
     const list = document.getElementById('bidangList');
     if (!data.success) {
       tanggal.textContent = 'Akan diumumkan';
+      document.getElementById('infoDurasi').textContent = '–';
+      document.getElementById('infoKuota').textContent = '–';
       list.innerHTML = '<p class="muted">Daftar bidang belum dapat dimuat.</p>';
       return;
     }
@@ -383,14 +505,20 @@
       } else if (today < p.tanggal_buka) {
         sisa = `Dibuka dalam <b>${selisih(today, p.tanggal_buka)} hari</b>.`;
       }
+      if (open) {
+        const n = selisih(today, p.tanggal_tutup);
+        document.getElementById('ctaSisa').textContent = n === 0 ? 'Hari terakhir pendaftaran' : `Ditutup dalam ${n} hari`;
+        document.getElementById('ctaLekat').classList.add('aktif');
+      }
       document.getElementById('infoOpen').innerHTML = (open
         ? '<span class="pill green"><span class="live"></span>Pendaftaran sedang dibuka</span>'
         : `<span class="pill gray">${today < p.tanggal_buka ? 'Belum dibuka' : 'Pendaftaran ditutup'}</span>`)
         + (sisa ? `<span class="sisa">${sisa}</span>` : '');
     }
 
+    list.removeAttribute('aria-busy');
     list.innerHTML = data.bidang.map(b => `
-      <div class="card" data-muncul><h3>${esc(b.nama)}</h3><p>${esc(b.deskripsi || '')}</p></div>
+      <div class="card" data-muncul><span class="ikon-bidang" data-ikon="${ikonBidang(b.nama)}" data-ikon-ukuran="21"></span><h3>${esc(b.nama)}</h3><p>${esc(b.deskripsi || '')}</p></div>
     `).join('') || '<p class="muted">Belum ada bidang.</p>';
     if (window.gerakAmati) gerakAmati(list);
   })();

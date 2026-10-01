@@ -23,10 +23,14 @@ ErrorDocument 404 /404.html
 # ---------- Header keamanan ----------
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
-  Header always set X-Frame-Options "DENY"
+  # SAMEORIGIN: halaman portal boleh menampilkan pratinjau PDF miliknya sendiri, situs lain tidak
+  Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"
+  # CSP tidak dikirim untuk berkas PDF supaya penampil PDF bawaan peramban tidak terblokir
+  <If "%{REQUEST_URI} !~ m#^/backend/api/file\.php#">
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+  </If>
   # Aktifkan setelah HTTPS berjalan stabil:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 

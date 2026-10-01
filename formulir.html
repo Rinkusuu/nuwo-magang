@@ -9,6 +9,7 @@
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
@@ -51,10 +52,25 @@
   .file-row .btn{min-width:96px;}
   @media(max-width:640px){.file-row{flex-wrap:wrap;}.file-row .act{width:100%;justify-content:flex-end;}}
   .upload-foot{font-size:12.5px;color:var(--ink-2);margin-top:12px;}
+  /* Selama data dimuat, isi kolom disamarkan dengan kilau kerangka */
+  .memuat .input,.memuat .select{color:transparent !important;background:linear-gradient(90deg,#EEF3F8 25%,#F7F9FC 40%,#EEF3F8 60%);background-size:300% 100%;animation:kilau 1.5s ease-in-out infinite;pointer-events:none;}
+  .memuat .input::placeholder{color:transparent;}
+  .missing ul{list-style:none;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;}
+  .missing li{display:flex;align-items:center;gap:8px;}
+  .missing li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
+  .file-row .txt a{display:inline-flex;align-items:center;gap:5px;margin-top:4px;}
+  .file-row .seret-hint{display:block;font-size:12px;color:var(--ink-3);margin-top:4px;}
+  @media(pointer:coarse){.file-row .seret-hint{display:none;}}
+  .file-row .progres{max-width:320px;}
+  .file-row .btn [data-ikon],.file-row .btn svg{margin-right:-2px;}
+  .file-row.seret{border-color:var(--navy-700);border-style:dashed;background:var(--navy-50);box-shadow:0 0 0 4px rgba(0,87,163,.1);}
+  .file-row.berhasil{animation:baris-berhasil 1.2s var(--ease);}
+  .file-row.berhasil .no svg{animation:centang-masuk .45s var(--ease);}
+  @keyframes baris-berhasil{0%{box-shadow:0 0 0 0 rgba(28,122,75,.35);}100%{box-shadow:0 0 0 10px rgba(28,122,75,0);}}
+  .pill.green svg{margin-left:-2px;}
 
   .statement{display:flex;flex-direction:column;gap:12px;}
   .missing{margin-top:14px;font-size:13px;color:var(--ink-2);}
-  .missing ul{margin:6px 0 0 18px;}
   .submit-row{display:flex;justify-content:flex-end;gap:12px;margin-top:18px;flex-wrap:wrap;}
   #banner{margin-bottom:18px;}
 </style>
@@ -63,7 +79,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.png" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <span class="autosave" id="autosave">Tersimpan otomatis sebagai draf</span>
       <a href="status_pengajuan.html" class="nav-link">Status</a>
@@ -90,7 +106,7 @@
     <p class="lead">Lengkapi data berikut. Pendaftaran dapat dikirim setelah syarat akademik terpenuhi dan kelima berkas terunggah.</p>
     <div id="banner"></div>
 
-    <form id="form" novalidate>
+    <form id="form" class="memuat" novalidate aria-busy="true">
       <section class="card" id="s1">
         <h2 class="card-title">1. Data Diri</h2>
         <div class="grid-2">
@@ -128,7 +144,7 @@
           <div class="field"><label for="bidang_utama_id">Bidang utama</label><select class="select" id="bidang_utama_id" name="bidang_utama_id"><option value="">Pilih bidang</option></select></div>
           <div class="field"><label for="bidang_alternatif_id">Bidang alternatif</label><select class="select" id="bidang_alternatif_id" name="bidang_alternatif_id"><option value="">Pilih bidang</option></select></div>
           <div class="field"><label for="tanggal_mulai">Tanggal mulai yang diajukan</label><input class="input" id="tanggal_mulai" name="tanggal_mulai" type="date"></div>
-          <div class="field" id="selesaiField"><label for="tanggal_selesai">Tanggal selesai yang diajukan</label><input class="input" id="tanggal_selesai" name="tanggal_selesai" type="date"><span class="err">Tanggal selesai harus setelah tanggal mulai.</span></div>
+          <div class="field" id="selesaiField"><label for="tanggal_selesai">Tanggal selesai yang diajukan</label><input class="input" id="tanggal_selesai" name="tanggal_selesai" type="date"></div>
         </div>
         <p class="hint muted" id="durasiHint" style="font-size:12.5px;margin-top:10px;"></p>
       </section>
@@ -161,7 +177,7 @@
 
 <footer class="kaki-ringkas">
   <div class="wrap">
-    <img src="assets/bi-logo.png" alt="Bank Indonesia" width="720" height="130">
+    <img src="assets/bi-logo.webp" alt="Bank Indonesia" width="360" height="65">
     <span>Program Magang Mahasiswa · Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
     <a href="https://www.bi.go.id" target="_blank" rel="noopener">bi.go.id</a>
   </div>
@@ -182,6 +198,10 @@
   $('logoutBtn').addEventListener('click', () => logout('login.html'));
 
   // ---------- Muat data ----------
+  // Kerangka baris berkas selama data dimuat
+  $('fileList').innerHTML = BERKAS.map(() => `<div class="file-row" aria-hidden="true">
+    <span class="kerangka" style="width:32px;height:32px;border-radius:50%;flex-shrink:0"></span>
+    <div class="txt"><span class="kerangka" style="width:45%;margin-bottom:8px"></span><span class="kerangka" style="width:72%"></span></div></div>`).join('');
   (async () => {
     const me = await api('backend/api/auth/me.php');
     if (!me.success) { window.location.href = 'login.html'; return; }
@@ -207,6 +227,10 @@
     }
 
     renderBanner();
+    form.classList.remove('memuat');
+    form.removeAttribute('aria-busy');
+    // Draf tersimpan yang isinya belum benar langsung ditandai, kolom kosong belum
+    FIELDS.forEach(id => { if (ATURAN[id] && val(id) !== '') disentuh.add(id); });
     if (!editable) form.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
     renderFiles();
     refresh();
@@ -230,13 +254,58 @@
   // ---------- Validasi & langkah ----------
   const val = id => $(id).value.trim();
   const eligible = () => val('jenjang') === 'S1' && Number(val('semester')) >= 4;
-  const datesOk = () => val('tanggal_mulai') && val('tanggal_selesai') && val('tanggal_selesai') > val('tanggal_mulai');
+
+  // Satu sumber aturan untuk pesan galat per kolom maupun tanda selesai tiap langkah.
+  // Mengembalikan true bila valid, atau teks galat bila belum.
+  const ATURAN = {
+    nama: v => v.length >= 3 || 'Nama lengkap minimal 3 huruf.',
+    email: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) || 'Format email belum benar, contoh: nama@email.com.',
+    no_wa: v => v.replace(/\D/g, '').length >= 9 || 'Nomor HP minimal 9 angka.',
+    domisili: v => !!v || 'Domisili wajib diisi.',
+    universitas: v => !!v || 'Nama perguruan tinggi wajib diisi.',
+    fakultas_prodi: v => !!v || 'Fakultas dan program studi wajib diisi.',
+    nim: v => !!v || 'NIM wajib diisi.',
+    ipk: v => { const n = Number(v.replace(',', '.')); return (v !== '' && !isNaN(n) && n >= 0 && n <= 4) || 'IPK berupa angka 0–4, contoh 3,45.'; },
+    jenjang: v => !!v || 'Pilih jenjang pendidikan.',
+    semester: v => (Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 14) || 'Semester berupa angka 1–14.',
+    bidang_utama_id: v => !!v || 'Pilih bidang utama.',
+    bidang_alternatif_id: v => !v || v !== val('bidang_utama_id') || 'Bidang alternatif harus berbeda dari bidang utama.',
+    tanggal_mulai: v => !!v || 'Pilih tanggal mulai.',
+    tanggal_selesai: v => !v ? 'Pilih tanggal selesai.' : (!val('tanggal_mulai') || v > val('tanggal_mulai')) || 'Tanggal selesai harus setelah tanggal mulai.',
+  };
+  const LANGKAH_KOLOM = {
+    1: ['nama', 'email', 'no_wa', 'domisili'],
+    2: ['universitas', 'fakultas_prodi', 'nim', 'ipk', 'jenjang', 'semester'],
+    3: ['bidang_utama_id', 'bidang_alternatif_id', 'tanggal_mulai', 'tanggal_selesai'],
+  };
+  const valid = id => ATURAN[id](val(id)) === true;
+
+  // Galat hanya tampil untuk kolom yang sudah disentuh, supaya formulir kosong tidak langsung "merah"
+  const disentuh = new Set();
+  function periksaKolom(id) {
+    const input = $(id);
+    const field = input.closest('.field');
+    let err = field.querySelector('.err');
+    if (!err) { err = document.createElement('span'); err.className = 'err'; field.appendChild(err); }
+    if (!err.id) err.id = id + 'Err';
+    input.setAttribute('aria-describedby', err.id);
+    const hasil = ATURAN[id](val(id));
+    const salah = disentuh.has(id) && hasil !== true;
+    field.classList.toggle('has-error', salah);
+    input.setAttribute('aria-invalid', String(salah));
+    if (salah) err.textContent = hasil;
+  }
+  form.addEventListener('focusout', e => {
+    if (!ATURAN[e.target.id] || !editable) return;
+    if (val(e.target.id) !== '' || e.target.tagName === 'SELECT') disentuh.add(e.target.id);
+    periksaKolom(e.target.id);
+  });
 
   function stepStatus() {
     return {
-      1: val('nama').length >= 3 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val('email')) && val('no_wa').replace(/\D/g, '').length >= 9 && !!val('domisili'),
-      2: ['universitas','fakultas_prodi','nim','ipk','jenjang','semester'].every(val) && eligible(),
-      3: !!val('bidang_utama_id') && datesOk() && val('bidang_utama_id') !== val('bidang_alternatif_id'),
+      1: LANGKAH_KOLOM[1].every(valid),
+      2: LANGKAH_KOLOM[2].every(valid) && eligible(),
+      3: LANGKAH_KOLOM[3].every(valid),
       4: BERKAS.every(b => files[b.jenis]),
       5: $('pernyataan').checked,
     };
@@ -259,25 +328,44 @@
     while (beruntun < 5 && s[beruntun + 1]) beruntun++;
     $('jalur').style.setProperty('--progres', Math.max(0, beruntun - 1) / 4);
 
-    // Cek syarat akademik
+    // Kolom yang sudah disentuh diperiksa ulang setiap ada perubahan
+    disentuh.forEach(periksaKolom);
+
+    // Cek syarat akademik. Kotak hanya digambar ulang bila isinya berubah, supaya
+    // animasinya tidak berkedip setiap kali pengguna mengetik.
     const el = $('eligibility');
-    if (val('jenjang') && val('semester')) {
-      el.innerHTML = eligible()
+    const kunciSyarat = val('jenjang') && val('semester') ? `${eligible()}-${val('semester')}` : '';
+    if (el.dataset.kunci !== kunciSyarat) {
+      el.dataset.kunci = kunciSyarat;
+      el.innerHTML = !kunciSyarat ? '' : eligible()
         ? `<div class="notice green"><b>Memenuhi syarat akademik</b>Jenjang S1 dan semester ${esc(val('semester'))} memenuhi ketentuan minimal semester 4. Semester akan dicocokkan dengan surat pengantar pada tahap verifikasi.</div>`
         : `<div class="notice red"><b>Belum memenuhi syarat akademik</b>Program ini khusus mahasiswa jenjang S1 yang sedang menempuh minimal semester 4.</div>`;
-    } else el.innerHTML = '';
+    }
 
-    $('selesaiField').classList.toggle('has-error', !!(val('tanggal_mulai') && val('tanggal_selesai') && !datesOk()));
-
+    // Daftar kekurangan; tiap butir menuju langkahnya dan menyorot kolom yang belum benar
     const missing = [];
-    if (!s[1]) missing.push('Lengkapi data diri');
-    if (!s[2]) missing.push(eligible() || !val('jenjang') ? 'Lengkapi data akademik' : 'Syarat akademik belum terpenuhi');
-    if (!s[3]) missing.push(val('bidang_utama_id') && val('bidang_utama_id') === val('bidang_alternatif_id') ? 'Bidang alternatif harus berbeda dari bidang utama' : 'Pilih bidang utama dan periode magang');
-    if (!s[4]) missing.push(`Unggah ${BERKAS.filter(b => !files[b.jenis]).length} berkas lagi`);
-    if (!s[5]) missing.push('Centang pernyataan');
-    $('missing').innerHTML = editable && missing.length ? `Sebelum mengirim:<ul>${missing.map(m => `<li>${esc(m)}</li>`).join('')}</ul>` : '';
+    if (!s[1]) missing.push([1, 'Lengkapi data diri']);
+    if (!s[2]) missing.push([2, eligible() || !val('jenjang') ? 'Lengkapi data akademik' : 'Syarat akademik belum terpenuhi']);
+    if (!s[3]) missing.push([3, val('bidang_utama_id') && val('bidang_utama_id') === val('bidang_alternatif_id') ? 'Bidang alternatif harus berbeda dari bidang utama' : 'Pilih bidang utama dan periode magang']);
+    if (!s[4]) missing.push([4, `Unggah ${BERKAS.filter(b => !files[b.jenis]).length} berkas lagi`]);
+    if (!s[5]) missing.push([5, 'Centang pernyataan']);
+    $('missing').innerHTML = editable && missing.length
+      ? `Sebelum mengirim:<ul>${missing.map(([n, m]) => `<li><a href="#s${n}" class="link" data-langkah="${n}">${esc(m)}</a></li>`).join('')}</ul>` : '';
     if (editable) $('submitBtn').disabled = missing.length > 0;
   }
+
+  $('missing').addEventListener('click', e => {
+    const a = e.target.closest('[data-langkah]');
+    if (!a) return;
+    const kolom = LANGKAH_KOLOM[a.dataset.langkah];
+    if (!kolom) return;
+    e.preventDefault();
+    kolom.forEach(id => disentuh.add(id));
+    refresh();
+    const pertama = kolom.find(id => !valid(id)) || kolom[0];
+    $(pertama).focus({ preventScroll: true });
+    $(pertama).closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
   // ---------- Draf otomatis ----------
   let saveTimer;
@@ -310,22 +398,27 @@
   form.addEventListener('change', () => { refresh(); queueSave(); });
 
   // ---------- Berkas ----------
+  let baruTerunggah = null;     // jenis berkas yang baru saja berhasil, untuk animasi umpan balik
   function renderFiles() {
     const flagged = app && app.status_admin === 'perbaikan';
     $('fileList').innerHTML = BERKAS.map((b, i) => {
       const f = files[b.jenis];
+      const sedang = uploadingJenis === b.jenis;
+      const baru = baruTerunggah === b.jenis;
       let status;
-      if (uploadingJenis === b.jenis) status = '<span class="pill blue"><span class="spinner"></span> Mengunggah</span>';
+      if (sedang) status = '<span class="pill blue"><span class="spinner"></span> Mengunggah</span>';
       else if (!f) status = '<span class="pill amber">Belum diunggah</span>';
       else if (f.status_verifikasi) status = pill(LABEL.berkas, f.status_verifikasi);
-      else status = '<span class="pill green">Terunggah</span>';
+      else status = `<span class="pill green${baru ? ' baru' : ''}">${ikon('centang', 13)}Terunggah</span>`;
       const flag = flagged && f && f.status_verifikasi && f.status_verifikasi !== 'sesuai';
-      return `<div class="file-row ${f ? 'has' : ''} ${flag ? 'flag' : ''}">
-        <span class="no">${i + 1}</span>
+      return `<div class="file-row ${f ? 'has' : ''} ${flag ? 'flag' : ''} ${baru ? 'berhasil' : ''}" data-jenis="${b.jenis}">
+        <span class="no">${f && !sedang ? ikon('centang', 15) : i + 1}</span>
         <div class="txt"><b>${esc(b.judul)}</b><p>${esc(b.ket)}</p>
-          ${f ? `<a href="backend/api/file.php?id=${f.id}" target="_blank" rel="noopener">${esc(f.original_name)}</a>` : ''}</div>
+          ${f && !sedang ? `<a href="backend/api/file.php?id=${f.id}" target="_blank" rel="noopener" data-pratinjau="${esc(b.singkat)} · ${esc(f.original_name)}">${ikon('dokumen', 13)}${esc(f.original_name)}</a>` : ''}
+          ${sedang ? `<div class="progres" role="progressbar" aria-label="Mengunggah ${esc(b.singkat)}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="progres"></i></div>` : ''}
+          ${editable && !f && !sedang ? '<span class="seret-hint">atau seret berkas PDF ke sini</span>' : ''}</div>
         <div class="act">${status}
-          ${editable ? `<button type="button" class="btn btn-outline btn-sm" data-upload="${b.jenis}" ${uploadingJenis ? 'disabled' : ''}>${f ? 'Ganti berkas' : 'Unggah PDF'}</button>` : ''}
+          ${editable ? `<button type="button" class="btn btn-outline btn-sm" data-upload="${b.jenis}" ${uploadingJenis ? 'disabled' : ''}>${ikon('unggah', 14)}${f ? 'Ganti berkas' : 'Unggah PDF'}</button>` : ''}
         </div></div>`;
     }).join('');
     const n = BERKAS.filter(b => files[b.jenis]).length;
@@ -337,25 +430,84 @@
     }));
   }
 
-  $('fileInput').addEventListener('change', async e => {
-    const file = e.target.files[0];
-    const jenis = e.target.dataset.jenis;
-    if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { toast('Ukuran berkas melebihi 2 MB.', true); return; }
-    if (!/\.pdf$/i.test(file.name)) { toast('Berkas harus berformat PDF.', true); return; }
+  // Seret-dan-lepas: setiap baris berkas menjadi area jatuhan untuk jenisnya sendiri
+  let hitungSeret = 0;
+  $('fileList').addEventListener('dragenter', e => {
+    const row = e.target.closest('.file-row');
+    if (!row || !editable || uploadingJenis) return;
+    e.preventDefault();
+    hitungSeret++;
+    document.querySelectorAll('.file-row.seret').forEach(r => r !== row && r.classList.remove('seret'));
+    row.classList.add('seret');
+  });
+  $('fileList').addEventListener('dragover', e => {
+    if (e.target.closest('.file-row') && editable && !uploadingJenis) { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; }
+  });
+  $('fileList').addEventListener('dragleave', e => {
+    const row = e.target.closest('.file-row');
+    if (row && !row.contains(e.relatedTarget)) row.classList.remove('seret');
+  });
+  $('fileList').addEventListener('drop', e => {
+    const row = e.target.closest('.file-row');
+    if (!row || !editable || uploadingJenis) return;
+    e.preventDefault();
+    row.classList.remove('seret');
+    const file = e.dataTransfer.files[0];
+    if (file) unggah(row.dataset.jenis, file);
+  });
+  // Berkas yang dijatuhkan di luar baris tidak membuat peramban membuka PDF dan meninggalkan formulir
+  window.addEventListener('dragover', e => { if (!e.target.closest?.('.file-row')) e.preventDefault(); });
+  window.addEventListener('drop', e => { if (!e.target.closest?.('.file-row')) e.preventDefault(); });
 
+  $('fileInput').addEventListener('change', e => {
+    const file = e.target.files[0];
+    if (file) unggah(e.target.dataset.jenis, file);
+  });
+
+  // Unggah lewat XMLHttpRequest supaya kemajuan pengiriman bisa ditampilkan (fetch belum mendukungnya)
+  function kirimBerkas(jenis, file, ulang = true) {
+    return new Promise(async selesai => {
+      const fd = new FormData();
+      fd.append('jenis', jenis);
+      fd.append('file', file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'backend/api/formulir/upload.php');
+      xhr.setRequestHeader('X-CSRF-Token', await ambilCsrf() || '');
+      xhr.upload.addEventListener('progress', ev => {
+        if (!ev.lengthComputable) return;
+        const persen = Math.round(ev.loaded / ev.total * 100);
+        const bar = $('progres');
+        if (bar) { bar.style.width = persen + '%'; bar.parentElement.setAttribute('aria-valuenow', persen); }
+      });
+      xhr.addEventListener('load', async () => {
+        if (xhr.status === 419 && ulang) { await ambilCsrf(true); selesai(await kirimBerkas(jenis, file, false)); return; }
+        let data;
+        try { data = JSON.parse(xhr.responseText); } catch (err) { data = { success: false, message: 'Respons server tidak valid.' }; }
+        selesai(data);
+      });
+      xhr.addEventListener('error', () => selesai({ success: false, message: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.' }));
+      xhr.send(fd);
+    });
+  }
+
+  async function unggah(jenis, file) {
+    if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') { toast('Berkas harus berformat PDF.', true); return; }
+    if (file.size > 2 * 1024 * 1024) { toast(`Ukuran berkas ${(file.size / 1048576).toFixed(1).replace('.', ',')} MB, melebihi batas 2 MB.`, true); return; }
     uploadingJenis = jenis;
+    baruTerunggah = null;
     renderFiles();
-    const fd = new FormData();
-    fd.append('jenis', jenis);
-    fd.append('file', file);
-    const res = await api('backend/api/formulir/upload.php', { method: 'POST', body: fd });
+    const res = await kirimBerkas(jenis, file);
     uploadingJenis = null;
-    if (res.success) { files = res.files; toast('Berkas terunggah.'); }
-    else toast(res.message || 'Berkas gagal diunggah.', true);
+    if (res.success) {
+      files = res.files;
+      baruTerunggah = jenis;
+      toast('Berkas terunggah.');
+    } else {
+      toast(res.message || 'Berkas gagal diunggah.', true);
+    }
     renderFiles();
     refresh();
-  });
+  }
 
   // ---------- Kirim ----------
   form.addEventListener('submit', async e => {
