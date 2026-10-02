@@ -109,7 +109,7 @@ const JENIS_BERKAS = [
     'motivation' => 'Motivation Letter',
     'pengantar'  => 'Surat Pengantar',
     'transkrip'  => 'Transkrip Nilai',
-    'pendukung'  => 'KTP, NPWP, Buku Tabungan',
+    'ktm'        => 'Kartu Tanda Mahasiswa (KTM)',
 ];
 
 // Bobot tujuh aspek penilaian wawancara (%)

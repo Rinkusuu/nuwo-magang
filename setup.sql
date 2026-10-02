@@ -94,7 +94,7 @@ CREATE TABLE applications (
 CREATE TABLE application_files (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
-  jenis ENUM('cv','motivation','pengantar','transkrip','pendukung') NOT NULL,
+  jenis ENUM('cv','motivation','pengantar','transkrip','ktm') NOT NULL,
   stored_name VARCHAR(100) NOT NULL,
   original_name VARCHAR(255) NOT NULL,
   size INT NOT NULL,
@@ -206,9 +206,9 @@ INSERT INTO application_files (application_id, jenis, stored_name, original_name
 (1, 'motivation', 'contoh.pdf', 'Motivation_Letter.pdf', 600, 'sesuai'),
 (1, 'pengantar', 'contoh.pdf', 'Surat_Pengantar.pdf', 600, 'sesuai'),
 (1, 'transkrip', 'contoh.pdf', 'Transkrip.pdf', 600, 'sesuai'),
-(1, 'pendukung', 'contoh.pdf', 'KTP_NPWP_Tabungan.pdf', 600, 'sesuai'),
+(1, 'ktm', 'contoh.pdf', 'KTM_Rahmat_Hidayat.pdf', 600, 'sesuai'),
 (2, 'cv', 'contoh.pdf', 'CV_Siti_Aisyah.pdf', 600, NULL),
 (2, 'motivation', 'contoh.pdf', 'Motivation_Letter.pdf', 600, NULL),
 (2, 'pengantar', 'contoh.pdf', 'Surat_Pengantar.pdf', 600, NULL),
 (2, 'transkrip', 'contoh.pdf', 'Transkrip.pdf', 600, NULL),
-(2, 'pendukung', 'contoh.pdf', 'KTP_NPWP_Tabungan.pdf', 600, NULL);
+(2, 'ktm', 'contoh.pdf', 'KTM_Siti_Aisyah.pdf', 600, NULL);

@@ -23,7 +23,7 @@ Selama `SMTP_HOST` kosong, email tidak dikirim melainkan dicatat di `backend/log
 
 1. Salin seluruh folder ke server (portal diasumsikan di akar domain).
 2. Buat database dan user khusus, lalu impor `setup.sql` (hapus data contoh terlebih dahulu).
-   Database yang sudah ada sebelum Oktober 2026: jalankan `backend/migrasi/001_keamanan_dan_reset_sandi.sql`.
+   Database yang sudah ada sebelumnya: jalankan berkas di `backend/migrasi/` secara berurutan (001, 002, …).
 3. Buat `backend/config.local.php` dari contohnya: `APP_URL`, kredensial database, SMTP.
 4. Ganti kata sandi admin: `php backend/atur_password_admin.php admin@bi.go.id`
 5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis oleh PHP.

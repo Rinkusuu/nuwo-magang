@@ -39,9 +39,9 @@ const BERKAS = [
   { jenis: 'transkrip', verif: 'Transkrip Nilai Terakhir', judul: 'Transkrip Nilai Terakhir', singkat: 'Transkrip Nilai',
     ket: 'Transkrip resmi sampai semester terakhir.',
     periksa: 'terbaru, identitas sesuai, terbaca jelas.' },
-  { jenis: 'pendukung', verif: 'Dokumen Pendukung', judul: 'Dokumen Pendukung', singkat: 'KTP, NPWP, Buku Tabungan',
-    ket: 'KTP, NPWP, dan Buku Tabungan.',
-    periksa: 'KTP · NPWP · buku tabungan; nama sesuai dan terbaca jelas.' },
+  { jenis: 'ktm', verif: 'Kartu Tanda Mahasiswa (KTM)', judul: 'Kartu Tanda Mahasiswa (KTM)', singkat: 'KTM',
+    ket: 'Pindaian KTM dalam satu berkas PDF.',
+    periksa: 'nama dan NIM sesuai data pendaftaran; terbaca jelas.' },
 ];
 
 // Token CSRF sesi ini. Diambil sekali sebelum permintaan pertama yang mengubah data,
