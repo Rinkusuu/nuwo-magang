@@ -55,6 +55,9 @@
   /* Selama data dimuat, isi kolom disamarkan dengan kilau kerangka */
   .memuat .input,.memuat .select{color:transparent !important;background:linear-gradient(90deg,#EEF3F8 25%,#F7F9FC 40%,#EEF3F8 60%);background-size:300% 100%;animation:kilau 1.5s ease-in-out infinite;pointer-events:none;}
   .memuat .input::placeholder{color:transparent;}
+  .periode-terpilih{align-self:end;font-size:13.5px;color:var(--ink-2);padding-bottom:10px;}
+  .periode-terpilih b{color:var(--ink);}
+  #periodeInfo .notice{margin-top:14px;}
   .missing ul{list-style:none;margin:8px 0 0;display:flex;flex-direction:column;gap:6px;}
   .missing li{display:flex;align-items:center;gap:8px;}
   .missing li::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--amber);flex-shrink:0;}
@@ -95,14 +98,14 @@
     <div class="jalur" id="jalur">
     <a href="#s1" data-step="1"><span class="c">1</span>Data Diri</a>
     <a href="#s2" data-step="2"><span class="c">2</span>Data Akademik</a>
-    <a href="#s3" data-step="3"><span class="c">3</span>Bidang dan Periode</a>
+    <a href="#s3" data-step="3"><span class="c">3</span>Periode PKL</a>
     <a href="#s4" data-step="4"><span class="c">4</span>Unggah Berkas</a>
     <a href="#s5" data-step="5"><span class="c">5</span>Pernyataan dan Kirim</a>
     </div>
   </nav>
 
   <main>
-    <h1 class="title">Formulir Pendaftaran Magang</h1>
+    <h1 class="title">Formulir Pendaftaran PKL</h1>
     <p class="lead">Lengkapi data berikut. Pendaftaran dapat dikirim setelah syarat akademik terpenuhi dan kelima berkas terunggah.</p>
     <div id="banner"></div>
 
@@ -110,7 +113,7 @@
       <section class="card" id="s1">
         <h2 class="card-title">1. Data Diri</h2>
         <div class="grid-2">
-          <div class="field"><label for="nama">Nama lengkap sesuai KTM</label><input class="input" id="nama" name="nama" placeholder="Nama lengkap" autocomplete="name"></div>
+          <div class="field"><label for="nama">Nama lengkap</label><input class="input" id="nama" name="nama" placeholder="Nama lengkap" autocomplete="name"></div>
           <div class="field"><label for="email">Email aktif</label><input class="input" id="email" name="email" type="email" placeholder="nama@email.com" autocomplete="email"></div>
           <div class="field"><label for="no_wa">Nomor HP/WhatsApp</label><input class="input" id="no_wa" name="no_wa" type="tel" placeholder="08xxxxxxxxxx" autocomplete="tel"></div>
           <div class="field"><label for="domisili">Domisili (kabupaten/kota)</label><input class="input" id="domisili" name="domisili" placeholder="Bandar Lampung"></div>
@@ -122,7 +125,7 @@
         <div class="grid-2">
           <div class="field"><label for="universitas">Perguruan tinggi</label><input class="input" id="universitas" name="universitas" placeholder="Nama perguruan tinggi"></div>
           <div class="field"><label for="fakultas_prodi">Fakultas / Program studi</label><input class="input" id="fakultas_prodi" name="fakultas_prodi" placeholder="Fakultas Ekonomi dan Bisnis / Akuntansi"></div>
-          <div class="field"><label for="nim">NIM</label><input class="input" id="nim" name="nim" placeholder="Nomor induk mahasiswa"></div>
+          <div class="field"><label for="nim">NPM</label><input class="input" id="nim" name="nim" placeholder="Nomor pokok mahasiswa"></div>
           <div class="field"><label for="ipk">IPK terakhir</label><input class="input" id="ipk" name="ipk" inputmode="decimal" placeholder="3,45"></div>
           <div class="field"><label for="jenjang">Jenjang pendidikan</label>
             <select class="select" id="jenjang" name="jenjang">
@@ -139,14 +142,12 @@
       </section>
 
       <section class="card" id="s3">
-        <h2 class="card-title">3. Bidang dan Periode Magang</h2>
+        <h2 class="card-title">3. Periode PKL</h2>
         <div class="grid-2">
-          <div class="field"><label for="bidang_utama_id">Bidang utama</label><select class="select" id="bidang_utama_id" name="bidang_utama_id"><option value="">Pilih bidang</option></select></div>
-          <div class="field"><label for="bidang_alternatif_id">Bidang alternatif</label><select class="select" id="bidang_alternatif_id" name="bidang_alternatif_id"><option value="">Pilih bidang</option></select></div>
-          <div class="field"><label for="tanggal_mulai">Tanggal mulai yang diajukan</label><input class="input" id="tanggal_mulai" name="tanggal_mulai" type="date"></div>
-          <div class="field" id="selesaiField"><label for="tanggal_selesai">Tanggal selesai yang diajukan</label><input class="input" id="tanggal_selesai" name="tanggal_selesai" type="date"></div>
+          <div class="field"><label for="batch_id">Periode yang dipilih</label><select class="select" id="batch_id" name="batch_id"><option value="">Pilih periode</option></select></div>
+          <div class="periode-terpilih" id="periodeTerpilih" aria-live="polite"></div>
         </div>
-        <p class="hint muted" id="durasiHint" style="font-size:12.5px;margin-top:10px;"></p>
+        <div id="periodeInfo"></div>
       </section>
 
       <section class="card" id="s4">
@@ -163,7 +164,7 @@
         <h2 class="card-title">5. Pernyataan dan Kirim</h2>
         <div class="statement">
           <label class="check"><input type="checkbox" id="pernyataan" name="pernyataan">
-            <span>Saya menyatakan bahwa seluruh data dan berkas yang saya sampaikan adalah benar dan dapat dipertanggungjawabkan. Saya bersedia didiskualifikasi apabila di kemudian hari ditemukan ketidaksesuaian, serta bersedia menjaga kerahasiaan informasi selama mengikuti program magang.</span>
+            <span>Saya menyatakan bahwa seluruh data dan berkas yang saya sampaikan adalah benar dan dapat dipertanggungjawabkan. Saya bersedia didiskualifikasi apabila di kemudian hari ditemukan ketidaksesuaian, serta bersedia menjaga kerahasiaan informasi selama mengikuti PKL.</span>
           </label>
         </div>
         <div class="missing" id="missing"></div>
@@ -188,8 +189,8 @@
 <script>
   const $ = id => document.getElementById(id);
   const form = $('form');
-  const FIELDS = ['nama','email','no_wa','domisili','universitas','fakultas_prodi','nim','ipk','jenjang','semester',
-                  'bidang_utama_id','bidang_alternatif_id','tanggal_mulai','tanggal_selesai'];
+  const FIELDS = ['nama','email','no_wa','domisili','universitas','fakultas_prodi','nim','ipk','jenjang','semester','batch_id'];
+  let daftarBatch = [];   // batch dari info.php (yang belum selesai)
   let app = null;
   let files = {};
   let editable = true;
@@ -209,13 +210,11 @@
     $('userName').textContent = me.user.nama;
 
     const [info, st] = await Promise.all([api('backend/api/public/info.php'), api('backend/api/formulir/status.php')]);
-    const opts = (info.bidang || []).map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join('');
-    $('bidang_utama_id').insertAdjacentHTML('beforeend', opts);
-    $('bidang_alternatif_id').insertAdjacentHTML('beforeend', opts);
-    if (info.periode?.durasi) $('durasiHint').textContent = `Durasi magang periode ini: ${info.periode.durasi}.`;
+    daftarBatch = info.batch || [];
 
     if (st.has_application) {
       app = st.application;
+      st_batch = st.batch;
       files = st.files || {};
       editable = app.editable;
       FIELDS.forEach(f => { if (app[f] !== null && app[f] !== undefined) $(f).value = f === 'ipk' ? String(app[f]).replace('.', ',') : app[f]; });
@@ -226,6 +225,7 @@
       $('no_wa').value = me.user.no_wa || '';
     }
 
+    isiPilihanBatch();
     renderBanner();
     form.classList.remove('memuat');
     form.removeAttribute('aria-busy');
@@ -251,6 +251,36 @@
     }
   }
 
+  // ---------- Periode PKL ----------
+  const batchDipilih = () => daftarBatch.find(b => String(b.id) === val('batch_id'))
+    || (app && String(app.batch_id) === val('batch_id') ? st_batch : null);
+  let st_batch = null;   // batch milik pendaftaran ini (bisa saja sudah tidak tampil di info publik)
+  const rentangTanggal = (a, b) => `${fmtTanggal(a)} – ${fmtTanggal(b)}`;
+
+  // Pilihan hanya periode yang pendaftarannya sedang dibuka, ditambah periode yang sudah tersimpan
+  function isiPilihanBatch() {
+    const sel = $('batch_id');
+    const terbuka = daftarBatch.filter(b => b.terbuka);
+    const pilihan = [...terbuka];
+    if (st_batch && !pilihan.some(b => b.id === st_batch.id)) pilihan.unshift(st_batch);
+    sel.insertAdjacentHTML('beforeend', pilihan.map(b =>
+      `<option value="${b.id}">${esc(b.nama)}${b.terbuka ? '' : ' (pendaftaran ditutup)'}</option>`).join(''));
+    if (app && app.batch_id) sel.value = String(app.batch_id);
+    // Satu-satunya periode yang dibuka langsung dipilihkan untuk pendaftar baru
+    if (!sel.value && terbuka.length === 1) { sel.value = String(terbuka[0].id); queueSave(); }
+    const info = $('periodeInfo');
+    if (!terbuka.length && !(app && app.status_admin === 'perbaikan')) {
+      const berikut = daftarBatch.find(b => todayISO() < b.daftar_buka);
+      info.innerHTML = `<div class="notice amber"><b>Belum ada periode yang dibuka pendaftarannya</b>${berikut
+        ? `Periode berikutnya, ${esc(berikut.nama)}, dibuka ${rentangTanggal(berikut.daftar_buka, berikut.daftar_tutup)}. Isian Anda tersimpan sebagai draf sampai pendaftaran dibuka.`
+        : 'Jadwal periode berikutnya akan diumumkan di beranda.'}</div>`;
+    }
+  }
+  function tampilkanPeriodeTerpilih() {
+    const b = batchDipilih();
+    $('periodeTerpilih').innerHTML = b ? `Pelaksanaan PKL: <b>${rentangTanggal(b.mulai, b.selesai)}</b> (2 bulan)` : '';
+  }
+
   // ---------- Validasi & langkah ----------
   const val = id => $(id).value.trim();
   const eligible = () => val('jenjang') === 'S1' && Number(val('semester')) >= 4;
@@ -264,19 +294,17 @@
     domisili: v => !!v || 'Domisili wajib diisi.',
     universitas: v => !!v || 'Nama perguruan tinggi wajib diisi.',
     fakultas_prodi: v => !!v || 'Fakultas dan program studi wajib diisi.',
-    nim: v => !!v || 'NIM wajib diisi.',
+    nim: v => !!v || 'NPM wajib diisi.',
     ipk: v => { const n = Number(v.replace(',', '.')); return (v !== '' && !isNaN(n) && n >= 0 && n <= 4) || 'IPK berupa angka 0–4, contoh 3,45.'; },
     jenjang: v => !!v || 'Pilih jenjang pendidikan.',
     semester: v => (Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 14) || 'Semester berupa angka 1–14.',
-    bidang_utama_id: v => !!v || 'Pilih bidang utama.',
-    bidang_alternatif_id: v => !v || v !== val('bidang_utama_id') || 'Bidang alternatif harus berbeda dari bidang utama.',
-    tanggal_mulai: v => !!v || 'Pilih tanggal mulai.',
-    tanggal_selesai: v => !v ? 'Pilih tanggal selesai.' : (!val('tanggal_mulai') || v > val('tanggal_mulai')) || 'Tanggal selesai harus setelah tanggal mulai.',
+    // Periode harus yang pendaftarannya sedang dibuka (pelamar yang memperbaiki berkas tetap memakai periodenya)
+    batch_id: v => !v ? 'Pilih periode PKL.' : (batchDipilih()?.terbuka || app?.status_admin === 'perbaikan') || 'Pendaftaran periode ini sudah ditutup. Pilih periode lain.',
   };
   const LANGKAH_KOLOM = {
     1: ['nama', 'email', 'no_wa', 'domisili'],
     2: ['universitas', 'fakultas_prodi', 'nim', 'ipk', 'jenjang', 'semester'],
-    3: ['bidang_utama_id', 'bidang_alternatif_id', 'tanggal_mulai', 'tanggal_selesai'],
+    3: ['batch_id'],
   };
   const valid = id => ATURAN[id](val(id)) === true;
 
@@ -346,7 +374,8 @@
     const missing = [];
     if (!s[1]) missing.push([1, 'Lengkapi data diri']);
     if (!s[2]) missing.push([2, eligible() || !val('jenjang') ? 'Lengkapi data akademik' : 'Syarat akademik belum terpenuhi']);
-    if (!s[3]) missing.push([3, val('bidang_utama_id') && val('bidang_utama_id') === val('bidang_alternatif_id') ? 'Bidang alternatif harus berbeda dari bidang utama' : 'Pilih bidang utama dan periode magang']);
+    if (!s[3]) missing.push([3, val('batch_id') ? 'Pendaftaran periode yang dipilih sudah ditutup' : 'Pilih periode PKL']);
+    tampilkanPeriodeTerpilih();
     if (!s[4]) missing.push([4, `Unggah ${BERKAS.filter(b => !files[b.jenis]).length} berkas lagi`]);
     if (!s[5]) missing.push([5, 'Centang pernyataan']);
     $('missing').innerHTML = editable && missing.length

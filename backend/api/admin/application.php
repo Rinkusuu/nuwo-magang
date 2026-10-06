@@ -10,9 +10,7 @@ $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
 
-$bidang = bidang_map($pdo);
-$app['bidang_utama'] = $bidang[$app['bidang_utama_id'] ?? '']['nama'] ?? null;
-$app['bidang_alternatif'] = $bidang[$app['bidang_alternatif_id'] ?? '']['nama'] ?? null;
+$app['batch'] = batch_by_id($pdo, $app['batch_id'] ? (int) $app['batch_id'] : null);
 
 $stmt = $pdo->prepare("
     SELECT ia.admin_id, ad.nama AS pewawancara, ia.skor, ia.catatan_aspek, ia.rekomendasi, ia.catatan,

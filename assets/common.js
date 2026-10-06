@@ -13,16 +13,24 @@ const LABEL = {
     perbaikan: ['Perlu perbaikan', 'amber'],
     tidak_sesuai: ['Tidak sesuai', 'red'],
   },
+  // Screening manual setelah berkas lengkap: diundang wawancara atau tidak
+  seleksi: {
+    lolos: ['Lolos ke wawancara', 'green'],
+    tidak_lolos: ['Tidak lolos ke wawancara', 'red'],
+  },
   hasil: {
     diterima: ['Diterima', 'green'],
-    cadangan: ['Cadangan', 'amber'],
     tidak_diterima: ['Tidak diterima', 'red'],
+  },
+  kesediaan: {
+    bersedia: ['Bersedia', 'green'],
+    tidak_bersedia: ['Mengundurkan diri', 'red'],
   },
   rekomendasi: {
     sangat: 'Sangat direkomendasikan',
     direkomendasikan: 'Direkomendasikan',
-    cadangan: 'Dipertimbangkan (cadangan)',
     tidak: 'Tidak direkomendasikan',
+    cadangan: 'Dipertimbangkan (cadangan)',   // hanya untuk penilaian lama sebelum Oktober 2026
   },
 };
 
@@ -31,17 +39,17 @@ const BERKAS = [
     ket: 'Riwayat pendidikan, organisasi, pengalaman, dan keterampilan.',
     periksa: 'data diri, riwayat pendidikan, pengalaman organisasi, keterampilan.' },
   { jenis: 'motivation', verif: 'Motivation Letter', judul: 'Motivation Letter', singkat: 'Motivation Letter',
-    ket: 'Maksud dan tujuan, bidang/sektor yang diminati, jangka waktu, serta harapan atau target yang akan dicapai.',
-    periksa: 'maksud dan tujuan · bidang/sektor yang diminati · jangka waktu · harapan atau target.' },
+    ket: 'Maksud dan tujuan PKL, harapan atau target yang akan dicapai, serta bidang pekerjaan yang diminati.',
+    periksa: 'maksud dan tujuan PKL · harapan atau target · bidang pekerjaan yang diminati.' },
   { jenis: 'pengantar', verif: 'Surat Pengantar Perguruan Tinggi', judul: 'Surat Pengantar dari Perguruan Tinggi', singkat: 'Surat Pengantar',
-    ket: 'Mencakup Nama, NIM, Fakultas/Program Studi, dan Semester.',
-    periksa: 'nama · NIM · fakultas/program studi · semester · tanda tangan dan cap.' },
+    ket: 'Mencakup Nama, NPM, Fakultas/Program Studi, Semester, serta durasi dan periode PKL (2 bulan).',
+    periksa: 'nama · NPM · fakultas/program studi · semester · durasi dan periode PKL (2 bulan) · tanda tangan dan cap.' },
   { jenis: 'transkrip', verif: 'Transkrip Nilai Terakhir', judul: 'Transkrip Nilai Terakhir', singkat: 'Transkrip Nilai',
-    ket: 'Transkrip resmi sampai semester terakhir.',
+    ket: 'Transkrip nilai sampai semester terakhir yang telah ditempuh.',
     periksa: 'terbaru, identitas sesuai, terbaca jelas.' },
   { jenis: 'ktm', verif: 'Kartu Tanda Mahasiswa (KTM)', judul: 'Kartu Tanda Mahasiswa (KTM)', singkat: 'KTM',
     ket: 'Pindaian KTM dalam satu berkas PDF.',
-    periksa: 'nama dan NIM sesuai data pendaftaran; terbaca jelas.' },
+    periksa: 'nama dan NPM sesuai data pendaftaran; terbaca jelas.' },
 ];
 
 // Token CSRF sesi ini. Diambil sekali sebelum permintaan pertama yang mengubah data,

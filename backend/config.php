@@ -162,8 +162,7 @@ function hitung_nilai(array $skor): ?float {
 function kategori_nilai(float $nilai, ?int $skorSikap): string {
     if ($skorSikap === 1) return 'tidak';
     if ($nilai >= 4.20) return 'sangat';
-    if ($nilai >= 3.40) return 'direkomendasikan';
-    if ($nilai >= 2.60) return 'cadangan';
+    if ($nilai >= 3.00) return 'direkomendasikan';
     return 'tidak';
 }
 

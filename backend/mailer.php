@@ -131,24 +131,28 @@ function tanggal_id(?string $ymd): string {
 
 // ---------- Notifikasi seleksi ----------
 
-function email_pendaftaran_terkirim(array $app, bool $perbaikan): void {
+function periode_pkl(?array $batch): string {
+    return $batch ? $batch['nama'] . ' (' . tanggal_id($batch['mulai']) . ' – ' . tanggal_id($batch['selesai']) . ')' : '-';
+}
+
+function email_pendaftaran_terkirim(array $app, bool $perbaikan, ?array $batch): void {
     kirim_email($app['email'], $app['nama'],
-        $perbaikan ? 'Perbaikan berkas diterima · ' . $app['no_pendaftaran'] : 'Pendaftaran magang diterima · ' . $app['no_pendaftaran'],
+        $perbaikan ? 'Perbaikan berkas diterima · ' . $app['no_pendaftaran'] : 'Pendaftaran PKL diterima · ' . $app['no_pendaftaran'],
         $perbaikan ? 'Perbaikan berkas Anda sudah kami terima' : 'Pendaftaran Anda sudah kami terima',
         [$perbaikan
             ? 'Berkas perbaikan Anda sudah masuk dan akan diverifikasi ulang oleh tim seleksi.'
-            : 'Terima kasih telah mendaftar Program Magang Mahasiswa. Pendaftaran Anda akan diverifikasi oleh tim seleksi.'],
-        [['No. pendaftaran', $app['no_pendaftaran']], ['Nama', $app['nama']], ['Perguruan tinggi', (string) $app['universitas']]],
+            : 'Terima kasih telah mendaftar PKL di Kantor Perwakilan Bank Indonesia Provinsi Lampung. Pendaftaran Anda akan diverifikasi oleh tim seleksi.'],
+        [['No. pendaftaran', $app['no_pendaftaran']], ['Nama', $app['nama']], ['Perguruan tinggi', (string) $app['universitas']], ['Periode PKL', periode_pkl($batch)]],
         tombol_portal('Lihat status pendaftaran', 'status_pengajuan.html'),
         ['Perkembangan seleksi dapat dipantau kapan saja di halaman Status Pendaftaran.']);
 }
 
 function email_hasil_verifikasi(array $app, string $hasil, string $catatan, ?string $batas): void {
     if ($hasil === 'memenuhi') {
-        kirim_email($app['email'], $app['nama'], 'Lolos verifikasi administrasi · ' . $app['no_pendaftaran'],
-            'Anda lolos verifikasi administrasi',
-            ['Seluruh syarat dan berkas administrasi Anda dinyatakan memenuhi. Tahap berikutnya adalah wawancara.',
-             'Jadwal wawancara akan dikirim melalui email dan ditampilkan di halaman Status Pendaftaran.'],
+        kirim_email($app['email'], $app['nama'], 'Berkas administrasi lengkap · ' . $app['no_pendaftaran'],
+            'Berkas administrasi Anda lengkap',
+            ['Seluruh syarat dan berkas administrasi Anda dinyatakan lengkap dan sesuai.',
+             'Selanjutnya tim akan menyeleksi berkas untuk menentukan pelamar yang diundang ke wawancara daring. Hasilnya kami sampaikan melalui email dan halaman Status Pendaftaran.'],
             [['No. pendaftaran', $app['no_pendaftaran']]],
             tombol_portal('Lihat status pendaftaran', 'status_pengajuan.html'));
     } elseif ($hasil === 'perbaikan') {
@@ -162,37 +166,41 @@ function email_hasil_verifikasi(array $app, string $hasil, string $catatan, ?str
     } else {
         kirim_email($app['email'], $app['nama'], 'Hasil verifikasi administrasi · ' . $app['no_pendaftaran'],
             'Hasil verifikasi administrasi',
-            ['Mohon maaf, pendaftaran Anda belum memenuhi syarat administrasi Program Magang Mahasiswa periode ini.',
+            ['Mohon maaf, pendaftaran Anda belum memenuhi syarat administrasi PKL periode ini.',
              $catatan !== '' ? 'Catatan dari tim seleksi: <i>' . nl2br(e_html($catatan)) . '</i>' : '',
-             'Terima kasih atas minat Anda terhadap Program Magang Mahasiswa KPwBI Provinsi Lampung.'],
+             'Terima kasih atas minat Anda mengikuti PKL di KPwBI Provinsi Lampung.'],
             [['No. pendaftaran', $app['no_pendaftaran']]], null);
     }
 }
 
-function email_jadwal_wawancara(array $app, string $tanggal, string $jam, string $lokasi, bool $ubah): void {
-    kirim_email($app['email'], $app['nama'],
-        ($ubah ? 'Perubahan jadwal wawancara · ' : 'Jadwal wawancara · ') . $app['no_pendaftaran'],
-        $ubah ? 'Jadwal wawancara Anda berubah' : 'Undangan wawancara',
-        [$ubah ? 'Jadwal wawancara Anda telah diperbarui. Berikut jadwal terbaru:'
-               : 'Anda diundang mengikuti wawancara seleksi Program Magang Mahasiswa pada:'],
-        [['Tanggal', tanggal_id($tanggal)], ['Waktu', substr($jam, 0, 5) . ' WIB'], ['Lokasi', $lokasi], ['No. pendaftaran', $app['no_pendaftaran']]],
-        tombol_portal('Lihat status pendaftaran', 'status_pengajuan.html'),
-        ['Mohon hadir 15 menit sebelum jadwal dan membawa kartu identitas.']);
+// Lolos screening berkas: undangan wawancara daring. Link Zoom sengaja tidak dicantumkan
+// di email; pelamar membukanya di halaman status (satu link per batch).
+function email_lolos_wawancara(array $app, ?array $batch): void {
+    $jadwal = $batch && $batch['wawancara_tanggal']
+        ? tanggal_id($batch['wawancara_tanggal']) . ($batch['wawancara_jam'] ? ', pukul ' . substr($batch['wawancara_jam'], 0, 5) . ' WIB' : '')
+        : 'Akan diumumkan di halaman Status Pendaftaran';
+    kirim_email($app['email'], $app['nama'], 'Lolos ke tahap wawancara · ' . $app['no_pendaftaran'],
+        'Anda lolos ke tahap wawancara',
+        ['Selamat, berkas Anda lolos seleksi dan Anda diundang mengikuti wawancara daring.'],
+        [['No. pendaftaran', $app['no_pendaftaran']], ['Periode PKL', periode_pkl($batch)], ['Jadwal wawancara', $jadwal]],
+        tombol_portal('Lihat jadwal dan tautan wawancara', 'status_pengajuan.html'),
+        ['Tautan Zoom wawancara tersedia di halaman Status Pendaftaran.']);
 }
 
-function email_hasil_akhir(array $app, string $hasil, ?string $penempatan): void {
-    $isi = [
-        'diterima' => ['Selamat, Anda diterima', ['Selamat, Anda dinyatakan <b>diterima</b> sebagai peserta Program Magang Mahasiswa KPwBI Provinsi Lampung.',
-                        'Informasi administrasi lanjutan akan disampaikan oleh tim kami.']],
-        'cadangan' => ['Anda masuk daftar cadangan', ['Anda masuk <b>daftar cadangan</b> Program Magang Mahasiswa. Kami akan menghubungi Anda apabila kuota tersedia.']],
-        'tidak_diterima' => ['Hasil seleksi Program Magang Mahasiswa', ['Terima kasih telah mengikuti seluruh rangkaian seleksi. Mohon maaf, Anda belum dapat kami terima pada periode ini.',
-                        'Kami menghargai waktu dan usaha Anda, dan berharap dapat bertemu kembali pada kesempatan berikutnya.']],
-    ][$hasil] ?? null;
-    if (!$isi) return;
-    $rincian = [['No. pendaftaran', $app['no_pendaftaran']]];
-    if ($hasil === 'diterima' && $penempatan) $rincian[] = ['Bidang penempatan', $penempatan];
-    kirim_email($app['email'], $app['nama'], 'Pengumuman hasil seleksi · ' . $app['no_pendaftaran'], $isi[0], $isi[1], $rincian,
-        tombol_portal('Lihat status pendaftaran', 'status_pengajuan.html'));
+function email_hasil_akhir(array $app, string $hasil, ?array $batch): void {
+    if ($hasil === 'diterima') {
+        kirim_email($app['email'], $app['nama'], 'Anda diterima PKL · ' . $app['no_pendaftaran'], 'Selamat, Anda diterima',
+            ['Selamat, Anda dinyatakan <b>diterima</b> sebagai peserta PKL di Kantor Perwakilan Bank Indonesia Provinsi Lampung.',
+             'Mohon konfirmasi kesediaan Anda mengikuti PKL melalui halaman Status Pendaftaran. Setelah menyatakan bersedia, Anda akan mendapatkan tautan grup WhatsApp peserta.'],
+            [['No. pendaftaran', $app['no_pendaftaran']], ['Periode PKL', periode_pkl($batch)]],
+            tombol_portal('Konfirmasi kesediaan', 'status_pengajuan.html'));
+    } elseif ($hasil === 'tidak_diterima') {
+        kirim_email($app['email'], $app['nama'], 'Pengumuman hasil seleksi · ' . $app['no_pendaftaran'], 'Hasil seleksi PKL',
+            ['Terima kasih telah mengikuti seluruh rangkaian seleksi. Mohon maaf, Anda belum dapat kami terima pada periode ini.',
+             'Kami menghargai waktu dan usaha Anda, dan berharap dapat bertemu kembali pada kesempatan berikutnya.'],
+            [['No. pendaftaran', $app['no_pendaftaran']]],
+            tombol_portal('Lihat status pendaftaran', 'status_pengajuan.html'));
+    }
 }
 
 function email_atur_ulang_sandi(string $email, string $nama, string $url): void {

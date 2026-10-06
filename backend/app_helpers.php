@@ -4,8 +4,7 @@
 const FIELD_FORMULIR = [
     'nama', 'email', 'no_wa', 'domisili',
     'universitas', 'fakultas_prodi', 'nim', 'ipk', 'jenjang', 'semester',
-    'bidang_utama_id', 'bidang_alternatif_id', 'tanggal_mulai', 'tanggal_selesai',
-    'pernyataan',
+    'batch_id', 'pernyataan',
 ];
 
 function app_by_user(PDO $pdo, int $userId): ?array {
@@ -40,8 +39,30 @@ function app_files(PDO $pdo, int $appId): object {
     return (object) $files;
 }
 
-function bidang_map(PDO $pdo): array {
-    $map = [];
-    foreach ($pdo->query("SELECT id, nama, singkat FROM bidang") as $b) $map[$b['id']] = $b;
-    return $map;
+// ---------- Batch (periode PKL) ----------
+function batch_by_id(PDO $pdo, ?int $id): ?array {
+    if (!$id) return null;
+    $q = $pdo->prepare("SELECT * FROM batch WHERE id = ?");
+    $q->execute([$id]);
+    return $q->fetch() ?: null;
+}
+
+// Pendaftaran batch dibuka bila hari ini (WIB) berada di antara tanggal buka dan tutup
+function batch_terbuka(array $batch): bool {
+    $hariIni = date('Y-m-d');
+    return $hariIni >= $batch['daftar_buka'] && $hariIni <= $batch['daftar_tutup'];
+}
+
+// Data batch yang aman ditampilkan ke publik (tanpa link Zoom dan grup WhatsApp)
+function batch_publik(array $b): array {
+    return array_intersect_key($b, array_flip(['id', 'nama', 'daftar_buka', 'daftar_tutup', 'mulai', 'selesai']))
+        + ['terbuka' => batch_terbuka($b)];
+}
+
+function berkas_pkl(PDO $pdo, int $appId): object {
+    $q = $pdo->prepare("SELECT id, jenis, original_name, size, uploaded_at FROM berkas_pkl WHERE application_id = ?");
+    $q->execute([$appId]);
+    $hasil = [];
+    foreach ($q->fetchAll() as $f) $hasil[$f['jenis']] = $f;
+    return (object) $hasil;
 }

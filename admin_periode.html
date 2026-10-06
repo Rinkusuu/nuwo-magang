@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Periode dan Kuota — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Batch dan Jadwal — Backoffice Magang KPwBI Provinsi Lampung</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -13,6 +13,22 @@
 <link rel="stylesheet" href="assets/fonts.css">
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
+<style>
+  .batch-tabel td{vertical-align:top;}
+  .batch-tabel td b{display:block;}
+  .batch-tabel td small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .batch-tabel .angka{display:flex;gap:14px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;}
+  .batch-tabel .angka b{font-size:15px;color:var(--ink);display:block;}
+  .batch-tabel .tautan{display:flex;flex-direction:column;gap:4px;font-size:12.5px;}
+  .batch-tabel .ada{color:var(--green);font-weight:700;}
+  .batch-tabel .belum{color:var(--ink-3);}
+  .aksi-sel{display:flex;gap:6px;flex-wrap:wrap;}
+  dialog.dialog.form-batch{width:min(720px,calc(100% - 32px));}
+  .form-batch form{padding:24px 26px 8px;max-height:72vh;overflow:auto;}
+  .form-batch h3{font-size:14px;font-weight:700;margin:18px 0 10px;color:var(--navy-800);}
+  .form-batch h3:first-of-type{margin-top:0;}
+  .pengaturan{max-width:760px;margin-top:22px;}
+</style>
 </head>
 <body data-menu="periode">
 <div class="bo">
@@ -21,51 +37,139 @@
     <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="page-head">
       <div>
-        <h1>Periode dan Kuota</h1>
-        <div class="sub">Informasi ini tampil di beranda portal dan menentukan kapan pendaftaran dapat dikirim.</div>
+        <h1>Batch dan Jadwal</h1>
+        <div class="sub">Atur periode PKL dari tahun ke tahun: tanggal pendaftaran, pelaksanaan, wawancara daring, link Zoom, dan link grup WhatsApp peserta.</div>
+      </div>
+      <button type="button" class="btn btn-primary" id="tambahBtn">Tambah batch</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="data batch-tabel">
+          <thead><tr><th>Batch</th><th>Pendaftaran</th><th>Pelaksanaan</th><th>Wawancara</th><th>Tautan</th><th>Pelamar</th><th>Aksi</th></tr></thead>
+          <tbody id="rows" data-kerangka-tabel="7"></tbody>
+        </table>
       </div>
     </div>
 
-    <form class="card" id="form" style="max-width:760px;" novalidate>
+    <form class="card pengaturan" id="formUmum" novalidate>
+      <h2 class="card-title">Pengaturan umum</h2>
       <div class="grid-2">
-        <div class="field"><label for="tahun">Tahun program</label><input class="input" id="tahun" type="number" min="2000" max="2100"></div>
-        <div class="field"><label for="kuota">Kuota peserta (orang)</label><input class="input" id="kuota" type="number" min="0" placeholder="Contoh: 20"></div>
-        <div class="field"><label for="tanggal_buka">Pendaftaran dibuka</label><input class="input" id="tanggal_buka" type="date"></div>
-        <div class="field"><label for="tanggal_tutup">Pendaftaran ditutup</label><input class="input" id="tanggal_tutup" type="date"></div>
-        <div class="field"><label for="durasi">Durasi magang</label><input class="input" id="durasi" placeholder="Contoh: 3 bulan (Januari–Maret 2027)"></div>
         <div class="field"><label for="hari_perbaikan">Batas perbaikan berkas (hari kerja)</label><input class="input" id="hari_perbaikan" type="number" min="1" max="30"></div>
       </div>
-      <p class="muted" style="font-size:12.5px;margin-top:12px;">Kosongkan tanggal bila jadwal belum ditetapkan; beranda akan menampilkan “Akan diumumkan”.</p>
-      <div style="display:flex;justify-content:flex-end;margin-top:16px;">
-        <button type="submit" class="btn btn-primary" id="saveBtn">Simpan</button>
-      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;"><button type="submit" class="btn btn-primary" id="simpanUmum">Simpan</button></div>
     </form>
   </main>
 </div>
+
+<dialog class="dialog form-batch" id="dialogBatch" aria-labelledby="judulBatch">
+  <form id="formBatch" novalidate>
+    <h2 id="judulBatch" style="margin-bottom:6px;">Tambah batch</h2>
+    <p class="card-sub">Pelamar dapat memilih batch selama tanggal pendaftarannya berlangsung.</p>
+    <input type="hidden" id="b_id">
+    <div class="field" style="margin-bottom:14px;"><label for="b_nama">Nama batch</label><input class="input" id="b_nama" placeholder="Contoh: Periode 1 2027" maxlength="100"></div>
+    <h3>Pendaftaran</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_daftar_buka">Dibuka</label><input class="input" type="date" id="b_daftar_buka"></div>
+      <div class="field"><label for="b_daftar_tutup">Ditutup</label><input class="input" type="date" id="b_daftar_tutup"></div>
+    </div>
+    <h3>Pelaksanaan PKL</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_mulai">Mulai</label><input class="input" type="date" id="b_mulai"></div>
+      <div class="field"><label for="b_selesai">Selesai</label><input class="input" type="date" id="b_selesai"></div>
+    </div>
+    <h3>Wawancara daring (boleh diisi belakangan)</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_wawancara_tanggal">Tanggal</label><input class="input" type="date" id="b_wawancara_tanggal"></div>
+      <div class="field"><label for="b_wawancara_jam">Jam mulai (WIB)</label><input class="input" type="time" id="b_wawancara_jam"></div>
+    </div>
+    <div class="field" style="margin-top:14px;"><label for="b_link_zoom">Link Zoom</label><input class="input" id="b_link_zoom" placeholder="https://zoom.us/j/…"><span class="hint">Satu link untuk seluruh pelamar yang lolos seleksi berkas di batch ini.</span></div>
+    <h3>Peserta yang diterima</h3>
+    <div class="field"><label for="b_link_wa">Link grup WhatsApp</label><input class="input" id="b_link_wa" placeholder="https://chat.whatsapp.com/…"><span class="hint">Hanya tampil kepada peserta yang sudah menyatakan bersedia.</span></div>
+  </form>
+  <div class="aksi"><button type="button" class="btn btn-outline" id="batalBatch">Batal</button><button type="button" class="btn btn-primary" id="simpanBatch">Simpan batch</button></div>
+</dialog>
 
 <script src="assets/ikon.js"></script>
 <script src="assets/common.js"></script>
 <script src="assets/admin.js"></script>
 <script>
-  const FIELDS = ['tahun', 'kuota', 'tanggal_buka', 'tanggal_tutup', 'durasi', 'hari_perbaikan'];
+  const $ = id => document.getElementById(id);
+  const KOLOM = ['nama', 'daftar_buka', 'daftar_tutup', 'mulai', 'selesai', 'wawancara_tanggal', 'wawancara_jam', 'link_zoom', 'link_wa'];
+  let daftar = [];
+  const rentang = (a, b) => `${fmtTanggal(a)} – ${fmtTanggal(b)}`;
+
+  function statusBatch(b, hariIni) {
+    if (b.terbuka) return '<span class="pill green">Pendaftaran dibuka</span>';
+    if (hariIni < b.daftar_buka) return '<span class="pill blue">Akan dibuka</span>';
+    if (hariIni <= b.selesai) return '<span class="pill gray">Berjalan</span>';
+    return '<span class="pill gray">Selesai</span>';
+  }
+
+  async function muat() {
+    const data = await api('backend/api/admin/batch.php');
+    if (!data.success) { toast(data.message, true); return; }
+    daftar = data.batch;
+    $('rows').removeAttribute('aria-busy');
+    $('rows').innerHTML = daftar.length ? daftar.map(b => `
+      <tr>
+        <td><b>${esc(b.nama)}</b>${statusBatch(b, data.hari_ini)}</td>
+        <td>${rentang(b.daftar_buka, b.daftar_tutup)}</td>
+        <td>${rentang(b.mulai, b.selesai)}</td>
+        <td>${b.wawancara_tanggal ? `<b>${fmtTanggal(b.wawancara_tanggal)}</b><small>${b.wawancara_jam ? esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : 'Jam belum diisi'}</small>` : '<span class="belum">Belum dijadwalkan</span>'}</td>
+        <td><div class="tautan">
+          <span class="${b.link_zoom ? 'ada' : 'belum'}">Zoom: ${b.link_zoom ? 'ada' : 'belum'}</span>
+          <span class="${b.link_wa ? 'ada' : 'belum'}">Grup WA: ${b.link_wa ? 'ada' : 'belum'}</span></div></td>
+        <td><div class="angka"><span><b>${b.pendaftar}</b>daftar</span><span><b>${b.lolos_seleksi}</b>wawancara</span><span><b>${b.diterima}</b>diterima</span><span><b>${b.bersedia}</b>bersedia</span></div></td>
+        <td><div class="aksi-sel"><button type="button" class="btn btn-outline btn-sm" data-ubah="${b.id}">Ubah</button>
+          ${Number(b.dipakai) === 0 ? `<button type="button" class="btn btn-danger btn-sm" data-hapus="${b.id}">Hapus</button>` : ''}</div></td>
+      </tr>`).join('') : '<tr><td colspan="7" class="empty">Belum ada batch. Tambahkan batch untuk membuka pendaftaran.</td></tr>';
+  }
+
+  function bukaForm(b) {
+    $('judulBatch').textContent = b ? `Ubah ${b.nama}` : 'Tambah batch';
+    $('b_id').value = b ? b.id : '';
+    KOLOM.forEach(k => { $('b_' + k).value = b && b[k] ? (k === 'wawancara_jam' ? b[k].slice(0, 5) : b[k]) : ''; });
+    $('dialogBatch').showModal();
+    $('b_nama').focus();
+  }
+
+  $('tambahBtn').addEventListener('click', () => bukaForm(null));
+  $('batalBatch').addEventListener('click', () => $('dialogBatch').close());
+  $('rows').addEventListener('click', async e => {
+    const ubah = e.target.closest('[data-ubah]');
+    if (ubah) return bukaForm(daftar.find(b => String(b.id) === ubah.dataset.ubah));
+    const hapus = e.target.closest('[data-hapus]');
+    if (!hapus) return;
+    const b = daftar.find(x => String(x.id) === hapus.dataset.hapus);
+    if (!await konfirmasi({ judul: `Hapus ${b.nama}?`, pesan: 'Batch yang belum dipilih pelamar mana pun dapat dihapus.', ya: 'Hapus', bahaya: true })) return;
+    const res = await api('backend/api/admin/batch.php', { json: { hapus: b.id } });
+    toast(res.message, !res.success);
+    if (res.success) muat();
+  });
+  $('simpanBatch').addEventListener('click', async () => {
+    const payload = { id: $('b_id').value || null };
+    KOLOM.forEach(k => { payload[k] = $('b_' + k).value.trim(); });
+    const btn = $('simpanBatch');
+    btn.disabled = true;
+    const res = await api('backend/api/admin/batch.php', { json: payload });
+    btn.disabled = false;
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+    if (res.success) { $('dialogBatch').close(); muat(); }
+  });
 
   (async () => {
     if (!await requireAdmin()) return;
-    const data = await api('backend/api/admin/periode.php');
-    if (!data.success) { toast(data.message, true); return; }
-    const p = data.periode || {};
-    FIELDS.forEach(f => document.getElementById(f).value = p[f] ?? '');
-    if (!p.tahun) document.getElementById('tahun').value = new Date().getFullYear();
-    if (!p.hari_perbaikan) document.getElementById('hari_perbaikan').value = 3;
+    muat();
+    const p = await api('backend/api/admin/periode.php');
+    $('hari_perbaikan').value = (p.periode && p.periode.hari_perbaikan) || 3;
   })();
 
-  document.getElementById('form').addEventListener('submit', async e => {
+  $('formUmum').addEventListener('submit', async e => {
     e.preventDefault();
-    const payload = {};
-    FIELDS.forEach(f => payload[f] = document.getElementById(f).value);
-    const btn = document.getElementById('saveBtn');
+    const btn = $('simpanUmum');
     btn.disabled = true;
-    const res = await api('backend/api/admin/periode.php', { json: payload });
+    const res = await api('backend/api/admin/periode.php', { json: { hari_perbaikan: $('hari_perbaikan').value } });
     btn.disabled = false;
     toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
   });

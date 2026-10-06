@@ -7,10 +7,10 @@ $adminId = require_admin();
 // Hanya pendaftaran yang sudah dikirim (draf tidak tampil)
 $rows = $pdo->query("
     SELECT a.id, a.no_pendaftaran, a.nama, a.email, a.universitas, a.fakultas_prodi, a.nim, a.ipk,
-           a.jenjang, a.semester, a.bidang_utama_id, a.bidang_penempatan_id, a.status_admin,
-           a.syarat_s1, a.syarat_semester, a.syarat_aktif, a.jadwal_tanggal, a.jadwal_jam, a.jadwal_lokasi,
-           a.hasil_akhir, a.submitted_at
-    FROM applications a
+           a.jenjang, a.semester, a.batch_id, b.nama AS batch, a.status_admin,
+           a.syarat_s1, a.syarat_semester, a.syarat_aktif, a.status_seleksi,
+           a.hasil_akhir, a.kesediaan, a.submitted_at
+    FROM applications a LEFT JOIN batch b ON b.id = a.batch_id
     WHERE a.submitted_at IS NOT NULL
     ORDER BY a.submitted_at DESC
 ")->fetchAll();
@@ -28,10 +28,7 @@ $mine = $pdo->prepare("SELECT application_id FROM interview_assessments WHERE ad
 $mine->execute([$adminId]);
 $sudahSaya = array_flip($mine->fetchAll(PDO::FETCH_COLUMN));
 
-$bidang = bidang_map($pdo);
 foreach ($rows as &$r) {
-    $r['bidang_utama'] = $bidang[$r['bidang_utama_id'] ?? '']['singkat'] ?? '-';
-    $r['bidang_penempatan'] = $bidang[$r['bidang_penempatan_id'] ?? '']['singkat'] ?? null;
     $n = $nilai[$r['id']] ?? null;
     $r['nilai'] = $n ? round((float) $n['rata'], 2) : null;
     $r['jumlah_penilai'] = $n ? (int) $n['jumlah'] : 0;
@@ -49,11 +46,10 @@ foreach ($rows as &$r) {
 }
 unset($r);
 
-$periode = get_periode($pdo);
+$batch = $pdo->query("SELECT id, nama, daftar_buka, daftar_tutup, mulai, selesai, wawancara_tanggal, wawancara_jam, link_zoom FROM batch ORDER BY daftar_buka DESC, id DESC")->fetchAll();
 
 json_out([
     'success' => true,
     'data' => $rows,
-    'periode' => $periode,
-    'bidang' => array_values($bidang),
+    'batch' => $batch,
 ]);

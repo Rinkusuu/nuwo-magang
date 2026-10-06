@@ -8,7 +8,7 @@ Frontend HTML/CSS/JavaScript tanpa proses build, backend PHP 8 + MySQL/MariaDB.
 ```bash
 mysql -uroot < setup.sql                       # membuat ulang database magang_bi + data contoh
 cp backend/config.local.example.php backend/config.local.php   # lalu sesuaikan DB_USER/DB_PASS
-php -S 0.0.0.0:8740 deploy/router-lokal.php    # buka http://127.0.0.1:8740
+php -d upload_max_filesize=11M -d post_max_size=12M -S 0.0.0.0:8740 deploy/router-lokal.php   # buka http://127.0.0.1:8740
 ```
 
 Akun contoh: pelamar `rahmat@email.com` / `Demo1234`, admin `admin@bi.go.id` / `AdminBI2026`.

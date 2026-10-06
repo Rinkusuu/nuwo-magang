@@ -2,16 +2,16 @@
 const MENU_ADMIN = [
   ['Seleksi', [
     ['dasbor', 'Dasbor', null],
-    ['periode', 'Periode dan Kuota', 'admin_periode.html'],
+    ['periode', 'Batch dan Jadwal', 'admin_periode.html'],
     ['pelamar', 'Daftar Pelamar', 'dashboard_admin.html'],
     ['verifikasi', 'Verifikasi Administrasi', 'dashboard_admin.html?status=menunggu'],
-    ['wawancara', 'Wawancara dan Penilaian', 'admin_wawancara.html'],
+    ['wawancara', 'Seleksi dan Wawancara', 'admin_wawancara.html'],
     ['rubrik', 'Rubrik Penilaian', 'admin_rubrik.html'],
     ['hasil', 'Hasil dan Pengumuman', 'admin_hasil.html'],
   ]],
   ['Pelaksanaan', [
     ['penempatan', 'Penempatan dan Pembimbing', null],
-    ['logbook', 'Logbook dan Evaluasi', null],
+    ['peserta', 'Peserta PKL', 'admin_peserta.html'],
     ['sertifikat', 'Sertifikat', null],
   ]],
   ['Sistem', [
@@ -57,7 +57,6 @@ function kategoriNilai(nilai, skorSikap) {
   if (nilai === null || nilai === undefined) return null;
   if (skorSikap === 1) return 'tidak';
   if (nilai >= 4.2) return 'sangat';
-  if (nilai >= 3.4) return 'direkomendasikan';
-  if (nilai >= 2.6) return 'cadangan';
+  if (nilai >= 3) return 'direkomendasikan';
   return 'tidak';
 }

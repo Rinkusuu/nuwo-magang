@@ -17,6 +17,7 @@
   td .score b{font-variant-numeric:tabular-nums;}
   td .score span{color:var(--ink-2);}
   td .reason{color:var(--ink-2);}
+  td .sel-seleksi{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:4px;}
 </style>
 </head>
 <body data-menu="pelamar">
@@ -26,7 +27,6 @@
     <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="page-head">
       <div>
-        <div class="meta">Periode <span id="tahun">–</span></div>
         <h1>Daftar Pelamar</h1>
       </div>
       <a href="backend/api/admin/export.php" class="btn btn-outline">Ekspor ke Excel</a>
@@ -35,15 +35,15 @@
     <div class="stats">
       <div class="stat"><span>Total pendaftar</span><b id="stTotal">–</b></div>
       <div class="stat"><span>Menunggu verifikasi</span><b id="stMenunggu">–</b></div>
-      <div class="stat"><span>Lolos administrasi</span><b id="stLolos">–</b></div>
-      <div class="stat"><span>Sudah dinilai</span><b id="stDinilai">–</b></div>
-      <div class="stat"><span>Diterima / kuota</span><b id="stDiterima">–</b></div>
+      <div class="stat"><span>Berkas lengkap</span><b id="stLolos">–</b></div>
+      <div class="stat"><span>Lolos ke wawancara</span><b id="stDinilai">–</b></div>
+      <div class="stat"><span>Diterima</span><b id="stDiterima">–</b></div>
     </div>
 
     <div class="filters">
-      <div class="field"><label for="q">Cari</label><input class="input" id="q" placeholder="Nama, NIM, atau nomor pendaftaran"></div>
+      <div class="field"><label for="q">Cari</label><input class="input" id="q" placeholder="Nama, NPM, atau nomor pendaftaran"></div>
       <div class="field"><label for="fPt">Perguruan tinggi</label><select class="select" id="fPt"><option value="">Semua</option></select></div>
-      <div class="field"><label for="fBidang">Bidang</label><select class="select" id="fBidang"><option value="">Semua bidang</option></select></div>
+      <div class="field"><label for="fBatch">Batch</label><select class="select" id="fBatch"><option value="">Semua batch</option></select></div>
       <div class="field"><label for="fStatus">Status</label>
         <select class="select" id="fStatus">
           <option value="">Semua status</option>
@@ -51,6 +51,8 @@
           <option value="perbaikan">Perlu perbaikan</option>
           <option value="memenuhi">Memenuhi</option>
           <option value="tidak_memenuhi">Tidak memenuhi</option>
+          <option value="lolos">Lolos ke wawancara</option>
+          <option value="tidak_lolos">Tidak lolos ke wawancara</option>
           <option value="dinilai">Sudah dinilai</option>
           <option value="diterima">Diterima</option>
         </select>
@@ -60,7 +62,7 @@
     <div class="table-card">
       <div class="table-scroll">
         <table class="data">
-          <thead><tr><th data-urut="nama"><button type="button" class="urut">Pelamar</button></th><th data-urut="universitas"><button type="button" class="urut">Perguruan tinggi</button></th><th data-urut="semester"><button type="button" class="urut">Prodi · Smt</button></th><th data-urut="bidang_utama"><button type="button" class="urut">Bidang utama</button></th><th data-urut="status_admin"><button type="button" class="urut">Administrasi</button></th><th data-urut="nilai"><button type="button" class="urut">Nilai wawancara</button></th><th>Aksi</th></tr></thead>
+          <thead><tr><th data-urut="nama"><button type="button" class="urut">Pelamar</button></th><th data-urut="universitas"><button type="button" class="urut">Perguruan tinggi</button></th><th data-urut="semester"><button type="button" class="urut">Prodi · Smt</button></th><th data-urut="batch"><button type="button" class="urut">Batch</button></th><th data-urut="status_admin"><button type="button" class="urut">Administrasi</button></th><th data-urut="nilai"><button type="button" class="urut">Seleksi dan nilai</button></th><th>Aksi</th></tr></thead>
           <tbody id="rows" data-kerangka-tabel="7"></tbody>
         </table>
       </div>
@@ -91,22 +93,21 @@
     const data = await api('backend/api/admin/applications.php');
     if (!data.success) { toast(data.message, true); return; }
     rows = data.data;
-    const p = data.periode || {};
-    document.getElementById('tahun').textContent = p.tahun || '–';
 
     document.getElementById('stTotal').textContent = rows.length;
     document.getElementById('stMenunggu').textContent = rows.filter(r => r.status_admin === 'menunggu').length;
     document.getElementById('stLolos').textContent = rows.filter(r => r.status_admin === 'memenuhi').length;
-    document.getElementById('stDinilai').textContent = rows.filter(r => r.nilai !== null).length;
-    document.getElementById('stDiterima').textContent = `${rows.filter(r => r.hasil_akhir === 'diterima').length} / ${p.kuota ?? '–'}`;
+    document.getElementById('stDinilai').textContent = rows.filter(r => r.status_seleksi === 'lolos').length;
+    document.getElementById('stDiterima').textContent = rows.filter(r => r.hasil_akhir === 'diterima').length;
 
     const pts = [...new Set(rows.map(r => r.universitas).filter(Boolean))].sort();
     document.getElementById('fPt').insertAdjacentHTML('beforeend', pts.map(u => `<option>${esc(u)}</option>`).join(''));
-    document.getElementById('fBidang').insertAdjacentHTML('beforeend', data.bidang.map(b => `<option value="${b.id}">${esc(b.singkat)}</option>`).join(''));
+    document.getElementById('fBatch').insertAdjacentHTML('beforeend', data.batch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join(''));
+    if (params.get('batch')) document.getElementById('fBatch').value = params.get('batch');
     render();
   })();
 
-  ['q', 'fPt', 'fBidang', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', () => { halaman = 1; render(); }));
+  ['q', 'fPt', 'fBatch', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', () => { halaman = 1; render(); }));
 
   // Klik judul kolom: urut naik, klik lagi: turun, klik ketiga: kembali ke urutan masuk
   document.querySelectorAll('th[data-urut] button').forEach(btn => btn.addEventListener('click', () => {
@@ -158,27 +159,35 @@
   function nilaiCell(r) {
     if (r.status_admin === 'tidak_memenuhi') return `<span class="reason">${esc(r.alasan)}</span>`;
     if (r.status_admin !== 'memenuhi') return '<span class="muted">—</span>';
-    if (r.nilai === null) return '<span class="reason">Belum dinilai</span>';
-    return `<span class="score"><b>${fmtAngka(r.nilai)}</b> · <span>${esc(LABEL.rekomendasi[r.kategori])}</span></span>`;
+    if (!r.status_seleksi) return '<span class="reason">Menunggu seleksi berkas</span>';
+    const seleksi = pill(LABEL.seleksi, r.status_seleksi);
+    if (r.status_seleksi !== 'lolos') return seleksi;
+    const nilai = r.nilai === null ? '<span class="reason">Belum dinilai</span>'
+      : `<span class="score"><b>${fmtAngka(r.nilai)}</b> · <span>${esc(LABEL.rekomendasi[r.kategori] || '')}</span></span>`;
+    const hasil = r.hasil_akhir ? ' ' + pill(LABEL.hasil, r.hasil_akhir) : '';
+    const sedia = r.kesediaan ? ' ' + pill(LABEL.kesediaan, r.kesediaan) : '';
+    return `<div class="sel-seleksi">${seleksi}${hasil}${sedia}</div>${nilai}`;
   }
 
   function aksi(r) {
     if (r.status_admin === 'menunggu') return `<a class="link" href="admin_verifikasi.html?id=${r.id}">Verifikasi</a>`;
-    if (r.status_admin === 'memenuhi' && !r.sudah_saya_nilai) return `<a class="link" href="admin_penilaian.html?id=${r.id}">Nilai</a>`;
-    if (r.status_admin === 'memenuhi') return `<a class="link" href="admin_penilaian.html?id=${r.id}">Lihat</a>`;
+    if (r.status_admin === 'memenuhi' && !r.status_seleksi) return `<a class="link" href="admin_wawancara.html${r.batch_id ? '?batch=' + r.batch_id : ''}">Seleksi</a>`;
+    if (r.status_seleksi === 'lolos' && !r.sudah_saya_nilai) return `<a class="link" href="admin_penilaian.html?id=${r.id}">Nilai</a>`;
+    if (r.status_seleksi === 'lolos') return `<a class="link" href="admin_penilaian.html?id=${r.id}">Lihat</a>`;
     return `<a class="link" href="admin_verifikasi.html?id=${r.id}">Lihat</a>`;
   }
 
   function render() {
     const q = document.getElementById('q').value.trim().toLowerCase();
     const pt = document.getElementById('fPt').value;
-    const bidang = document.getElementById('fBidang').value;
+    const batch = document.getElementById('fBatch').value;
     const status = document.getElementById('fStatus').value;
     const list = rows.filter(r =>
       (!q || [r.nama, r.nim, r.no_pendaftaran].join(' ').toLowerCase().includes(q)) &&
       (!pt || r.universitas === pt) &&
-      (!bidang || String(r.bidang_utama_id) === bidang) &&
-      (!status || (status === 'dinilai' ? r.nilai !== null : status === 'diterima' ? r.hasil_akhir === 'diterima' : r.status_admin === status))
+      (!batch || String(r.batch_id) === batch) &&
+      (!status || (status === 'dinilai' ? r.nilai !== null : status === 'diterima' ? r.hasil_akhir === 'diterima'
+        : status === 'lolos' || status === 'tidak_lolos' ? r.status_seleksi === status : r.status_admin === status))
     );
     if (urut.kunci) {
       // Nilai kosong (mis. belum dinilai) selalu di bawah, apa pun arahnya
@@ -200,7 +209,7 @@
         <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)}</span></td>
         <td>${esc(r.universitas)}</td>
         <td>${esc(prodi(r.fakultas_prodi))} · ${esc(r.semester)}${r.jenjang !== 'S1' ? ` (${esc(r.jenjang)})` : ''}</td>
-        <td>${esc(r.bidang_utama)}</td>
+        <td>${esc(r.batch || '–')}</td>
         <td>${pill(LABEL.admin, r.status_admin)}</td>
         <td>${nilaiCell(r)}</td>
         <td>${aksi(r)}</td>

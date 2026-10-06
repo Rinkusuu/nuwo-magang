@@ -117,7 +117,7 @@
           <span class="avatar lg">${esc(initials(app.nama))}</span>
           <div>
             <b>${esc(app.nama)}</b> <span class="muted">· ${esc(app.no_pendaftaran)}</span>
-            <p>${esc(app.universitas)} · ${esc(app.jenjang)} ${esc(prodi)} · Semester ${esc(app.semester)} · IPK ${fmtAngka(app.ipk)} · Bidang: ${esc(app.bidang_utama || '-')}</p>
+            <p>${esc(app.universitas)} · ${esc(app.jenjang)} ${esc(prodi)} · Semester ${esc(app.semester)} · IPK ${fmtAngka(app.ipk)} · ${esc(app.batch ? app.batch.nama : '-')}</p>
             <div class="docs">${BERKAS.map(b => data.files[b.jenis]
               ? `<a class="link" href="backend/api/file.php?id=${data.files[b.jenis].id}" target="_blank" rel="noopener" data-pratinjau="${esc(DOC_LABEL[b.jenis])} · ${esc(data.application.nama)}">${DOC_LABEL[b.jenis]}</a>` : '').join('')}</div>
           </div>
@@ -125,7 +125,7 @@
         <div class="aside">
           ${lolos ? '<span class="pill green">Administrasi: Memenuhi syarat</span>' : `<span class="pill amber">Administrasi: ${esc(LABEL.admin[app.status_admin][0])}</span>`}
           <span>Pewawancara: ${esc(admin.nama)}${others.length ? ` · ${others.length} penilaian lain masuk` : ''}</span>
-          ${app.jadwal_tanggal ? `<span>Jadwal: ${fmtTanggal(app.jadwal_tanggal)}, ${esc(String(app.jadwal_jam).slice(0, 5))} WIB</span>` : ''}
+          ${app.batch && app.batch.wawancara_tanggal ? `<span>Wawancara: ${fmtTanggal(app.batch.wawancara_tanggal)}${app.batch.wawancara_jam ? ', ' + esc(app.batch.wawancara_jam.slice(0, 5)) + ' WIB' : ''}</span>` : ''}
         </div>
       </section>
 
@@ -143,7 +143,7 @@
             <p class="small" id="saran" style="margin-top:4px;"></p>
             <div id="recoBtns"></div>
             <label class="label" for="catatan" style="margin-top:14px;">Catatan keseluruhan</label>
-            <textarea class="textarea" id="catatan" placeholder="Kekuatan, hal yang perlu dibina, dan kesesuaian dengan bidang yang dilamar.">${esc(catatan)}</textarea>
+            <textarea class="textarea" id="catatan" placeholder="Kekuatan, hal yang perlu dibina, dan kesesuaian dengan bidang pekerjaan yang diminati.">${esc(catatan)}</textarea>
             <p class="small" id="saveHint" style="margin:8px 0 10px;">Semua aspek wajib diberi skor.</p>
             <button type="button" class="btn btn-primary btn-block" id="saveBtn">Simpan Penilaian</button>
           </section>
@@ -214,7 +214,7 @@
     document.getElementById('saran').innerHTML = `Saran sistem berdasarkan nilai: <b>${complete ? esc(LABEL.rekomendasi[saran]) : 'menunggu semua aspek dinilai'}</b>`;
     const lockTidak = skor[6] === 1;
     if (lockTidak) rekomendasi = 'tidak';
-    document.getElementById('recoBtns').innerHTML = Object.entries(LABEL.rekomendasi).map(([k, label]) =>
+    document.getElementById('recoBtns').innerHTML = Object.entries(LABEL.rekomendasi).filter(([k]) => k !== 'cadangan').map(([k, label]) =>
       `<button type="button" data-reco="${k}" class="${rekomendasi === k ? 'on' : ''}" aria-pressed="${rekomendasi === k}" ${!enabled || (lockTidak && k !== 'tidak') ? 'disabled' : ''}>${esc(label)}</button>`).join('');
     document.querySelectorAll('[data-reco]').forEach(b => b.addEventListener('click', () => { rekomendasi = b.dataset.reco; update(enabled); }));
 

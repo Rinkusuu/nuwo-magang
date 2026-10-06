@@ -5,11 +5,11 @@ $adminId = require_admin();
 $data = body();
 $id = (int) ($data['id'] ?? 0);
 
-$stmt = $pdo->prepare("SELECT status_admin FROM applications WHERE id = ?");
+$stmt = $pdo->prepare("SELECT status_admin, status_seleksi FROM applications WHERE id = ?");
 $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
-if ($app['status_admin'] !== 'memenuhi') fail('Pelamar belum lolos verifikasi administrasi.');
+if ($app['status_seleksi'] !== 'lolos') fail('Pelamar belum diloloskan ke tahap wawancara.');
 
 $skor = [];
 foreach (array_keys(BOBOT_ASPEK) as $i) {
@@ -23,7 +23,7 @@ $nilai = hitung_nilai($skor);
 if ($nilai === null) fail('Semua aspek wajib diberi skor.');
 
 $rekomendasi = $data['rekomendasi'] ?? '';
-if (!in_array($rekomendasi, ['sangat', 'direkomendasikan', 'cadangan', 'tidak'], true)) fail('Pilih rekomendasi pewawancara.');
+if (!in_array($rekomendasi, ['sangat', 'direkomendasikan', 'tidak'], true)) fail('Pilih rekomendasi pewawancara.');
 if ($skor[6] === 1 && $rekomendasi !== 'tidak') fail('Skor 1 pada aspek Sikap, Integritas, dan Profesionalisme otomatis tidak direkomendasikan.');
 
 $pdo->prepare("

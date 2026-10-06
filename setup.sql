@@ -45,6 +45,23 @@ CREATE TABLE bidang (
   urutan TINYINT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB;
 
+-- Batch (periode) PKL. Dikelola admin dari tahun ke tahun.
+CREATE TABLE batch (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  nama VARCHAR(100) NOT NULL,
+  daftar_buka DATE NOT NULL,
+  daftar_tutup DATE NOT NULL,
+  mulai DATE NOT NULL,
+  selesai DATE NOT NULL,
+  wawancara_tanggal DATE NULL,
+  wawancara_jam TIME NULL,
+  link_zoom VARCHAR(500) NULL,
+  link_wa VARCHAR(500) NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  INDEX idx_daftar (daftar_buka, daftar_tutup)
+) ENGINE=InnoDB;
+
 CREATE TABLE applications (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL UNIQUE,
@@ -63,6 +80,7 @@ CREATE TABLE applications (
   bidang_alternatif_id INT NULL,
   tanggal_mulai DATE NULL,
   tanggal_selesai DATE NULL,
+  batch_id INT NULL,
   pernyataan TINYINT(1) NOT NULL DEFAULT 0,
   submitted_at TIMESTAMP NULL,
   syarat_s1 ENUM('memenuhi','tidak') NULL,
@@ -76,9 +94,14 @@ CREATE TABLE applications (
   jadwal_tanggal DATE NULL,
   jadwal_jam TIME NULL,
   jadwal_lokasi VARCHAR(255) NULL,
-  hasil_akhir ENUM('diterima','cadangan','tidak_diterima') NULL,
+  status_seleksi ENUM('lolos','tidak_lolos') NULL,   -- screening manual: lolos ke wawancara atau tidak
+  seleksi_at TIMESTAMP NULL,
+  seleksi_by INT NULL,
+  hasil_akhir ENUM('diterima','tidak_diterima') NULL,
   bidang_penempatan_id INT NULL,
   decided_at TIMESTAMP NULL,
+  kesediaan ENUM('bersedia','tidak_bersedia') NULL,
+  kesediaan_at TIMESTAMP NULL,
   
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -87,7 +110,10 @@ CREATE TABLE applications (
   CONSTRAINT fk_app_bidang2 FOREIGN KEY (bidang_alternatif_id) REFERENCES bidang(id) ON DELETE SET NULL,
   CONSTRAINT fk_app_bidang3 FOREIGN KEY (bidang_penempatan_id) REFERENCES bidang(id) ON DELETE SET NULL,
   CONSTRAINT fk_app_admin FOREIGN KEY (verified_by) REFERENCES admins(id) ON DELETE SET NULL,
-  INDEX idx_status_admin (status_admin)
+  CONSTRAINT fk_app_batch FOREIGN KEY (batch_id) REFERENCES batch(id),
+  CONSTRAINT fk_app_seleksi FOREIGN KEY (seleksi_by) REFERENCES admins(id) ON DELETE SET NULL,
+  INDEX idx_status_admin (status_admin),
+  INDEX idx_batch (batch_id)
 ) ENGINE=InnoDB;
 
 -- Lima berkas administrasi (PDF, maks. 2 MB)
@@ -105,6 +131,19 @@ CREATE TABLE application_files (
 ) ENGINE=InnoDB;
 
 -- Penilaian wawancara: satu baris per pewawancara per pelamar
+-- Berkas selama pelaksanaan PKL: logbook (Excel) dan laporan akhir (PDF), satu berkas per jenis
+CREATE TABLE berkas_pkl (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  application_id INT NOT NULL,
+  jenis ENUM('logbook','laporan') NOT NULL,
+  stored_name VARCHAR(255) NOT NULL,
+  original_name VARCHAR(255) NOT NULL,
+  size INT NOT NULL,
+  uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_app_jenis (application_id, jenis),
+  FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
 CREATE TABLE interview_assessments (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -163,7 +202,15 @@ INSERT INTO admins (nama, email, password) VALUES
 ('Admin Seleksi', 'admin@bi.go.id', '$2y$12$hL5kVeYAwz7HvJOG0jWXmufBCNn5MCbtG2wx0/VMTtC3GnozxXgvW');
 
 INSERT INTO periode (id, tahun, tanggal_buka, tanggal_tutup, durasi, kuota, hari_perbaikan) VALUES
-(1, 2026, '2026-09-01', '2026-10-31', '3 bulan', 20, 3);
+(1, 2027, NULL, NULL, NULL, NULL, 3);
+
+-- Periode PKL 2027 (sesuai tabel dari kantor, 6 Oktober 2026). Dapat diubah admin.
+INSERT INTO batch (nama, daftar_buka, daftar_tutup, mulai, selesai) VALUES
+('Periode 1 2027', '2027-01-01', '2027-01-20', '2027-02-01', '2027-03-31'),
+('Periode 2 2027', '2027-03-01', '2027-03-20', '2027-04-01', '2027-05-31'),
+('Periode 3 2027', '2027-05-01', '2027-05-20', '2027-06-01', '2027-07-30'),
+('Periode 4 2027', '2027-07-01', '2027-07-20', '2027-08-02', '2027-09-30'),
+('Periode 5 2027', '2027-09-01', '2027-09-20', '2027-10-01', '2027-11-30');
 
 INSERT INTO bidang (nama, singkat, deskripsi, urutan) VALUES
 ('Asesmen Ekonomi dan Keuangan', 'Asesmen Ekonomi', 'Membantu pemantauan dan analisis perekonomian daerah, inflasi, serta stabilitas sistem keuangan. Relevan untuk Ekonomi Pembangunan, Statistika, Manajemen, dan Akuntansi.', 1),
@@ -180,23 +227,23 @@ INSERT INTO users (nama, email, password, no_wa) VALUES
 
 INSERT INTO applications
 (user_id, no_pendaftaran, nama, email, no_wa, domisili, universitas, fakultas_prodi, nim, ipk, jenjang, semester,
- bidang_utama_id, bidang_alternatif_id, tanggal_mulai, tanggal_selesai, pernyataan, submitted_at,
+ batch_id, pernyataan, submitted_at,
  syarat_s1, syarat_semester, syarat_aktif, status_admin, verified_at, verified_by,
- jadwal_tanggal, jadwal_jam, jadwal_lokasi)
+ status_seleksi, seleksi_at, seleksi_by)
 VALUES
 (1, 'MG-2026-0001', 'Rahmat Hidayat', 'rahmat@email.com', '0812-3456-7890', 'Bandar Lampung',
  'Universitas Lampung', 'Fakultas Ekonomi dan Bisnis / Ekonomi Pembangunan', '2211021001', 3.52, 'S1', 6,
- 1, 4, '2027-01-04', '2027-03-31', 1, NOW(),
+ 1, 1, NOW(),
  'memenuhi', 'memenuhi', 'memenuhi', 'memenuhi', NOW(), 1,
- '2026-10-12', '09:00:00', 'Ruang Rapat Lt. 2 KPwBI Provinsi Lampung');
+ 'lolos', NOW(), 1);
 
 INSERT INTO applications
 (user_id, no_pendaftaran, nama, email, no_wa, domisili, universitas, fakultas_prodi, nim, ipk, jenjang, semester,
- bidang_utama_id, bidang_alternatif_id, tanggal_mulai, tanggal_selesai, pernyataan, submitted_at)
+ batch_id, pernyataan, submitted_at)
 VALUES
 (2, 'MG-2026-0002', 'Siti Aisyah', 'siti@email.com', '0813-2211-4455', 'Lampung Selatan',
  'Institut Teknologi Sumatera', 'Fakultas Sains / Sains Data', '122450011', 3.61, 'S1', 5,
- 2, 1, '2027-01-04', '2027-03-31', 1, NOW());
+ 1, 1, NOW());
 
 
 

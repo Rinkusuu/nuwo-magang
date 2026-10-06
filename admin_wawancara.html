@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Wawancara dan Penilaian — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Seleksi dan Wawancara — Backoffice Magang KPwBI Provinsi Lampung</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -14,12 +14,16 @@
 <link rel="stylesheet" href="assets/portal.css">
 <script src="assets/gerak.js"></script>
 <style>
-  table.data td .input{padding:7px 9px;font-size:13px;}
-  table.data td.jadwal{min-width:420px;}
-  .jadwal-grid{display:grid;grid-template-columns:140px 100px minmax(0,1fr) auto;gap:8px;align-items:center;}
-  /* Tanggal, jam, lokasi, dan tombol simpan setinggi satu sama lain */
-  .jadwal-grid > .input,.jadwal-grid > .btn{height:38px;padding-top:0;padding-bottom:0;}
-  @media(max-width:720px){.jadwal-grid > .input,.jadwal-grid > .btn{height:44px;}}
+  .batch-info{display:flex;justify-content:space-between;align-items:center;gap:16px 24px;flex-wrap:wrap;margin-bottom:18px;}
+  .batch-info .detail{display:flex;gap:18px 28px;flex-wrap:wrap;font-size:13.5px;}
+  .batch-info .detail span{display:block;font-size:12px;color:var(--ink-3);font-weight:600;}
+  .batch-info .detail b{font-size:14.5px;}
+  .batch-info .field{min-width:220px;}
+  table.data tr.baris-lolos td:first-child{box-shadow:inset 4px 0 0 var(--green);}
+  table.data tr.baris-tidak td:first-child{box-shadow:inset 4px 0 0 var(--red);}
+  table.data tr.baris-tidak td{background:#FFFBFB;}
+  .seg button{display:inline-flex;align-items:center;gap:6px;}
+  .catatan-seleksi{font-size:12px;color:var(--ink-3);margin-top:6px;}
 </style>
 </head>
 <body data-menu="wawancara">
@@ -29,18 +33,23 @@
     <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="page-head">
       <div>
-        <div class="meta">Tahap 2 · Pelamar yang lolos administrasi</div>
-        <h1>Wawancara dan Penilaian</h1>
-        <div class="sub">Tetapkan jadwal wawancara (tampil di dasbor pelamar), lalu nilai dengan rubrik tujuh aspek.</div>
+        <div class="meta">Tahap 2 dan 3 · Pelamar dengan berkas lengkap</div>
+        <h1>Seleksi dan Wawancara</h1>
+        <div class="sub">Tentukan pelamar yang lolos ke wawancara daring. Yang diloloskan menerima email berisi tautan ke halaman status, tempat jadwal dan link Zoom batch ditampilkan.</div>
       </div>
       <a href="admin_rubrik.html" class="btn btn-outline">Lihat Rubrik</a>
     </div>
 
+    <section class="card batch-info" id="batchInfo">
+      <div class="field"><label for="fBatch">Batch</label><select class="select" id="fBatch"></select></div>
+      <div class="detail" id="detailBatch"></div>
+    </section>
+
     <div class="table-card">
       <div class="table-scroll">
         <table class="data">
-          <thead><tr><th>Pelamar</th><th>Bidang utama</th><th>Jadwal wawancara (tanggal · jam · ruang/tautan)</th><th>Nilai</th><th>Aksi</th></tr></thead>
-          <tbody id="rows" data-kerangka-tabel="5"></tbody>
+          <thead><tr><th>Pelamar</th><th>Prodi · Smt · IPK</th><th>Berkas</th><th>Keputusan seleksi</th><th>Nilai wawancara</th><th>Aksi</th></tr></thead>
+          <tbody id="rows" data-kerangka-tabel="6"></tbody>
         </table>
       </div>
     </div>
@@ -51,49 +60,76 @@
 <script src="assets/common.js"></script>
 <script src="assets/admin.js"></script>
 <script>
-  let rows = [];
+  const $ = id => document.getElementById(id);
+  let semua = [], daftarBatch = [];
+  const params = new URLSearchParams(location.search);
 
   (async () => {
     if (!await requireAdmin()) return;
-    await load();
+    await muat();
   })();
 
-  async function load() {
+  async function muat() {
     const data = await api('backend/api/admin/applications.php');
     if (!data.success) { toast(data.message, true); return; }
-    rows = data.data.filter(r => r.status_admin === 'memenuhi');
+    semua = data.data.filter(r => r.status_admin === 'memenuhi');
+    if (!daftarBatch.length) {
+      daftarBatch = data.batch;
+      $('fBatch').innerHTML = '<option value="">Semua batch</option>' + daftarBatch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join('');
+      // Bawaan: batch dari tautan, atau batch terbaru yang punya pelamar berkas lengkap
+      const awal = params.get('batch') || (semua[0] && semua[0].batch_id) || '';
+      $('fBatch').value = String(awal);
+    }
     render();
   }
+  $('fBatch').addEventListener('input', render);
+
+  function prodi(s) { const p = String(s || '').split('/'); return p[p.length - 1].trim(); }
 
   function render() {
-    document.getElementById('rows').removeAttribute('aria-busy');
-    document.getElementById('rows').innerHTML = rows.length ? rows.map(r => `
-      <tr data-id="${r.id}">
-        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
-        <td>${esc(r.bidang_utama)}</td>
-        <td class="jadwal"><div class="jadwal-grid">
-          <input class="input" type="date" data-f="tanggal" value="${esc(r.jadwal_tanggal || '')}" aria-label="Tanggal">
-          <input class="input" type="time" data-f="jam" value="${esc(String(r.jadwal_jam || '').slice(0, 5))}" aria-label="Jam">
-          <input class="input" data-f="lokasi" value="${esc(r.jadwal_lokasi || '')}" placeholder="Ruang / tautan daring" aria-label="Lokasi">
-          <button type="button" class="btn btn-outline btn-sm" data-save>${r.jadwal_tanggal ? 'Ubah' : 'Simpan'}</button>
-        </div></td>
-        <td>${r.nilai !== null
-          ? `<b class="num">${fmtAngka(r.nilai)}</b> <span class="muted">· ${r.jumlah_penilai} pewawancara</span><br><span style="font-size:12.5px;">${esc(LABEL.rekomendasi[r.kategori])}</span>`
-          : '<span class="muted">Belum dinilai</span>'}</td>
-        <td><a class="link" href="admin_penilaian.html?id=${r.id}">${r.sudah_saya_nilai ? 'Lihat / ubah' : 'Nilai'}</a></td>
-      </tr>`).join('') : '<tr><td colspan="5" class="empty">Belum ada pelamar yang lolos verifikasi administrasi.</td></tr>';
+    const id = $('fBatch').value;
+    const b = daftarBatch.find(x => String(x.id) === id);
+    $('detailBatch').innerHTML = b ? `
+      <div><span>Jadwal wawancara</span><b>${b.wawancara_tanggal ? fmtTanggal(b.wawancara_tanggal) + (b.wawancara_jam ? ', ' + esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : '') : 'Belum diatur'}</b></div>
+      <div><span>Link Zoom</span><b>${b.link_zoom ? `<a class="link" href="${esc(b.link_zoom)}" target="_blank" rel="noopener">Buka Zoom</a>` : 'Belum diatur'}</b></div>
+      <div><span>Pengaturan</span><b><a class="link" href="admin_periode.html">Ubah di Batch dan Jadwal</a></b></div>`
+      : '<div><span>Batch</span><b>Pilih batch untuk melihat jadwal dan link Zoom</b></div>';
 
-    document.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', async () => {
-      const tr = btn.closest('tr');
-      const v = f => tr.querySelector(`[data-f="${f}"]`).value.trim();
-      btn.disabled = true;
-      const res = await api('backend/api/admin/schedule.php', { json: { id: Number(tr.dataset.id), tanggal: v('tanggal'), jam: v('jam'), lokasi: v('lokasi') } });
-      btn.disabled = false;
-      if (!res.success) { toast(res.message, true); return; }
-      toast('Jadwal wawancara disimpan dan tampil di dasbor pelamar.');
-      btn.textContent = 'Ubah';
-    }));
+    const rows = semua.filter(r => !id || String(r.batch_id) === id);
+    $('rows').removeAttribute('aria-busy');
+    $('rows').innerHTML = rows.length ? rows.map(r => {
+      const s = r.status_seleksi;
+      const terkunci = !!r.hasil_akhir;
+      return `<tr data-id="${r.id}" class="${s === 'lolos' ? 'baris-lolos' : s === 'tidak_lolos' ? 'baris-tidak' : ''}">
+        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
+        <td>${esc(prodi(r.fakultas_prodi))} · ${esc(r.semester)} · ${fmtAngka(r.ipk)}</td>
+        <td><a class="link" href="admin_verifikasi.html?id=${r.id}">Lihat berkas</a></td>
+        <td><div class="seg">
+            <button type="button" data-putus="lolos" class="${s === 'lolos' ? 'on-green' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('centang', 13)}Loloskan</button>
+            <button type="button" data-putus="tidak_lolos" class="${s === 'tidak_lolos' ? 'on-red' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('tutup', 13)}Tidak lolos</button>
+          </div>
+          <div class="catatan-seleksi">${terkunci ? 'Hasil akhir sudah ditetapkan.' : s ? 'Klik pilihan yang aktif untuk membatalkan.' : 'Belum diputuskan.'}</div></td>
+        <td>${s !== 'lolos' ? '<span class="muted">—</span>' : r.nilai !== null
+          ? `<b class="num">${fmtAngka(r.nilai)}</b> <span class="muted">· ${r.jumlah_penilai} pewawancara</span><br><span style="font-size:12.5px;">${esc(LABEL.rekomendasi[r.kategori] || '')}</span>`
+          : '<span class="muted">Belum dinilai</span>'}</td>
+        <td>${s === 'lolos' ? `<a class="link" href="admin_penilaian.html?id=${r.id}">${r.sudah_saya_nilai ? 'Lihat / ubah' : 'Nilai'}</a>` : '<span class="muted">—</span>'}</td>
+      </tr>`;
+    }).join('') : '<tr><td colspan="6" class="empty">Belum ada pelamar dengan berkas lengkap di batch ini.</td></tr>';
   }
+
+  $('rows').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-putus]');
+    if (!btn) return;
+    const r = semua.find(x => String(x.id) === btn.closest('tr').dataset.id);
+    // Klik pilihan yang sedang aktif = batalkan keputusan
+    const keputusan = r.status_seleksi === btn.dataset.putus ? null : btn.dataset.putus;
+    if (keputusan === 'lolos' && !await konfirmasi({ judul: `Loloskan ${r.nama}?`, pesan: 'Pelamar akan menerima email bahwa ia lolos ke tahap wawancara, berisi tautan ke halaman status.', ya: 'Loloskan' })) return;
+    btn.closest('.seg').querySelectorAll('button').forEach(b => { b.disabled = true; });
+    const res = await api('backend/api/admin/seleksi.php', { json: { id: r.id, keputusan } });
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+    if (res.success) { r.status_seleksi = keputusan; }
+    render();
+  });
 </script>
 </body>
 </html>

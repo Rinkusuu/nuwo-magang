@@ -119,6 +119,12 @@
   .docs .doc p{font-size:13px;color:var(--ink-2);}
   @media(max-width:620px){.docs{grid-template-columns:1fr;}}
   .req .foot{font-size:13px;color:var(--ink-2);}
+  .req .info-tambahan{margin-top:22px;padding-top:18px;border-top:1px solid var(--line);}
+  .req .info-tambahan h4{font-size:14px;font-weight:700;margin-bottom:8px;}
+  .req .info-tambahan + .info-tambahan{margin-top:16px;padding-top:0;border-top:none;}
+  .req .prodi{list-style:none;display:flex;flex-wrap:wrap;gap:6px;}
+  .req .prodi li{font-size:12.5px;font-weight:600;color:var(--navy-800);background:var(--navy-50);border:1px solid var(--navy-100);border-radius:999px;padding:4px 10px;}
+  .req .info-tambahan p{font-size:13.5px;color:var(--ink-2);}
 
   /* ---------- Alur seleksi: enam halte pada satu jalur ---------- */
   .flow{position:relative;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:22px;padding-top:34px;list-style:none;}
@@ -157,28 +163,34 @@
     .flow .step p{max-width:480px;}
   }
 
-  /* ---------- Bidang ---------- */
+  /* ---------- Jadwal periode ---------- */
   /* Grid 6 kolom: tiap kartu 2 kolom (3 per baris). Sisa 2 kartu dibagi rata satu baris,
      sisa 1 kartu diletakkan di tengah, sehingga tidak ada slot kosong yang menggantung. */
-  .bidang{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;}
-  .bidang > *{grid-column:span 2;}
-  .bidang > p{grid-column:1 / -1;}
-  .bidang > .card:nth-last-child(2):nth-child(3n+1),.bidang > .card:last-child:nth-child(3n+2){grid-column:span 3;}
-  .bidang > .card:last-child:nth-child(3n+1){grid-column:3 / span 2;}
+  .periode-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:16px;}
+  .periode-grid > *{grid-column:span 2;}
+  .periode-grid > p{grid-column:1 / -1;}
+  .periode-grid > .card:nth-last-child(2):nth-child(3n+1),.periode-grid > .card:last-child:nth-child(3n+2){grid-column:span 3;}
+  .periode-grid > .card:last-child:nth-child(3n+1){grid-column:3 / span 2;}
   @media(max-width:900px){
-    .bidang{grid-template-columns:repeat(2,minmax(0,1fr));}
-    .bidang > *,.bidang > .card:nth-last-child(2):nth-child(3n+1),.bidang > .card:last-child:nth-child(3n+2),.bidang > .card:last-child:nth-child(3n+1){grid-column:span 1;}
-    .bidang > .card:last-child:nth-child(odd){grid-column:1 / -1;}
+    .periode-grid{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .periode-grid > *,.periode-grid > .card:nth-last-child(2):nth-child(3n+1),.periode-grid > .card:last-child:nth-child(3n+2),.periode-grid > .card:last-child:nth-child(3n+1){grid-column:span 1;}
+    .periode-grid > .card:last-child:nth-child(odd){grid-column:1 / -1;}
   }
-  @media(max-width:600px){.bidang{grid-template-columns:minmax(0,1fr);}.bidang > .card:last-child:nth-child(odd){grid-column:auto;}}
-  .bidang .card > [data-ikon],.bidang .card > .ikon-bidang{width:42px;height:42px;border-radius:12px;background:var(--navy-50);color:var(--navy-700);margin-bottom:16px;transition:background-color .3s,color .3s;}
-  .bidang .card:hover > .ikon-bidang{background:var(--navy-700);color:#fff;}
-  .bidang .card{position:relative;padding:24px 24px 22px;margin:0;overflow:hidden;transition:border-color .25s,box-shadow .35s var(--ease),transform .35s var(--ease);}
-  .bidang .card::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;background:var(--navy-700);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease);}
-  .bidang .card:hover{border-color:var(--navy-100);box-shadow:var(--shadow-lg);transform:translateY(-3px);}
-  .bidang .card:hover::before{transform:scaleX(1);}
-  .bidang .card h3{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.25;letter-spacing:-.01em;margin-bottom:8px;}
-  .bidang .card p{font-size:13.5px;color:var(--ink-2);}
+  @media(max-width:600px){.periode-grid{grid-template-columns:minmax(0,1fr);}.periode-grid > .card:last-child:nth-child(odd){grid-column:auto;}}
+  .periode-grid .card{position:relative;padding:24px 24px 22px;margin:0;overflow:hidden;transition:border-color .25s,box-shadow .35s var(--ease),transform .35s var(--ease);}
+  .periode-grid .card::before{content:"";position:absolute;left:24px;right:24px;top:0;height:2px;background:var(--navy-700);transform:scaleX(0);transform-origin:left;transition:transform .45s var(--ease);}
+  .periode-grid .card:hover{border-color:var(--navy-100);box-shadow:var(--shadow-lg);transform:translateY(-3px);}
+  .periode-grid .card:hover::before{transform:scaleX(1);}
+  .periode-grid .card h3{font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.25;letter-spacing:-.01em;margin-bottom:8px;}
+  .periode-grid .card p{font-size:13.5px;color:var(--ink-2);}
+
+  .periode-grid .card .atas{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:16px;}
+  .periode-grid .card h3{margin:0;}
+  .periode-grid dl{display:flex;flex-direction:column;gap:12px;}
+  .periode-grid dt{font-size:12.5px;color:var(--ink-3);font-weight:600;}
+  .periode-grid dd{font-size:14.5px;font-weight:700;color:var(--ink);}
+  .periode-grid .card.terbuka{border-color:#BFE0CC;box-shadow:0 0 0 3px rgba(28,122,75,.08),var(--shadow);}
+  .catatan-periode{margin-top:18px;font-size:13.5px;color:var(--ink-2);}
 
   /* ---------- FAQ ---------- */
   .faq{max-width:820px;display:flex;flex-direction:column;gap:10px;}
@@ -228,7 +240,7 @@
     <nav class="nav-links" aria-label="Navigasi utama">
       <a href="#persyaratan">Persyaratan</a>
       <a href="#alur">Alur Seleksi</a>
-      <a href="#bidang">Bidang Magang</a>
+      <a href="#jadwal">Jadwal</a>
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-cta">
@@ -243,7 +255,7 @@
   <nav aria-label="Navigasi utama (HP)">
     <a href="#persyaratan">Persyaratan</a>
     <a href="#alur">Alur Seleksi</a>
-    <a href="#bidang">Bidang Magang</a>
+    <a href="#jadwal">Jadwal</a>
     <a href="#faq">FAQ</a>
   </nav>
   <div class="tombol">
@@ -259,9 +271,9 @@
   </svg>
   <div class="wrap">
     <div>
-      <div class="kicker" data-muncul style="--urut:0">Program Magang Mahasiswa <span id="heroTahun"></span></div>
+      <div class="kicker" data-muncul style="--urut:0">Praktik Kerja Lapangan (PKL) Mahasiswa</div>
       <h1 data-kata>Mengenal tugas bank sentral langsung dari Kantor Perwakilan Bank Indonesia Provinsi Lampung.</h1>
-      <p data-muncul style="--urut:6">Program magang bagi mahasiswa jenjang Strata Satu (S1) untuk memperoleh pengalaman kerja pada unit kerja KPwBI Provinsi Lampung sesuai bidang yang diminati.</p>
+      <p data-muncul style="--urut:6">Program PKL bagi mahasiswa jenjang Strata Satu (S1) untuk memperoleh pengalaman kerja selama 2 bulan pada unit kerja KPwBI Provinsi Lampung.</p>
       <div class="actions" data-muncul style="--urut:8">
         <a href="registrasi.html" class="btn btn-light">Daftar Sekarang</a>
         <a href="#persyaratan" class="btn btn-ghost-light">Lihat Persyaratan</a>
@@ -269,9 +281,9 @@
     </div>
     <aside class="period-card" aria-label="Informasi periode" data-muncul style="--urut:7">
       <div class="kicker">Informasi Periode</div>
-      <div class="item"><span data-ikon="kalender"></span><div><span>Pendaftaran dibuka</span><b id="infoTanggal"><span class="kerangka" style="width:88%;margin-top:4px"></span></b><div class="open" id="infoOpen"></div></div></div>
-      <div class="item"><span data-ikon="umur"></span><div><span>Durasi magang</span><b id="infoDurasi"><span class="kerangka" style="width:40%;margin-top:4px"></span></b></div></div>
-      <div class="item"><span data-ikon="kelompok"></span><div><span>Kuota peserta</span><b id="infoKuota"><span class="kerangka" style="width:45%;margin-top:4px"></span></b></div></div>
+      <div class="item"><span data-ikon="kalender"></span><div><span id="infoLabel">Periode</span><b id="infoNama"><span class="kerangka" style="width:60%;margin-top:4px"></span></b><div class="open" id="infoOpen"></div></div></div>
+      <div class="item"><span data-ikon="daftar"></span><div><span>Pendaftaran</span><b id="infoDaftar"><span class="kerangka" style="width:70%;margin-top:4px"></span></b></div></div>
+      <div class="item"><span data-ikon="umur"></span><div><span>Pelaksanaan PKL · 2 bulan</span><b id="infoLaksana"><span class="kerangka" style="width:80%;margin-top:4px"></span></b></div></div>
     </aside>
   </div>
 </section>
@@ -288,17 +300,36 @@
         <ol class="num-list">
           <li><span class="n">1</span><span>Mahasiswa aktif jenjang <strong>Strata Satu (S1)</strong>.</span></li>
           <li><span class="n">2</span><span>Sedang menempuh <strong>minimal semester 4</strong> pada saat mendaftar, dibuktikan dengan surat pengantar dari perguruan tinggi.</span></li>
-          <li><span class="n">3</span><span>Bersedia mengikuti seluruh rangkaian seleksi dan menjalani magang sesuai periode yang diajukan.</span></li>
+          <li><span class="n">3</span><span>Bersedia mengikuti seluruh rangkaian seleksi dan menjalani PKL sesuai periode yang dipilih.</span></li>
         </ol>
+        <div class="info-tambahan">
+          <h4>Program studi yang sesuai</h4>
+          <ul class="prodi">
+            <li>Ekonomi (Manajemen, Akuntansi, Ilmu Ekonomi, Keuangan)</li>
+            <li>Matematika</li>
+            <li>Statistika</li>
+            <li>Teknik (Informatika, Elektro, Arsitektur, dll.)</li>
+            <li>Ilmu Komputer, Sistem Informasi, Teknologi Informasi</li>
+            <li>Ilmu Komunikasi</li>
+            <li>Hubungan Internasional</li>
+            <li>Hukum</li>
+            <li>Administrasi Bisnis/Niaga</li>
+            <li>Psikologi</li>
+          </ul>
+        </div>
+        <div class="info-tambahan">
+          <h4>Keahlian khusus</h4>
+          <p>Menguasai Microsoft Office (Word, Excel, PowerPoint), desain grafis, programmer, komputer jaringan, multimedia, dan administrasi arsip.</p>
+        </div>
       </div>
       <div class="card" data-muncul>
         <h3>B. Persyaratan Administrasi</h3>
-        <p class="muted" style="font-size:13.5px;">Persyaratan administrasi Program Magang Mahasiswa paling tidak meliputi:</p>
+        <p class="muted" style="font-size:13.5px;">Persyaratan administrasi PKL meliputi:</p>
         <div class="docs">
           <div class="doc"><span data-ikon="dokumen"></span><div><b>1. Data Diri Lengkap</b><p><em>Curriculum Vitae</em> (CV).</p></div></div>
-          <div class="doc"><span data-ikon="dokumen"></span><div><b>2. <em>Motivation Letter</em></b><p>Menjelaskan maksud dan tujuan, bidang/sektor yang diminati, jangka waktu, serta harapan atau target yang akan dicapai.</p></div></div>
-          <div class="doc"><span data-ikon="dokumen"></span><div><b>3. Surat Pengantar dari Perguruan Tinggi</b><p>Mencakup Nama, NIM, Fakultas/Program Studi, dan Semester.</p></div></div>
-          <div class="doc"><span data-ikon="dokumen"></span><div><b>4. Transkrip Nilai Terakhir</b><p>Transkrip resmi sampai semester terakhir yang telah ditempuh.</p></div></div>
+          <div class="doc"><span data-ikon="dokumen"></span><div><b>2. <em>Motivation Letter</em></b><p>Menjelaskan maksud dan tujuan PKL, harapan atau target yang akan dicapai, serta bidang pekerjaan yang diminati.</p></div></div>
+          <div class="doc"><span data-ikon="dokumen"></span><div><b>3. Surat Pengantar dari Perguruan Tinggi</b><p>Mencakup Nama, NPM, Fakultas/Program Studi, Semester, serta durasi dan periode PKL (2 bulan).</p></div></div>
+          <div class="doc"><span data-ikon="dokumen"></span><div><b>4. Transkrip Nilai Terakhir</b><p>Transkrip nilai sampai semester terakhir yang telah ditempuh.</p></div></div>
           <div class="doc wide"><span data-ikon="dokumen"></span><div><b>5. Kartu Tanda Mahasiswa (KTM)</b><p>Pindaian KTM dalam satu berkas PDF.</p></div></div>
         </div>
         <p class="foot">Seluruh berkas diunggah dalam format PDF (maksimal 2 MB per berkas) melalui formulir pendaftaran daring.</p>
@@ -311,26 +342,27 @@
   <div class="wrap">
     <div class="section-head" data-muncul>
       <div class="kicker">Alur Seleksi</div>
-      <h2>Enam tahap dari pendaftaran hingga penempatan</h2>
+      <h2>Enam tahap dari pendaftaran hingga pelaksanaan PKL</h2>
     </div>
     <ol class="flow">
       <li class="step"><div class="no">01</div><h3>Registrasi Akun</h3><p>Pelamar membuat akun dan mengisi data diri serta data akademik.</p></li>
-      <li class="step"><div class="no">02</div><h3>Unggah Berkas</h3><p>Pelamar memilih bidang dan periode, lalu mengunggah lima berkas administrasi.</p></li>
-      <li class="step"><div class="no">03</div><h3>Verifikasi Administrasi</h3><p>Tim memeriksa kelengkapan berkas dan syarat minimal semester 4 S1.</p></li>
-      <li class="step"><div class="no">04</div><h3>Wawancara</h3><p>Pelamar yang lolos administrasi mengikuti wawancara dengan unit kerja terkait.</p></li>
-      <li class="step"><div class="no">05</div><h3>Pengumuman</h3><p>Hasil seleksi dan penempatan diumumkan melalui dasbor pelamar dan email.</p></li>
-      <li class="step"><div class="no">06</div><h3>Pelaksanaan Magang</h3><p>Peserta menjalani magang, menyusun laporan, dan menerima evaluasi serta sertifikat.</p></li>
+      <li class="step"><div class="no">02</div><h3>Unggah Berkas</h3><p>Pelamar memilih periode PKL, lalu mengunggah lima berkas administrasi.</p></li>
+      <li class="step"><div class="no">03</div><h3>Verifikasi dan Seleksi Berkas</h3><p>Tim memeriksa kelengkapan berkas, lalu menyeleksi pelamar yang diundang wawancara.</p></li>
+      <li class="step"><div class="no">04</div><h3>Wawancara Daring</h3><p>Pelamar yang lolos seleksi berkas mengikuti wawancara melalui Zoom.</p></li>
+      <li class="step"><div class="no">05</div><h3>Pengumuman</h3><p>Hasil diumumkan melalui email dan halaman status; peserta yang diterima mengonfirmasi kesediaan.</p></li>
+      <li class="step"><div class="no">06</div><h3>Pelaksanaan PKL</h3><p>Peserta menjalani PKL selama 2 bulan, mengunggah logbook dan laporan akhir, lalu menerima sertifikat.</p></li>
     </ol>
   </div>
 </section>
 
-<section class="block alt" id="bidang">
+<section class="block alt" id="jadwal">
   <div class="wrap">
     <div class="section-head" data-muncul>
-      <div class="kicker">Bidang Magang</div>
-      <h2>Pilih bidang sesuai minat dan latar belakang studi</h2>
+      <div class="kicker">Jadwal Periode</div>
+      <h2>Periode PKL dan jadwal pendaftaran</h2>
     </div>
-    <div class="bidang" id="bidangList" aria-busy="true"><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:42px;height:42px;border-radius:12px;margin-bottom:16px"></span><span class="kerangka" style="width:75%;height:1.1em;margin-bottom:12px"></span><span class="kerangka" style="width:95%;margin-bottom:8px"></span><span class="kerangka" style="width:80%"></span></div></div>
+    <div class="periode-grid" id="daftarPeriode" aria-busy="true"><div class="card" aria-hidden="true"><span class="kerangka" style="width:55%;height:1.1em;margin-bottom:18px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:70%;margin-bottom:14px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:55%;height:1.1em;margin-bottom:18px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:70%;margin-bottom:14px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:80%"></span></div><div class="card" aria-hidden="true"><span class="kerangka" style="width:55%;height:1.1em;margin-bottom:18px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:70%;margin-bottom:14px"></span><span class="kerangka" style="width:35%;margin-bottom:6px"></span><span class="kerangka" style="width:80%"></span></div></div>
+    <p class="catatan-periode">Setiap periode PKL berlangsung selama 2 bulan. Pilih periode saat mengisi formulir pendaftaran.</p>
   </div>
 </section>
 
@@ -344,7 +376,7 @@
       <details data-muncul><summary>Apakah mahasiswa D3 atau D4 dapat mendaftar?</summary><p>Tidak. Program ini khusus untuk mahasiswa aktif jenjang Strata Satu (S1) yang sedang menempuh minimal semester 4.</p></details>
       <details data-muncul><summary>Bagaimana jika salah satu berkas saya dinyatakan perlu perbaikan?</summary><p>Anda akan menerima catatan dan batas waktu perbaikan pada dasbor pelamar. Unggah ulang berkas yang diminta lalu kirim kembali pendaftaran sebelum batas waktu berakhir.</p></details>
       <details data-muncul><summary>Apakah formulir bisa diisi bertahap?</summary><p>Bisa. Isian formulir tersimpan otomatis sebagai draf, sehingga Anda dapat melanjutkannya kapan saja sebelum mengirim pendaftaran.</p></details>
-      <details data-muncul><summary>Bagaimana saya mengetahui hasil seleksi?</summary><p>Jadwal wawancara, hasil seleksi, dan bidang penempatan diumumkan melalui halaman Status Pendaftaran di dasbor pelamar.</p></details>
+      <details data-muncul><summary>Bagaimana saya mengetahui hasil seleksi?</summary><p>Hasil seleksi berkas, jadwal dan tautan wawancara daring, serta pengumuman akhir dikirim melalui email dan dapat dilihat di halaman Status Pendaftaran.</p></details>
     </div>
 
     <div class="cta-band" style="margin-top:56px;" data-muncul>
@@ -362,7 +394,7 @@
 </section>
 
 <div class="cta-lekat" id="ctaLekat" aria-label="Pendaftaran dibuka">
-  <div><b>Pendaftaran dibuka</b><span id="ctaSisa"></span></div>
+  <div><b id="ctaJudul">Pendaftaran dibuka</b><span id="ctaSisa"></span></div>
   <a href="registrasi.html" class="btn btn-light btn-sm">Daftar Sekarang</a>
 </div>
 
@@ -375,14 +407,14 @@
       <div class="identitas">
         <span class="logo-putih"><img src="assets/bi-logo.webp" alt="Bank Indonesia" width="360" height="65"></span>
         <b>Portal Magang Mahasiswa</b>
-        <p>Kantor Perwakilan Bank Indonesia Provinsi Lampung. Pendaftaran, seleksi, dan pengumuman Program Magang Mahasiswa S1 dalam satu tempat.</p>
+        <p>Kantor Perwakilan Bank Indonesia Provinsi Lampung. Pendaftaran, seleksi, dan pengumuman PKL mahasiswa S1 dalam satu tempat.</p>
       </div>
       <nav aria-label="Informasi program">
         <h2>Informasi</h2>
         <ul>
           <li><a href="#persyaratan">Persyaratan</a></li>
           <li><a href="#alur">Alur Seleksi</a></li>
-          <li><a href="#bidang">Bidang Magang</a></li>
+          <li><a href="#jadwal">Jadwal</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
       </nav>
@@ -413,17 +445,6 @@
 <script src="assets/common.js"></script>
 <script>
   document.getElementById('tahunKaki').textContent = new Date().getFullYear();
-  // Ikon tiap bidang ditentukan dari kata kunci namanya (bidang diatur di database)
-  function ikonBidang(nama) {
-    const n = String(nama).toLowerCase();
-    if (/asesmen|ekonomi dan keuangan|statistik|riset/.test(n)) return 'grafik';
-    if (/pembayaran|rupiah|uang/.test(n)) return 'uang';
-    if (/umkm|syariah/.test(n)) return 'pasar';
-    if (/komunikasi|humas|masyarakat|publikasi/.test(n)) return 'obrolan';
-    if (/manajemen|intern|sdm|logistik|administrasi/.test(n)) return 'gedung';
-    return 'dokumen';
-  }
-
   // ---------- Menu HP ----------
   const menuBtn = document.getElementById('menuBtn');
   const menuHp = document.getElementById('menuHp');
@@ -446,7 +467,7 @@
 
   // ---------- Penanda bagian yang sedang dibaca ----------
   const tautanBagian = [...document.querySelectorAll('.nav-links a, .menu-hp nav a')];
-  const bagian = ['persyaratan', 'alur', 'bidang', 'faq'].map(id => document.getElementById(id));
+  const bagian = ['persyaratan', 'alur', 'jadwal', 'faq'].map(id => document.getElementById(id));
   if ('IntersectionObserver' in window) {
     const pengamatBagian = new IntersectionObserver(entri => {
       entri.forEach(e => {
@@ -474,51 +495,67 @@
     [document.querySelector('.hero'), document.querySelector('.cta-band'), document.querySelector('footer.kaki')].forEach(el => pengamatCta.observe(el));
   }
 
+  // "1–20 Januari 2027", "1 Februari – 31 Maret 2027", atau dua tanggal lengkap bila beda tahun
+  function rentang(a, b) {
+    const [ya, ma, da] = a.split('-').map(Number), [yb, mb, db] = b.split('-').map(Number);
+    if (ya === yb && ma === mb) return `${da}–${db} ${BULAN[mb - 1]} ${yb}`;
+    if (ya === yb) return `${da} ${BULAN[ma - 1]} – ${db} ${BULAN[mb - 1]} ${yb}`;
+    return `${fmtTanggal(a)} – ${fmtTanggal(b)}`;
+  }
+  // Selisih hari kalender antara dua tanggal YYYY-MM-DD
+  const selisih = (a, b) => Math.round((Date.UTC(...b.split('-').map((n, i) => i === 1 ? n - 1 : +n)) - Date.UTC(...a.split('-').map((n, i) => i === 1 ? n - 1 : +n))) / 864e5);
+
+  function statusBatch(b, hariIni) {
+    if (b.terbuka) return '<span class="pill green"><span class="live"></span>Pendaftaran dibuka</span>';
+    if (hariIni < b.daftar_buka) return '<span class="pill blue">Segera dibuka</span>';
+    if (hariIni < b.mulai) return '<span class="pill gray">Pendaftaran ditutup</span>';
+    return '<span class="pill gray">Sedang berjalan</span>';
+  }
+
   (async () => {
     const data = await api('backend/api/public/info.php');
-    const tanggal = document.getElementById('infoTanggal');
-    const list = document.getElementById('bidangList');
+    const list = document.getElementById('daftarPeriode');
+    list.removeAttribute('aria-busy');
     if (!data.success) {
-      tanggal.textContent = 'Akan diumumkan';
-      document.getElementById('infoDurasi').textContent = '–';
-      document.getElementById('infoKuota').textContent = '–';
-      list.innerHTML = '<p class="muted">Daftar bidang belum dapat dimuat.</p>';
+      ['infoNama', 'infoDaftar', 'infoLaksana'].forEach(id => { document.getElementById(id).textContent = '–'; });
+      list.innerHTML = '<p class="muted">Jadwal periode belum dapat dimuat.</p>';
       return;
     }
-    const p = data.periode || {};
-    document.getElementById('heroTahun').textContent = p.tahun || '';
-    tanggal.textContent = p.tanggal_buka && p.tanggal_tutup
-      ? `${fmtTanggal(p.tanggal_buka)} – ${fmtTanggal(p.tanggal_tutup)}` : 'Akan diumumkan';
-    document.getElementById('infoDurasi').textContent = p.durasi || 'Akan diumumkan';
-    document.getElementById('infoKuota').textContent = p.kuota ? `${p.kuota} orang` : 'Akan diumumkan';
+    const hariIni = data.hari_ini || todayISO();
+    const batch = data.batch || [];
 
-    if (p.tanggal_buka && p.tanggal_tutup) {
-      const today = todayISO();
-      const open = today >= p.tanggal_buka && today <= p.tanggal_tutup;
-      // Selisih hari kalender antara dua tanggal YYYY-MM-DD
-      const selisih = (a, b) => Math.round((Date.UTC(...b.split('-').map((n, i) => i === 1 ? n - 1 : +n)) - Date.UTC(...a.split('-').map((n, i) => i === 1 ? n - 1 : +n))) / 864e5);
+    // Kartu periode: batch yang sedang dibuka, atau yang berikutnya akan dibuka
+    const tampil = batch.find(b => b.terbuka) || batch.find(b => hariIni < b.daftar_buka);
+    if (!tampil) {
+      document.getElementById('infoNama').textContent = 'Akan diumumkan';
+      document.getElementById('infoDaftar').textContent = '–';
+      document.getElementById('infoLaksana').textContent = '–';
+    } else {
+      document.getElementById('infoNama').textContent = tampil.nama;
+      document.getElementById('infoDaftar').textContent = rentang(tampil.daftar_buka, tampil.daftar_tutup);
+      document.getElementById('infoLaksana').textContent = rentang(tampil.mulai, tampil.selesai);
       let sisa = '';
-      if (open) {
-        const n = selisih(today, p.tanggal_tutup);
+      if (tampil.terbuka) {
+        const n = selisih(hariIni, tampil.daftar_tutup);
         sisa = n === 0 ? 'Hari ini hari terakhir pendaftaran.' : `Ditutup dalam <b>${n} hari</b>.`;
-      } else if (today < p.tanggal_buka) {
-        sisa = `Dibuka dalam <b>${selisih(today, p.tanggal_buka)} hari</b>.`;
-      }
-      if (open) {
-        const n = selisih(today, p.tanggal_tutup);
+        document.getElementById('ctaJudul').textContent = `Pendaftaran ${tampil.nama} dibuka`;
         document.getElementById('ctaSisa').textContent = n === 0 ? 'Hari terakhir pendaftaran' : `Ditutup dalam ${n} hari`;
         document.getElementById('ctaLekat').classList.add('aktif');
+      } else {
+        document.getElementById('infoLabel').textContent = 'Periode berikutnya';
+        sisa = `Dibuka dalam <b>${selisih(hariIni, tampil.daftar_buka)} hari</b>.`;
       }
-      document.getElementById('infoOpen').innerHTML = (open
-        ? '<span class="pill green"><span class="live"></span>Pendaftaran sedang dibuka</span>'
-        : `<span class="pill gray">${today < p.tanggal_buka ? 'Belum dibuka' : 'Pendaftaran ditutup'}</span>`)
-        + (sisa ? `<span class="sisa">${sisa}</span>` : '');
+      document.getElementById('infoOpen').innerHTML = statusBatch(tampil, hariIni) + `<span class="sisa">${sisa}</span>`;
     }
 
-    list.removeAttribute('aria-busy');
-    list.innerHTML = data.bidang.map(b => `
-      <div class="card" data-muncul><span class="ikon-bidang" data-ikon="${ikonBidang(b.nama)}" data-ikon-ukuran="21"></span><h3>${esc(b.nama)}</h3><p>${esc(b.deskripsi || '')}</p></div>
-    `).join('') || '<p class="muted">Belum ada bidang.</p>';
+    list.innerHTML = batch.map(b => `
+      <div class="card${b.terbuka ? ' terbuka' : ''}" data-muncul>
+        <div class="atas"><h3>${esc(b.nama)}</h3>${statusBatch(b, hariIni)}</div>
+        <dl>
+          <div><dt>Pendaftaran</dt><dd>${rentang(b.daftar_buka, b.daftar_tutup)}</dd></div>
+          <div><dt>Pelaksanaan PKL</dt><dd>${rentang(b.mulai, b.selesai)}</dd></div>
+        </dl>
+      </div>`).join('') || '<p class="muted">Jadwal periode berikutnya akan diumumkan.</p>';
     if (window.gerakAmati) gerakAmati(list);
   })();
 </script>

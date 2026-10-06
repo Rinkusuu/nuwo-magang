@@ -17,6 +17,7 @@
   .decide{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
   .decide .select{width:auto;min-width:190px;padding:7px 9px;font-size:13px;}
   .rank{font-weight:700;color:var(--ink-2);}
+  .filter-batch{max-width:320px;margin-bottom:16px;}
 </style>
 </head>
 <body data-menu="hasil">
@@ -26,15 +27,16 @@
     <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
     <div class="page-head">
       <div>
-        <div class="meta">Periode <span id="tahun">–</span></div>
         <h1>Hasil dan Pengumuman</h1>
-        <div class="sub">Peringkat berdasarkan rata-rata nilai wawancara. Hasil yang ditetapkan langsung tampil di dasbor pelamar.</div>
+        <div class="sub">Peringkat berdasarkan rata-rata nilai wawancara. Pelamar yang diterima mendapat email untuk mengonfirmasi kesediaan di halaman status.</div>
       </div>
     </div>
 
+    <div class="field filter-batch"><label for="fBatch">Batch</label><select class="select" id="fBatch"><option value="">Semua batch</option></select></div>
+
     <div class="stats" style="grid-template-columns:repeat(4,minmax(0,1fr));">
-      <div class="stat"><span>Diterima / kuota</span><b id="stDiterima">–</b></div>
-      <div class="stat"><span>Cadangan</span><b id="stCadangan">–</b></div>
+      <div class="stat"><span>Diterima</span><b id="stDiterima">–</b></div>
+      <div class="stat"><span>Bersedia</span><b id="stBersedia">–</b></div>
       <div class="stat"><span>Tidak diterima</span><b id="stTidak">–</b></div>
       <div class="stat"><span>Belum ditetapkan</span><b id="stBelum">–</b></div>
     </div>
@@ -42,7 +44,7 @@
     <div class="table-card">
       <div class="table-scroll">
         <table class="data">
-          <thead><tr><th>#</th><th>Pelamar</th><th>Bidang utama</th><th>Nilai wawancara</th><th>Hasil</th><th>Tetapkan hasil dan penempatan</th></tr></thead>
+          <thead><tr><th>#</th><th>Pelamar</th><th>Nilai wawancara</th><th>Hasil</th><th>Kesediaan</th><th>Tetapkan hasil</th></tr></thead>
           <tbody id="rows" data-kerangka-tabel="6"></tbody>
         </table>
       </div>
@@ -54,73 +56,70 @@
 <script src="assets/common.js"></script>
 <script src="assets/admin.js"></script>
 <script>
-  let rows = [], bidang = [], kuota = null;
+  const $ = id => document.getElementById(id);
+  let semua = [];
 
   (async () => {
     if (!await requireAdmin()) return;
-    await load();
+    await muat(true);
   })();
 
-  async function load() {
+  async function muat(pertama = false) {
     const data = await api('backend/api/admin/applications.php');
     if (!data.success) { toast(data.message, true); return; }
-    bidang = data.bidang;
-    kuota = data.periode?.kuota ?? null;
-    document.getElementById('tahun').textContent = data.periode?.tahun || '–';
-    rows = data.data.filter(r => r.status_admin === 'memenuhi')
-      .sort((a, b) => (b.nilai ?? -1) - (a.nilai ?? -1));
+    // Hanya pelamar yang lolos ke wawancara
+    semua = data.data.filter(r => r.status_seleksi === 'lolos').sort((a, b) => (b.nilai ?? -1) - (a.nilai ?? -1));
+    if (pertama) {
+      $('fBatch').insertAdjacentHTML('beforeend', data.batch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join(''));
+      if (semua[0]) $('fBatch').value = String(semua[0].batch_id || '');
+    }
     render();
   }
+  $('fBatch').addEventListener('input', render);
 
   function render() {
-    const count = h => rows.filter(r => r.hasil_akhir === h).length;
-    document.getElementById('stDiterima').textContent = `${count('diterima')} / ${kuota ?? '–'}`;
-    document.getElementById('stCadangan').textContent = count('cadangan');
-    document.getElementById('stTidak').textContent = count('tidak_diterima');
-    document.getElementById('stBelum').textContent = rows.filter(r => !r.hasil_akhir).length;
+    const id = $('fBatch').value;
+    const rows = semua.filter(r => !id || String(r.batch_id) === id);
+    const hitung = f => rows.filter(f).length;
+    $('stDiterima').textContent = hitung(r => r.hasil_akhir === 'diterima');
+    $('stBersedia').textContent = hitung(r => r.kesediaan === 'bersedia');
+    $('stTidak').textContent = hitung(r => r.hasil_akhir === 'tidak_diterima');
+    $('stBelum').textContent = hitung(r => !r.hasil_akhir);
 
-    document.getElementById('rows').removeAttribute('aria-busy');
-    document.getElementById('rows').innerHTML = rows.length ? rows.map((r, i) => `
+    $('rows').removeAttribute('aria-busy');
+    $('rows').innerHTML = rows.length ? rows.map((r, i) => `
       <tr data-id="${r.id}">
         <td class="rank">${i + 1}</td>
-        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
-        <td>${esc(r.bidang_utama)}</td>
+        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}${!id && r.batch ? ' · ' + esc(r.batch) : ''}</span></td>
         <td>${r.nilai !== null
-          ? `<b class="num">${fmtAngka(r.nilai)}</b> · ${esc(LABEL.rekomendasi[r.kategori])}<br><span class="muted" style="font-size:12.5px;">${r.jumlah_penilai} pewawancara</span>`
+          ? `<b class="num">${fmtAngka(r.nilai)}</b> · ${esc(LABEL.rekomendasi[r.kategori] || '')}<br><span class="muted" style="font-size:12.5px;">${r.jumlah_penilai} pewawancara</span>`
           : '<span class="muted">Belum dinilai</span>'}</td>
-        <td>${r.hasil_akhir ? pill(LABEL.hasil, r.hasil_akhir) + (r.bidang_penempatan ? `<br><span class="muted" style="font-size:12.5px;">${esc(r.bidang_penempatan)}</span>` : '') : '<span class="muted">—</span>'}</td>
+        <td>${r.hasil_akhir ? pill(LABEL.hasil, r.hasil_akhir) : '<span class="muted">—</span>'}</td>
+        <td>${r.hasil_akhir !== 'diterima' ? '<span class="muted">—</span>' : r.kesediaan ? pill(LABEL.kesediaan, r.kesediaan) : '<span class="pill gray">Menunggu konfirmasi</span>'}</td>
         <td><div class="decide">
-          <select class="select" data-f="hasil" aria-label="Hasil">
+          <select class="select" data-f="hasil" aria-label="Hasil" ${r.kesediaan ? 'disabled' : ''}>
             <option value="">Belum ditetapkan</option>
             ${Object.entries(LABEL.hasil).map(([k, [label]]) => `<option value="${k}" ${r.hasil_akhir === k ? 'selected' : ''}>${label}</option>`).join('')}
           </select>
-          <select class="select" data-f="penempatan" aria-label="Bidang penempatan" ${r.hasil_akhir === 'diterima' ? '' : 'hidden'}>
-            <option value="">Pilih penempatan</option>
-            ${bidang.map(b => `<option value="${b.id}" ${String(r.bidang_penempatan_id ?? r.bidang_utama_id) === String(b.id) ? 'selected' : ''}>${esc(b.singkat)}</option>`).join('')}
-          </select>
-          <button type="button" class="btn btn-primary btn-sm" data-save>Simpan</button>
+          <button type="button" class="btn btn-primary btn-sm" data-save ${r.kesediaan ? 'disabled' : ''}>Simpan</button>
         </div></td>
-      </tr>`).join('') : '<tr><td colspan="6" class="empty">Belum ada pelamar yang lolos verifikasi administrasi.</td></tr>';
-
-    document.querySelectorAll('[data-f="hasil"]').forEach(sel => sel.addEventListener('change', () => {
-      sel.closest('tr').querySelector('[data-f="penempatan"]').hidden = sel.value !== 'diterima';
-    }));
-    document.querySelectorAll('[data-save]').forEach(btn => btn.addEventListener('click', async () => {
-      const tr = btn.closest('tr');
-      const hasil = tr.querySelector('[data-f="hasil"]').value || null;
-      const r = rows.find(x => x.id === Number(tr.dataset.id));
-      if (hasil === 'diterima' && r.hasil_akhir !== 'diterima' && kuota !== null && rows.filter(x => x.hasil_akhir === 'diterima').length >= kuota
-          && !await konfirmasi({ judul: 'Kuota sudah penuh', pesan: `Jumlah peserta diterima sudah mencapai kuota (${kuota} orang). Tetap terima ${r.nama}?`, ya: 'Tetap terima' })) return;
-      btn.disabled = true;
-      const res = await api('backend/api/admin/decide.php', { json: {
-        id: r.id, hasil_akhir: hasil, bidang_penempatan_id: tr.querySelector('[data-f="penempatan"]').value,
-      }});
-      btn.disabled = false;
-      if (!res.success) { toast(res.message, true); return; }
-      toast('Hasil seleksi disimpan.');
-      await load();
-    }));
+      </tr>`).join('') : '<tr><td colspan="6" class="empty">Belum ada pelamar yang lolos ke wawancara di batch ini.</td></tr>';
   }
+
+  $('rows').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-save]');
+    if (!btn) return;
+    const tr = btn.closest('tr');
+    const r = semua.find(x => String(x.id) === tr.dataset.id);
+    const hasil = tr.querySelector('[data-f="hasil"]').value || null;
+    if (hasil === r.hasil_akhir) { toast('Tidak ada perubahan.'); return; }
+    if (hasil === 'diterima' && !await konfirmasi({ judul: `Terima ${r.nama}?`, pesan: 'Pelamar akan menerima email pengumuman dan diminta mengonfirmasi kesediaan di halaman status.', ya: 'Terima' })) return;
+    btn.disabled = true;
+    const res = await api('backend/api/admin/decide.php', { json: { id: r.id, hasil_akhir: hasil } });
+    btn.disabled = false;
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+    if (res.success) await muat();
+  });
 </script>
 </body>
 </html>

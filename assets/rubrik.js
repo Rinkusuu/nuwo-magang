@@ -7,7 +7,7 @@ const ASPEK = [
     nama: 'Kesesuaian Akademik', singkat: 'Akademik', bobot: 15,
     ket: 'Relevansi program studi, mata kuliah, dan capaian akademik dengan bidang yang dilamar.',
     ketRubrik: 'Relevansi prodi, mata kuliah, dan capaian akademik dengan bidang.',
-    tanya: 'Mata kuliah apa yang paling relevan dengan bidang pilihan Anda, dan bagaimana Anda akan menerapkannya selama magang?',
+    tanya: 'Mata kuliah apa yang paling relevan dengan bidang pilihan Anda, dan bagaimana Anda akan menerapkannya selama PKL?',
     d: {
       5: 'Sangat relevan dengan capaian akademik sangat baik; mampu mengaitkan ilmu dengan tugas bidang secara konkret.',
       4: 'Relevan dengan capaian akademik baik; mampu memberi contoh penerapan.',
@@ -17,16 +17,16 @@ const ASPEK = [
     },
   },
   {
-    nama: 'Motivasi dan Target Magang', singkat: 'Motivasi', bobot: 15,
-    ket: 'Kejelasan maksud, tujuan, jangka waktu, dan target; konsisten dengan motivation letter.',
-    ketRubrik: 'Maksud, tujuan, jangka waktu, dan target; konsisten dengan motivation letter.',
-    tanya: 'Apa yang ingin Anda capai selama magang, dan bagaimana Anda mengukur keberhasilannya?',
+    nama: 'Motivasi dan Target PKL', singkat: 'Motivasi', bobot: 15,
+    ket: 'Kejelasan maksud, tujuan, dan target; konsisten dengan motivation letter.',
+    ketRubrik: 'Maksud, tujuan, dan target; konsisten dengan motivation letter.',
+    tanya: 'Apa yang ingin Anda capai selama PKL, dan bagaimana Anda mengukur keberhasilannya?',
     d: {
-      5: 'Tujuan dan target spesifik, terukur, dan konsisten dengan motivation letter; rencana waktu realistis.',
+      5: 'Tujuan dan target spesifik, terukur, dan konsisten dengan motivation letter.',
       4: 'Tujuan jelas dan konsisten; target cukup spesifik.',
       3: 'Tujuan bersifat umum; target belum terukur.',
       2: 'Motivasi lemah atau tidak konsisten dengan motivation letter.',
-      1: 'Tidak dapat menjelaskan alasan dan tujuan magang.',
+      1: 'Tidak dapat menjelaskan alasan dan tujuan PKL.',
     },
   },
   {
@@ -85,7 +85,7 @@ const ASPEK = [
     nama: 'Sikap, Integritas, dan Profesionalisme', singkat: 'Sikap dan integritas', bobot: 15,
     ket: 'Kesantunan, ketepatan waktu, kejujuran, serta komitmen terhadap aturan dan kerahasiaan.',
     ketRubrik: 'Kesantunan, ketepatan waktu, kejujuran, serta komitmen terhadap aturan dan kerahasiaan.',
-    tanya: 'Bagaimana Anda menyikapi data atau informasi yang bersifat rahasia di tempat magang? (Lengkapi dengan pengamatan sikap selama wawancara.)',
+    tanya: 'Bagaimana Anda menyikapi data atau informasi yang bersifat rahasia di tempat PKL? (Lengkapi dengan pengamatan sikap selama wawancara.)',
     d: {
       5: 'Santun, tepat waktu, jujur, dan konsisten; menunjukkan komitmen kuat terhadap aturan dan kerahasiaan.',
       4: 'Santun dan profesional dengan komitmen yang baik.',
@@ -96,4 +96,4 @@ const ASPEK = [
   },
 ];
 
-const KETENTUAN_NILAI = '≥ 4,20 Sangat direkomendasikan · 3,40–4,19 Direkomendasikan · 2,60–3,39 Dipertimbangkan (cadangan) · < 2,60 Tidak direkomendasikan.';
+const KETENTUAN_NILAI = '≥ 4,20 Sangat direkomendasikan · 3,00–4,19 Direkomendasikan · < 3,00 Tidak direkomendasikan.';

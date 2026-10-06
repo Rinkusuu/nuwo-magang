@@ -43,9 +43,10 @@ $pdo->beginTransaction();
 $pdo->prepare("
     UPDATE applications
     SET syarat_s1 = ?, syarat_semester = ?, syarat_aktif = ?, status_admin = ?, catatan_verifikasi = ?,
-        batas_perbaikan = ?, verified_at = NOW(), verified_by = ?
+        batas_perbaikan = ?, verified_at = NOW(), verified_by = ?,
+        status_seleksi = IF(? = 'memenuhi', status_seleksi, NULL)
     WHERE id = ?
-")->execute([$syarat['s1'], $syarat['semester'], $syarat['aktif'], $hasil, $catatan ?: null, $batas, $adminId, $id]);
+")->execute([$syarat['s1'], $syarat['semester'], $syarat['aktif'], $hasil, $catatan ?: null, $batas, $adminId, $hasil, $id]);
 
 $upd = $pdo->prepare("UPDATE application_files SET status_verifikasi = ? WHERE application_id = ? AND jenis = ?");
 foreach ($berkas as $jenis => $status) $upd->execute([$status, $id, $jenis]);

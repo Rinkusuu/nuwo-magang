@@ -22,10 +22,10 @@ foreach (FIELD_FORMULIR as $f) {
     } elseif ($f === 'ipk' && $v !== null) {
         $num = str_replace(',', '.', (string) $v);
         $v = is_numeric($num) ? min(4, max(0, (float) $num)) : null;
-    } elseif (in_array($f, ['semester', 'bidang_utama_id', 'bidang_alternatif_id'], true) && $v !== null) {
+    } elseif ($f === 'semester' && $v !== null) {
         $v = (int) $v ?: null;
-    } elseif (in_array($f, ['tanggal_mulai', 'tanggal_selesai'], true) && $v !== null && !preg_match('/^\d{4}-\d{2}-\d{2}$/', $v)) {
-        $v = null;
+    } elseif ($f === 'batch_id' && $v !== null) {
+        $v = batch_by_id($pdo, (int) $v) ? (int) $v : null;
     }
 
     $sets[] = "$f = ?";

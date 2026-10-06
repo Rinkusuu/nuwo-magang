@@ -137,11 +137,10 @@
             <div><span>Email</span><b>${esc(app.email)}</b></div>
             <div><span>HP/WhatsApp</span><b>${esc(app.no_wa)}</b></div>
             <div><span>Domisili</span><b>${esc(app.domisili)}</b></div>
-            <div><span>NIM</span><b>${esc(app.nim)}</b></div>
+            <div><span>NPM</span><b>${esc(app.nim)}</b></div>
             <div><span>IPK</span><b>${fmtAngka(app.ipk)}</b></div>
-            <div><span>Bidang utama</span><b>${esc(app.bidang_utama || '-')}</b></div>
-            <div><span>Bidang alternatif</span><b>${esc(app.bidang_alternatif || '-')}</b></div>
-            <div><span>Periode</span><b>${fmtTanggal(app.tanggal_mulai)} – ${fmtTanggal(app.tanggal_selesai)}</b></div>
+            <div><span>Batch</span><b>${esc(app.batch ? app.batch.nama : '-')}</b></div>
+            <div><span>Pelaksanaan</span><b>${app.batch ? `${fmtTanggal(app.batch.mulai)} – ${fmtTanggal(app.batch.selesai)}` : '-'}</b></div>
             <button type="button" class="btn btn-danger btn-sm" id="deleteBtn" style="margin-top:12px;">Hapus pelamar</button>
           </section>
         </div>
