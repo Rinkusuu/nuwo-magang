@@ -59,11 +59,6 @@
             <input class="input" type="email" id="email" placeholder="nama@email.com" autocomplete="email" required>
             <span class="err">Email tidak valid.</span>
           </div>
-          <div class="field" id="waField">
-            <label for="wa">Nomor HP/WhatsApp</label>
-            <input class="input" type="tel" id="wa" placeholder="08xxxxxxxxxx" autocomplete="tel" required>
-            <span class="err">Nomor HP wajib diisi.</span>
-          </div>
           <div class="field" id="passField">
             <label for="password">Kata sandi</label>
             <div class="pass-wrap">
@@ -109,7 +104,6 @@
   const rules = [
     ['namaField', () => $('nama').value.trim().length >= 3],
     ['emailField', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('email').value.trim())],
-    ['waField', () => $('wa').value.replace(/\D/g, '').length >= 9],
     ['passField', () => $('password').value.length >= 8],
     ['confirmField', () => $('confirm').value === $('password').value && $('confirm').value.length >= 8],
   ];
@@ -128,7 +122,6 @@
     const data = await api('backend/api/auth/register.php', { json: {
       nama: $('nama').value.trim(),
       email: $('email').value.trim().toLowerCase(),
-      no_wa: $('wa').value.trim(),
       password: $('password').value,
     }});
     if (!data.success) {

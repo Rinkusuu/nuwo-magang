@@ -22,9 +22,8 @@ foreach (array_keys(BOBOT_ASPEK) as $i) $catatanAspek[$i] = mb_substr(trim($data
 $nilai = hitung_nilai($skor);
 if ($nilai === null) fail('Semua aspek wajib diberi skor.');
 
-$rekomendasi = $data['rekomendasi'] ?? '';
-if (!in_array($rekomendasi, ['sangat', 'direkomendasikan', 'tidak'], true)) fail('Pilih rekomendasi pewawancara.');
-if ($skor[6] === 1 && $rekomendasi !== 'tidak') fail('Skor 1 pada aspek Sikap, Integritas, dan Profesionalisme otomatis tidak direkomendasikan.');
+// Rekomendasi ditetapkan sistem dari nilai akhir (skor 1 pada aspek sikap otomatis tidak direkomendasikan)
+$rekomendasi = kategori_nilai($nilai, $skor[6]);
 
 $pdo->prepare("
     INSERT INTO interview_assessments (application_id, admin_id, skor, catatan_aspek, rekomendasi, catatan, nilai_akhir, lengkap)

@@ -63,10 +63,9 @@
   .score-card li{display:flex;justify-content:space-between;font-size:12.5px;padding:3px 0;color:#DCE4F1;}
   .score-card li b{font-variant-numeric:tabular-nums;}
 
-  .reco button{display:block;width:100%;text-align:left;background:#fff;border:1px solid var(--line-strong);border-radius:8px;padding:9px 12px;font-size:13.5px;font-weight:600;cursor:pointer;margin-top:8px;}
-  .reco button:hover{border-color:var(--navy-600);}
-  .reco button.on{background:var(--navy-700);border-color:var(--navy-700);color:#fff;}
-  .reco button:disabled{opacity:.45;cursor:not-allowed;}
+  .reco-otomatis{margin-top:10px;padding:12px 14px;border-radius:10px;background:var(--bg);border:1px solid var(--line);font-weight:700;font-size:14px;}
+  .reco-otomatis.sangat,.reco-otomatis.direkomendasikan{background:var(--green-bg);border-color:#C9E6D5;color:var(--green);}
+  .reco-otomatis.tidak{background:var(--red-bg);border-color:#F1CACB;color:var(--red);}
   .small{font-size:12.5px;color:var(--ink-2);}
   .others div{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;gap:10px;}
 </style>
@@ -139,9 +138,9 @@
         <div class="sticky">
           <div class="score-card" id="scoreCard"></div>
           <section class="card reco">
-            <h3 style="font-size:16px;">Rekomendasi Pewawancara</h3>
-            <p class="small" id="saran" style="margin-top:4px;"></p>
-            <div id="recoBtns"></div>
+            <h3 style="font-size:16px;">Rekomendasi dan Catatan</h3>
+            <p class="small" style="margin-top:4px;">Rekomendasi ditetapkan otomatis oleh sistem dari nilai akhir.</p>
+            <div class="reco-otomatis" id="saran"></div>
             <label class="label" for="catatan" style="margin-top:14px;">Catatan keseluruhan</label>
             <textarea class="textarea" id="catatan" placeholder="Kekuatan, hal yang perlu dibina, dan kesesuaian dengan bidang pekerjaan yang diminati.">${esc(catatan)}</textarea>
             <p class="small" id="saveHint" style="margin:8px 0 10px;">Semua aspek wajib diberi skor.</p>
@@ -211,21 +210,20 @@
       <span class="tag">${complete ? esc(LABEL.rekomendasi[saran]) : `Lengkapi ${7 - n} aspek lagi`}</span>
       <ul>${ASPEK.map((a, i) => `<li><span>${esc(a.singkat)} (${a.bobot}%)</span><b>${skor[i] ? `${skor[i]} → ${fmtAngka(skor[i] * a.bobot / 100)}` : '– → –'}</b></li>`).join('')}</ul>`;
 
-    document.getElementById('saran').innerHTML = `Saran sistem berdasarkan nilai: <b>${complete ? esc(LABEL.rekomendasi[saran]) : 'menunggu semua aspek dinilai'}</b>`;
-    const lockTidak = skor[6] === 1;
-    if (lockTidak) rekomendasi = 'tidak';
-    document.getElementById('recoBtns').innerHTML = Object.entries(LABEL.rekomendasi).filter(([k]) => k !== 'cadangan').map(([k, label]) =>
-      `<button type="button" data-reco="${k}" class="${rekomendasi === k ? 'on' : ''}" aria-pressed="${rekomendasi === k}" ${!enabled || (lockTidak && k !== 'tidak') ? 'disabled' : ''}>${esc(label)}</button>`).join('');
-    document.querySelectorAll('[data-reco]').forEach(b => b.addEventListener('click', () => { rekomendasi = b.dataset.reco; update(enabled); }));
+    // Rekomendasi tidak dipilih pewawancara: selalu mengikuti kategori nilai akhir
+    rekomendasi = saran;
+    const kotak = document.getElementById('saran');
+    kotak.className = 'reco-otomatis ' + (saran || '');
+    kotak.textContent = complete ? LABEL.rekomendasi[saran] : `Menunggu ${7 - n} aspek lagi dinilai`;
 
-    document.getElementById('saveHint').textContent = !complete ? 'Semua aspek wajib diberi skor.' : !rekomendasi ? 'Pilih rekomendasi pewawancara.' : 'Siap disimpan.';
-    document.getElementById('saveBtn').disabled = !enabled || !complete || !rekomendasi;
+    document.getElementById('saveHint').textContent = !complete ? 'Semua aspek wajib diberi skor.' : 'Siap disimpan.';
+    document.getElementById('saveBtn').disabled = !enabled || !complete;
   }
 
   async function save() {
     const btn = document.getElementById('saveBtn');
     btn.disabled = true;
-    const res = await api('backend/api/admin/assess.php', { json: { id, skor, catatan_aspek: catatanAspek, rekomendasi, catatan } });
+    const res = await api('backend/api/admin/assess.php', { json: { id, skor, catatan_aspek: catatanAspek, catatan } });
     if (!res.success) { toast(res.message, true); btn.disabled = false; return; }
     toast(`Penilaian disimpan · nilai ${fmtAngka(res.nilai_akhir)}`);
     setTimeout(() => { location.href = 'admin_wawancara.html'; }, 800);
