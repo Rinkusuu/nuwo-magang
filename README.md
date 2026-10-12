@@ -25,7 +25,8 @@ Selama `SMTP_HOST` kosong, email tidak dikirim melainkan dicatat di `backend/log
 2. Buat database dan user khusus, lalu impor `setup.sql` (hapus data contoh terlebih dahulu).
    Database yang sudah ada sebelumnya: jalankan berkas di `backend/migrasi/` secara berurutan (001, 002, …).
 3. Buat `backend/config.local.php` dari contohnya: `APP_URL`, kredensial database, SMTP.
-4. Ganti kata sandi admin: `php backend/atur_password_admin.php admin@bi.go.id`
+4. Ganti kata sandi admin: `php backend/atur_password_admin.php admin@bi.go.id`.
+   Akun pewawancara dan admin lain dibuat dari menu **Pengguna dan Hak Akses** di backoffice.
 5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis oleh PHP.
 6. Web server:
    - **Apache**: `.htaccess` di folder utama sudah berisi aturan (butuh `mod_headers`, `mod_alias`).

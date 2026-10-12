@@ -94,7 +94,8 @@
       btn.textContent = 'Masuk';
       return;
     }
-    window.location.href = 'dashboard_admin.html';
+    // Pewawancara langsung ke daftar wawancara
+    window.location.href = data.peran === 'pewawancara' ? 'admin_wawancara.html' : 'dashboard_admin.html';
   });
 </script>
 </body>

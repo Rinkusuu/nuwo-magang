@@ -63,7 +63,7 @@
 <script src="assets/admin.js"></script>
 <script src="assets/rubrik.js"></script>
 <script>
-  requireAdmin();
+  requireAdmin(['admin', 'pewawancara']);
   const id = new URLSearchParams(location.search).get('id');
   if (id) document.getElementById('formLink').href = `admin_penilaian.html?id=${encodeURIComponent(id)}`;
   document.getElementById('kategori').textContent = KETENTUAN_NILAI + ' Skor 1 pada aspek integritas otomatis tidak direkomendasikan.';

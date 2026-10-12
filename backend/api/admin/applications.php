@@ -2,18 +2,21 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-$adminId = require_admin();
+$adminId = require_staf();
 
 // Hanya pendaftaran yang sudah dikirim (draf tidak tampil)
-$rows = $pdo->query("
+$q = $pdo->prepare("
     SELECT a.id, a.no_pendaftaran, a.nama, a.email, a.universitas, a.fakultas_prodi, a.nim, a.ipk,
            a.jenjang, a.semester, a.batch_id, b.nama AS batch, a.status_admin,
            a.syarat_s1, a.syarat_semester, a.syarat_aktif, a.status_seleksi,
            a.hasil_akhir, a.kesediaan, a.submitted_at
     FROM applications a LEFT JOIN batch b ON b.id = a.batch_id
     WHERE a.submitted_at IS NOT NULL
+      AND (? = 0 OR a.status_seleksi = 'lolos')   -- pewawancara hanya melihat pelamar yang diundang wawancara
     ORDER BY a.submitted_at DESC
-")->fetchAll();
+");
+$q->execute([staf_pewawancara() ? 1 : 0]);
+$rows = $q->fetchAll();
 
 // Rekap penilaian wawancara per pelamar (hanya penilaian lengkap)
 $nilai = [];

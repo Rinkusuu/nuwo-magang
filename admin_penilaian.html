@@ -89,7 +89,7 @@
   let app, skor = Array(7).fill(null), catatanAspek = Array(7).fill(''), rekomendasi = null, catatan = '';
 
   (async () => {
-    const admin = await requireAdmin();
+    const admin = await requireAdmin(['admin', 'pewawancara']);
     if (!admin) return;
     const data = await api(`backend/api/admin/application.php?id=${id}`);
     const main = document.getElementById('main');
@@ -108,7 +108,7 @@
 
     main.innerHTML = `
       <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
-      <a href="dashboard_admin.html" class="back-link"><span data-ikon="kembali" data-ikon-ukuran="15"></span>Daftar Pelamar</a>
+      <a href="${admin.peran === 'admin' ? 'dashboard_admin.html' : 'admin_wawancara.html'}" class="back-link"><span data-ikon="kembali" data-ikon-ukuran="15"></span>${admin.peran === 'admin' ? 'Daftar Pelamar' : 'Daftar Wawancara'}</a>
       <div class="page-head" style="margin-bottom:16px;"><h1>Penilaian Wawancara</h1></div>
 
       <section class="card applicant">

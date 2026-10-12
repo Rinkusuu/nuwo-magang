@@ -61,13 +61,22 @@
 <script src="assets/admin.js"></script>
 <script>
   const $ = id => document.getElementById(id);
-  let semua = [], daftarBatch = [];
+  let semua = [], daftarBatch = [], peran = null;
   const params = new URLSearchParams(location.search);
 
   (async () => {
-    if (!await requireAdmin()) return;
+    if (!(peran = (await requireAdmin(['admin', 'pewawancara']))?.peran)) return;
+    sesuaikanPeran();
     await muat();
   })();
+
+  function sesuaikanPeran() {
+    if (peran === 'admin') return;
+    document.querySelector('.page-head .meta').textContent = 'Pelamar yang diundang wawancara';
+    document.querySelector('.page-head h1').textContent = 'Daftar Wawancara';
+    document.querySelectorAll('thead th')[3].textContent = 'Status';
+    document.querySelector('.page-head .sub').textContent = 'Pilih pelamar untuk mengisi penilaian wawancara Anda. Nilai dari setiap pewawancara dirata-rata menjadi nilai akhir pelamar.';
+  }
 
   async function muat() {
     const data = await api('backend/api/admin/applications.php');
@@ -92,7 +101,7 @@
     $('detailBatch').innerHTML = b ? `
       <div><span>Jadwal wawancara</span><b>${b.wawancara_tanggal ? fmtTanggal(b.wawancara_tanggal) + (b.wawancara_jam ? ', ' + esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : '') : 'Belum diatur'}</b></div>
       <div><span>Link Zoom</span><b>${b.link_zoom ? `<a class="link" href="${esc(b.link_zoom)}" target="_blank" rel="noopener">Buka Zoom</a>` : 'Belum diatur'}</b></div>
-      <div><span>Pengaturan</span><b><a class="link" href="admin_periode.html">Ubah di Batch dan Jadwal</a></b></div>`
+      ${peran === 'admin' ? '<div><span>Pengaturan</span><b><a class="link" href="admin_periode.html">Ubah di Batch dan Jadwal</a></b></div>' : ''}`
       : '<div><span>Batch</span><b>Pilih batch untuk melihat jadwal dan link Zoom</b></div>';
 
     const rows = semua.filter(r => !id || String(r.batch_id) === id);
@@ -103,18 +112,18 @@
       return `<tr data-id="${r.id}" class="${s === 'lolos' ? 'baris-lolos' : s === 'tidak_lolos' ? 'baris-tidak' : ''}">
         <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
         <td>${esc(prodi(r.fakultas_prodi))} · ${esc(r.semester)} · ${fmtAngka(r.ipk)}</td>
-        <td><a class="link" href="admin_verifikasi.html?id=${r.id}">Lihat berkas</a></td>
-        <td><div class="seg">
+        <td><a class="link" href="${peran === 'admin' ? `admin_verifikasi.html?id=${r.id}` : `admin_penilaian.html?id=${r.id}`}">Lihat berkas</a></td>
+        <td>${peran !== 'admin' ? pill(LABEL.seleksi, s) : `<div class="seg">
             <button type="button" data-putus="lolos" class="${s === 'lolos' ? 'on-green' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('centang', 13)}Loloskan</button>
             <button type="button" data-putus="tidak_lolos" class="${s === 'tidak_lolos' ? 'on-red' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('tutup', 13)}Tidak lolos</button>
           </div>
-          <div class="catatan-seleksi">${terkunci ? 'Hasil akhir sudah ditetapkan.' : s ? 'Klik pilihan yang aktif untuk membatalkan.' : 'Belum diputuskan.'}</div></td>
+          <div class="catatan-seleksi">${terkunci ? 'Hasil akhir sudah ditetapkan.' : s ? 'Klik pilihan yang aktif untuk membatalkan.' : 'Belum diputuskan.'}</div>`}</td>
         <td>${s !== 'lolos' ? '<span class="muted">—</span>' : r.nilai !== null
           ? `<b class="num">${fmtAngka(r.nilai)}</b> <span class="muted">· ${r.jumlah_penilai} pewawancara</span><br><span style="font-size:12.5px;">${esc(LABEL.rekomendasi[r.kategori] || '')}</span>`
           : '<span class="muted">Belum dinilai</span>'}</td>
         <td>${s === 'lolos' ? `<a class="link" href="admin_penilaian.html?id=${r.id}">${r.sudah_saya_nilai ? 'Lihat / ubah' : 'Nilai'}</a>` : '<span class="muted">—</span>'}</td>
       </tr>`;
-    }).join('') : '<tr><td colspan="6" class="empty">Belum ada pelamar dengan berkas lengkap di batch ini.</td></tr>';
+    }).join('') : `<tr><td colspan="6" class="empty">${peran === 'admin' ? 'Belum ada pelamar dengan berkas lengkap di batch ini.' : 'Belum ada pelamar yang diundang wawancara di batch ini.'}</td></tr>`;
   }
 
   $('rows').addEventListener('click', async e => {

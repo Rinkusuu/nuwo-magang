@@ -1,7 +1,7 @@
 <?php
 require '../../config.php';
 
-$adminId = require_admin();
+$adminId = require_staf();
 $data = body();
 $id = (int) ($data['id'] ?? 0);
 

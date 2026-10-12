@@ -10,7 +10,7 @@ $password = (string) ($data['password'] ?? '');
 $kunci = 'admin:' . $email;
 cek_batas($pdo, $kunci, 5, 15, 10);
 
-$stmt = $pdo->prepare("SELECT id, nama, email, password FROM admins WHERE email = ?");
+$stmt = $pdo->prepare("SELECT id, nama, email, password, peran FROM admins WHERE email = ? AND aktif = 1");
 $stmt->execute([$email]);
 $admin = $stmt->fetch();
 
@@ -26,4 +26,4 @@ $_SESSION['admin_id'] = (int) $admin['id'];
 $_SESSION['admin_nama'] = $admin['nama'];
 $_SESSION['admin_email'] = $admin['email'];
 
-json_out(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $admin['nama'], 'csrf' => csrf_token()]);
+json_out(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $admin['nama'], 'peran' => $admin['peran'], 'csrf' => csrf_token()]);

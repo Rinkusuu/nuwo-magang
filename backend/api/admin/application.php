@@ -2,13 +2,13 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-$adminId = require_admin();
+$adminId = require_staf();
 $id = (int) ($_GET['id'] ?? 0);
 
 $stmt = $pdo->prepare("SELECT * FROM applications WHERE id = ? AND submitted_at IS NOT NULL");
 $stmt->execute([$id]);
 $app = $stmt->fetch();
-if (!$app) fail('Data pelamar tidak ditemukan.', 404);
+if (!$app || (staf_pewawancara() && $app['status_seleksi'] !== 'lolos')) fail('Data pelamar tidak ditemukan.', 404);
 
 $app['batch'] = batch_by_id($pdo, $app['batch_id'] ? (int) $app['batch_id'] : null);
 

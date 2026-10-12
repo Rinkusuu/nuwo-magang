@@ -22,6 +22,8 @@ CREATE TABLE admins (
   nama VARCHAR(150) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
+  peran ENUM('admin','pewawancara') NOT NULL DEFAULT 'admin',   -- pewawancara hanya menilai wawancara
+  aktif TINYINT(1) NOT NULL DEFAULT 1,                         -- akun nonaktif tidak bisa masuk; riwayat nilai tetap ada
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 

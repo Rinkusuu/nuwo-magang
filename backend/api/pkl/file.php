@@ -11,7 +11,7 @@ $q->execute([$id]);
 $f = $q->fetch();
 
 $pemilik = $f && isset($_SESSION['user_id']) && (int) $f['user_id'] === (int) $_SESSION['user_id'];
-if (!$f || (!$pemilik && !isset($_SESSION['admin_id']))) fail('Berkas tidak ditemukan.', 404);
+if (!$f || (!$pemilik && (staf_aktif()['peran'] ?? '') !== 'admin')) fail('Berkas tidak ditemukan.', 404);
 
 $path = UPLOAD_DIR . $f['stored_name'];
 if (!is_file($path)) fail('Berkas tidak ditemukan di server.', 404);

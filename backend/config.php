@@ -135,9 +135,38 @@ function require_user(): int {
     return (int) $_SESSION['user_id'];
 }
 
+// Akun backoffice diperiksa ke database pada setiap permintaan, sehingga akun yang
+// dinonaktifkan atau diturunkan perannya langsung kehilangan akses tanpa menunggu sesi habis.
+function staf_aktif(): ?array {
+    static $staf = false;
+    if ($staf !== false) return $staf;
+    $staf = null;
+    if (isset($_SESSION['admin_id'])) {
+        $q = $GLOBALS['pdo']->prepare("SELECT id, nama, email, peran FROM admins WHERE id = ? AND aktif = 1");
+        $q->execute([$_SESSION['admin_id']]);
+        $staf = $q->fetch() ?: null;
+        if (!$staf) unset($_SESSION['admin_id'], $_SESSION['admin_nama'], $_SESSION['admin_email']);
+    }
+    return $staf;
+}
+
+// Admin maupun pewawancara
+function require_staf(): int {
+    $s = staf_aktif();
+    if (!$s) fail('Silakan masuk ke backoffice terlebih dahulu.', 401);
+    return (int) $s['id'];
+}
+
+// Khusus peran admin
 function require_admin(): int {
-    if (!isset($_SESSION['admin_id'])) fail('Akses admin diperlukan.', 401);
-    return (int) $_SESSION['admin_id'];
+    $s = staf_aktif();
+    if (!$s) fail('Silakan masuk ke backoffice terlebih dahulu.', 401);
+    if ($s['peran'] !== 'admin') fail('Halaman ini hanya untuk admin.', 403);
+    return (int) $s['id'];
+}
+
+function staf_pewawancara(): bool {
+    return (staf_aktif()['peran'] ?? '') === 'pewawancara';
 }
 
 function get_periode(PDO $pdo): array {
