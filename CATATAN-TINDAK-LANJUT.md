@@ -7,10 +7,8 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
 
 ## A. Ditunda atas keputusan pengguna
 
-- [ ] **Menu backoffice berlabel "Segera"** (poin 6). Empat menu belum ada isinya:
-      Dasbor, Penempatan dan Pembimbing, Sertifikat, Log Aktivitas. Pilihannya:
-      sembunyikan dulu, atau bangun. (Logbook kini di menu Peserta PKL; Pengguna dan
-      Hak Akses sudah dibangun 12 Oktober 2026.)
+- [ ] **Menu yang belum dibangun** (Dasbor, Penempatan dan Pembimbing, Sertifikat, Log
+      Aktivitas) sudah dihapus dari sidebar pada 14 Oktober 2026. Bangun kembali bila diperlukan.
 - [ ] **Pratinjau tautan WhatsApp / media sosial (Open Graph).** Tag `og:title`,
       `og:description`, `og:image` (gambar 1200×630) di beranda, supaya tautan yang
       dibagikan tampil sebagai kartu bergambar, bukan teks polos.

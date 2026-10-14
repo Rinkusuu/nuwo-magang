@@ -2,7 +2,6 @@
 // Item: [kunci, label, tautan, peran yang boleh melihat]. Tanpa peran = khusus admin.
 const MENU_ADMIN = [
   ['Seleksi', [
-    ['dasbor', 'Dasbor', null],
     ['periode', 'Batch dan Jadwal', 'admin_periode.html'],
     ['pelamar', 'Daftar Pelamar', 'dashboard_admin.html'],
     ['verifikasi', 'Verifikasi Administrasi', 'dashboard_admin.html?status=menunggu'],
@@ -11,14 +10,11 @@ const MENU_ADMIN = [
     ['hasil', 'Hasil dan Pengumuman', 'admin_hasil.html'],
   ]],
   ['Pelaksanaan', [
-    ['penempatan', 'Penempatan dan Pembimbing', null],
     ['peserta', 'Peserta PKL', 'admin_peserta.html'],
     ['kehadiran', 'Kehadiran', 'admin_kehadiran.html'],
-    ['sertifikat', 'Sertifikat', null],
   ]],
   ['Sistem', [
     ['pengguna', 'Pengguna dan Hak Akses', 'admin_pengguna.html'],
-    ['log', 'Log Aktivitas', null],
   ]],
 ];
 const NAMA_PERAN = { admin: 'Admin', pewawancara: 'Pewawancara' };
@@ -27,17 +23,17 @@ function renderSidebar(admin) {
   const active = document.body.dataset.menu;
   const side = document.getElementById('sidebar');
   const boleh = (peranItem) => (peranItem || ['admin']).includes(admin.peran);
-  // Pewawancara tidak melihat menu yang belum tersedia maupun menu khusus admin
-  const grup = MENU_ADMIN.map(([nama, items]) => [nama, items.filter(([, , href, peran]) => href ? boleh(peran) : admin.peran === 'admin')])
+  // Pewawancara hanya melihat menu yang diizinkan untuk perannya
+  const grup = MENU_ADMIN.map(([nama, items]) => [nama, items.filter(([, , , peran]) => boleh(peran))])
     .filter(([, items]) => items.length);
   side.innerHTML = `
     <div class="brand"><span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="32" height="32"></span><span><b>Backoffice Magang</b><span>KPwBI Provinsi Lampung</span></span></div>
     ${grup.map(([group, items]) => `
       <div class="group">${group}</div>
-      ${items.map(([key, label, href]) => (label = key === 'wawancara' && admin.peran === 'pewawancara' ? 'Daftar Wawancara' : label, href)
-        ? `<a href="${href}" class="${key === active ? 'active' : ''}"${key === active ? ' aria-current="page"' : ''}>${label}</a>`
-        : `<span class="soon" title="Belum tersedia">${label}<small>Segera</small></span>`
-      ).join('')}
+      ${items.map(([key, label, href]) => {
+        if (key === 'wawancara' && admin.peran === 'pewawancara') label = 'Daftar Wawancara';
+        return `<a href="${href}" class="${key === active ? 'active' : ''}"${key === active ? ' aria-current="page"' : ''}>${label}</a>`;
+      }).join('')}
     `).join('')}
     <div class="me"><b>${esc(admin.nama)}</b><span>${esc(admin.email)}</span><span class="peran">${NAMA_PERAN[admin.peran] || ''}</span>
       <div class="tombol-me"><button type="button" id="sandiBtn">${ikon('gembok', 14)}Kata sandi</button><button type="button" id="logoutBtn">${ikon('keluar', 14)}Keluar</button></div></div>

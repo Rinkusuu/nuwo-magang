@@ -276,12 +276,10 @@ body:has(> .kaki-ringkas) > .wrap{width:100%;}
 .bo-side .brand b{display:block;color:#fff;font-size:15px;line-height:1.25;}
 .bo-side .brand span span{display:block;font-size:11.5px;color:#93A9C6;}
 .bo-side .group{font-size:11.5px;font-weight:700;letter-spacing:.04em;color:#7F95B4;padding:18px 10px 6px;}
-.bo-side a,.bo-side .soon{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:8px;font-size:13.5px;text-decoration:none;color:#D2DDEA;transition:background-color .2s,color .2s;}
+.bo-side a{position:relative;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 12px;border-radius:8px;font-size:13.5px;text-decoration:none;color:#D2DDEA;transition:background-color .2s,color .2s;}
 .bo-side a:hover{background:rgba(255,255,255,.06);color:#fff;}
 .bo-side a.active{background:rgba(125,185,236,.14);color:#fff;font-weight:700;}
 .bo-side a.active::before{content:"";position:absolute;left:0;top:9px;bottom:9px;width:3px;border-radius:0 3px 3px 0;background:var(--sky);}
-.bo-side .soon{color:#6F85A5;cursor:default;}
-.bo-side .soon small{font-size:10.5px;border:1px solid #3A5171;border-radius:999px;padding:1px 7px;}
 .bo-side .me{margin:22px 10px 0;padding-top:16px;border-top:1px solid rgba(255,255,255,.08);font-size:12.5px;color:#93A9C6;word-break:break-all;}
 .bo-side .me b{display:block;color:#fff;font-size:13px;word-break:normal;}
 .bo-side .me .peran{display:inline-block;margin-top:6px;font-size:11px;font-weight:700;color:var(--sky);border:1px solid rgba(125,185,236,.4);border-radius:999px;padding:1px 8px;word-break:normal;}
