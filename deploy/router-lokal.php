@@ -29,8 +29,8 @@ $diblokir = [
     '#(^|/)\.#',                                    // .git, .htaccess, berkas tersembunyi
     '#\.(sql|md|log|lock|dist)$#i',
     '#^/deploy/#',
-    '#^/backend/(vendor|logs|migrasi|uploads)(/|$)#',
-    '#^/backend/(config|config\.local|config\.local\.example|app_helpers|mailer|batas_percobaan|atur_password_admin)\.php$#',
+    '#^/backend/(vendor|logs|migrasi|uploads|font)(/|$)#',
+    '#^/backend/(config|config\.local|config\.local\.example|app_helpers|absen_helpers|mailer|batas_percobaan|atur_password_admin)\.php$#',
     '#^/backend/composer\.json$#',
 ];
 foreach ($diblokir as $pola) {

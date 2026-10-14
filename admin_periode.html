@@ -28,6 +28,8 @@
   .form-batch h3{font-size:14px;font-weight:700;margin:18px 0 10px;color:var(--navy-800);}
   .form-batch h3:first-of-type{margin-top:0;}
   .pengaturan{max-width:760px;margin-top:22px;}
+  .pengaturan .sub-judul{font-size:15px;font-weight:700;margin:22px 0 4px;padding-top:18px;border-top:1px solid var(--line);}
+  .lokasi-aksi{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;}
 </style>
 </head>
 <body data-menu="periode">
@@ -57,6 +59,15 @@
       <div class="grid-2">
         <div class="field"><label for="hari_perbaikan">Batas perbaikan berkas (hari kerja)</label><input class="input" id="hari_perbaikan" type="number" min="1" max="30"></div>
       </div>
+      <h3 class="sub-judul">Lokasi absen harian</h3>
+      <p class="card-sub">Peserta hanya bisa absen bila berada dalam radius dari titik kantor. Paling mudah: buka halaman ini di HP saat berada di kantor, lalu tekan "Gunakan lokasi saya sekarang".</p>
+      <div class="grid-2">
+        <div class="field"><label for="kantor_lat">Lintang kantor</label><input class="input" id="kantor_lat" inputmode="decimal" placeholder="-5.4…"></div>
+        <div class="field"><label for="kantor_lng">Bujur kantor</label><input class="input" id="kantor_lng" inputmode="decimal" placeholder="105.2…"></div>
+        <div class="field"><label for="radius_m">Radius absen (meter)</label><input class="input" id="radius_m" type="number" min="20" max="2000"></div>
+        <div class="field"><label for="akurasi_maks_m">Akurasi GPS maksimal (meter)</label><input class="input" id="akurasi_maks_m" type="number" min="10" max="1000"><span class="hint">Lokasi yang kurang akurat dari batas ini ditolak.</span></div>
+      </div>
+      <div class="lokasi-aksi"><button type="button" class="btn btn-outline btn-sm" id="lokasiSaya">Gunakan lokasi saya sekarang</button><span class="muted" id="lokasiInfo"></span></div>
       <div style="display:flex;justify-content:flex-end;margin-top:16px;"><button type="submit" class="btn btn-primary" id="simpanUmum">Simpan</button></div>
     </form>
   </main>
@@ -162,14 +173,34 @@
     if (!await requireAdmin()) return;
     muat();
     const p = await api('backend/api/admin/periode.php');
-    $('hari_perbaikan').value = (p.periode && p.periode.hari_perbaikan) || 3;
+    const umum = p.periode || {};
+    $('hari_perbaikan').value = umum.hari_perbaikan || 3;
+    $('kantor_lat').value = umum.kantor_lat ?? '';
+    $('kantor_lng').value = umum.kantor_lng ?? '';
+    $('radius_m').value = umum.radius_m || 150;
+    $('akurasi_maks_m').value = umum.akurasi_maks_m || 100;
+    $('lokasiSaya').insertAdjacentHTML('afterbegin', ikon('lokasi', 15));
   })();
+
+  // Isi titik kantor dari lokasi perangkat admin (dipakai saat berada di kantor)
+  $('lokasiSaya').addEventListener('click', () => {
+    if (!navigator.geolocation || !window.isSecureContext) { toast('Lokasi hanya tersedia di alamat HTTPS.', true); return; }
+    $('lokasiInfo').textContent = 'Mencari lokasi…';
+    navigator.geolocation.getCurrentPosition(pos => {
+      $('kantor_lat').value = pos.coords.latitude.toFixed(7);
+      $('kantor_lng').value = pos.coords.longitude.toFixed(7);
+      $('lokasiInfo').textContent = `Terisi (akurasi ±${Math.round(pos.coords.accuracy)} m). Tekan Simpan untuk menyimpan.`;
+    }, err => {
+      $('lokasiInfo').textContent = err.code === 1 ? 'Akses lokasi ditolak oleh peramban.' : 'Lokasi tidak dapat ditentukan.';
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+  });
 
   $('formUmum').addEventListener('submit', async e => {
     e.preventDefault();
     const btn = $('simpanUmum');
     btn.disabled = true;
-    const res = await api('backend/api/admin/periode.php', { json: { hari_perbaikan: $('hari_perbaikan').value } });
+    const kunci = ['hari_perbaikan', 'kantor_lat', 'kantor_lng', 'radius_m', 'akurasi_maks_m'];
+    const res = await api('backend/api/admin/periode.php', { json: Object.fromEntries(kunci.map(k => [k, $(k).value.trim().replace(',', '.')])) });
     btn.disabled = false;
     toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
   });

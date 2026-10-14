@@ -231,7 +231,7 @@
         ? `<a class="btn btn-primary btn-sm" href="${esc(batch.link_wa)}" target="_blank" rel="noopener">${ikon('obrolan', 14)}Gabung grup WhatsApp peserta</a>`
         : '<span class="muted">Tautan grup WhatsApp peserta akan tersedia di sini.</span>';
       steps.push({ cls: 'current', n: 6, title: 'Pelaksanaan PKL', text: periodePkl ? `Periode PKL: ${periodePkl}.` : '',
-        extra: `<div class="aksi-baris">${wa}</div>
+        extra: `<div class="aksi-baris"><a class="btn btn-primary btn-sm" href="absen.html">${ikon('kalender', 14)}Absen hari ini</a>${wa.replace('btn btn-primary', 'btn btn-outline')}</div>
           <div class="info-pkl">
             <div><span>Hari dan jam kerja</span><b>Senin–Jumat, pukul 07.10–16.30 WIB</b></div>
             <div><span>Pakaian</span><b>Baju putih, celana hitam, dan sepatu hitam. Setiap Selasa dan Jumat memakai batik.</b></div>

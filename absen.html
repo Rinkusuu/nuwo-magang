@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Absen Harian — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+<style>
+  main.wrap{padding:32px 24px 64px;max-width:640px;}
+  @media(max-width:560px){main.wrap{padding:22px 16px 48px;}}
+  .head .meta{font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:4px;}
+  .head h1{font-size:clamp(28px,6vw,36px);line-height:1.1;margin-bottom:18px;}
+
+  /* Kartu hari ini: jam datang dan pulang berdampingan */
+  .hari-ini{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
+  .slot{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);}
+  .slot span{display:block;font-size:12.5px;color:var(--ink-3);font-weight:600;}
+  .slot b{display:block;font-family:var(--serif);font-size:30px;font-weight:600;line-height:1.15;margin-top:2px;font-variant-numeric:tabular-nums lining-nums;}
+  .slot small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .slot.ada{border-color:#BFE0CC;background:var(--green-bg);}
+  .slot.ada b{color:var(--green);}
+  .slot a{font-size:12.5px;font-weight:600;color:var(--navy-700);}
+
+  /* Langkah absen */
+  .langkah{display:flex;flex-direction:column;gap:14px;}
+  .baris-lokasi{display:flex;align-items:flex-start;gap:12px;}
+  .baris-lokasi .ikon{width:38px;height:38px;border-radius:10px;background:var(--navy-50);color:var(--navy-700);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .baris-lokasi.siap .ikon{background:var(--green-bg);color:var(--green);}
+  .baris-lokasi.jauh .ikon{background:var(--red-bg);color:var(--red);}
+  .baris-lokasi b{display:block;font-size:14.5px;}
+  .baris-lokasi span{font-size:13px;color:var(--ink-2);}
+  .kamera{position:relative;border-radius:var(--radius-lg);overflow:hidden;background:#0A1626;aspect-ratio:3 / 4;max-height:70vh;margin:0 auto;width:100%;}
+  .kamera video,.kamera img{width:100%;height:100%;object-fit:cover;display:block;}
+  .kamera video{transform:scaleX(-1);}   /* pratinjau seperti cermin; hasil foto tidak dibalik */
+  .kamera .panduan{position:absolute;inset:12% 18% 22%;border:2px dashed rgba(255,255,255,.55);border-radius:50%;pointer-events:none;}
+  .kamera .info-kamera{position:absolute;left:12px;right:12px;bottom:12px;color:#fff;font-size:12.5px;font-weight:600;text-align:center;text-shadow:0 1px 3px rgba(0,0,0,.6);}
+  .tombol-kamera{display:flex;gap:10px;}
+  .tombol-kamera .btn{flex:1;}
+  .catatan-absen{font-size:12.5px;color:var(--ink-3);}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="wrap">
+    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <div class="right">
+      <a href="status_pengajuan.html" class="nav-link">Status</a>
+      <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
+      <button type="button" class="link" id="logoutBtn">Keluar</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="main">
+  <div class="head">
+    <div class="meta" id="metaTanggal">&nbsp;</div>
+    <h1>Absen Harian</h1>
+  </div>
+  <div class="hari-ini">
+    <div class="slot" id="slotDatang"><span>Datang</span><b>–</b><small>&nbsp;</small></div>
+    <div class="slot" id="slotPulang"><span>Pulang</span><b>–</b><small>&nbsp;</small></div>
+  </div>
+  <section class="card" id="panel"><div class="loading" style="padding:24px;">Memuat…</div></section>
+  <p class="catatan-absen" style="margin-top:14px;">Jam absen dicatat menurut waktu server. Foto dan lokasi hanya dapat dilihat oleh Anda dan panitia.</p>
+</main>
+
+<footer class="kaki-ringkas">
+  <div class="wrap">
+    <img src="assets/bi-logo.webp" alt="Bank Indonesia" width="360" height="65">
+    <span>Program Magang Mahasiswa · Kantor Perwakilan Bank Indonesia Provinsi Lampung</span>
+    <a href="https://www.bi.go.id" target="_blank" rel="noopener">bi.go.id</a>
+  </div>
+</footer>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  let st = null;           // status dari server
+  let posisi = null;       // { lat, lng, akurasi }
+  let pantauGps = null, aliran = null, fotoBlob = null;
+  const JENIS_LABEL = { datang: 'Absen datang', pulang: 'Absen pulang' };
+
+  $('logoutBtn').addEventListener('click', () => logout('login.html'));
+
+  (async () => {
+    const me = await api('backend/api/auth/me.php');
+    if (!me.success) { window.location.href = 'login.html'; return; }
+    $('avatar').textContent = initials(me.user.nama);
+    $('userName').textContent = me.user.nama;
+    await muat();
+  })();
+
+  async function muat() {
+    st = await api('backend/api/absen/status.php');
+    if (!st.success) { $('panel').innerHTML = `<div class="notice red">${esc(st.message)}</div>`; return; }
+    $('metaTanggal').textContent = fmtTanggal(st.hari_ini) + (st.batch ? ' · ' + st.batch.nama : '');
+    isiSlot('slotDatang', st.absen.datang);
+    isiSlot('slotPulang', st.absen.pulang);
+    tampilAwal();
+  }
+
+  function isiSlot(id, a) {
+    const el = $(id);
+    el.classList.toggle('ada', !!a);
+    el.querySelector('b').textContent = a ? a.waktu.slice(11, 16) : '–';
+    el.querySelector('small').innerHTML = a ? `${a.jarak_m !== null ? a.jarak_m + ' m dari kantor · ' : ''}<a href="backend/api/absen/foto.php?id=${a.id}" target="_blank" rel="noopener">Lihat foto</a>` : 'Belum absen';
+  }
+
+  function jenisBerikut() {
+    if (!st.absen.datang) return 'datang';
+    if (!st.absen.pulang) return 'pulang';
+    return null;
+  }
+
+  function tampilAwal() {
+    berhentiSemua();
+    const panel = $('panel');
+    if (!st.boleh) { panel.innerHTML = `<div class="notice amber"><b>Absen belum tersedia</b>${esc(st.alasan || '')}</div>`; return; }
+    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.geolocation) {
+      panel.innerHTML = '<div class="notice red"><b>Peramban tidak mendukung absen</b>Absen memerlukan kamera dan lokasi, yang hanya tersedia di alamat HTTPS dan peramban terbaru (Chrome atau Safari).</div>';
+      return;
+    }
+    const jenis = jenisBerikut();
+    if (!jenis) { panel.innerHTML = '<div class="notice green"><b>Absen hari ini lengkap</b>Absen datang dan pulang sudah tercatat. Sampai jumpa besok.</div>'; return; }
+    panel.innerHTML = `
+      <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
+      <p class="card-sub">Pastikan Anda berada di kantor. Anda akan diminta mengizinkan lokasi dan kamera, lalu mengambil swafoto.</p>
+      <button type="button" class="btn btn-primary btn-block" id="mulaiBtn">${ikon('lokasi', 16)}Mulai ${JENIS_LABEL[jenis].toLowerCase()}</button>`;
+    $('mulaiBtn').addEventListener('click', () => langkahLokasi(jenis));
+  }
+
+  // ---------- Langkah 1: lokasi ----------
+  function langkahLokasi(jenis) {
+    $('panel').innerHTML = `
+      <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
+      <div class="langkah">
+        <div class="baris-lokasi" id="barisLokasi"><span class="ikon">${ikon('lokasi', 18)}</span>
+          <div><b id="lokasiJudul">Mencari lokasi…</b><span id="lokasiKet">Izinkan akses lokasi bila diminta.</span></div></div>
+        <button type="button" class="btn btn-primary btn-block" id="lanjutKamera" disabled>${ikon('gambar', 16)}Lanjut ke kamera</button>
+        <button type="button" class="btn btn-outline btn-block" id="batalBtn">Batal</button>
+      </div>`;
+    $('batalBtn').addEventListener('click', tampilAwal);
+    $('lanjutKamera').addEventListener('click', () => langkahKamera(jenis));
+    pantauGps = navigator.geolocation.watchPosition(p => {
+      posisi = { lat: p.coords.latitude, lng: p.coords.longitude, akurasi: p.coords.accuracy };
+      const l = st.lokasi;
+      const jarak = jarakMeter(posisi.lat, posisi.lng, l.kantor_lat, l.kantor_lng);
+      const akurat = posisi.akurasi <= l.akurasi_maks_m;
+      const dekat = jarak <= l.radius_m;
+      const baris = $('barisLokasi');
+      if (!baris) return;
+      baris.classList.toggle('siap', akurat && dekat);
+      baris.classList.toggle('jauh', akurat && !dekat);
+      $('lokasiJudul').textContent = !akurat ? 'Menunggu sinyal GPS lebih akurat…' : dekat ? 'Anda berada di area kantor' : 'Anda di luar area kantor';
+      $('lokasiKet').textContent = `Sekitar ${fmtRibu(jarak)} m dari kantor · akurasi ±${Math.round(posisi.akurasi)} m` + (!dekat && akurat ? ` · batas ${l.radius_m} m` : '');
+      $('lanjutKamera').disabled = !(akurat && dekat);
+    }, err => {
+      const pesan = err.code === 1 ? 'Akses lokasi ditolak. Izinkan lokasi untuk situs ini di pengaturan peramban, lalu muat ulang halaman.'
+        : 'Lokasi tidak dapat ditentukan. Aktifkan GPS dan coba lagi.';
+      if ($('lokasiJudul')) { $('lokasiJudul').textContent = 'Lokasi tidak tersedia'; $('lokasiKet').textContent = pesan; $('barisLokasi').classList.add('jauh'); }
+    }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
+  }
+
+  // ---------- Langkah 2: kamera ----------
+  async function langkahKamera(jenis) {
+    $('panel').innerHTML = `
+      <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
+      <div class="langkah">
+        <div class="kamera" id="kotakKamera"><video id="video" autoplay playsinline muted></video><div class="panduan"></div>
+          <div class="info-kamera">Posisikan wajah di dalam bingkai</div></div>
+        <div class="tombol-kamera" id="tombolKamera">
+          <button type="button" class="btn btn-outline" id="batalBtn">Batal</button>
+          <button type="button" class="btn btn-primary" id="jepretBtn" disabled>${ikon('gambar', 16)}Jepret</button>
+        </div>
+      </div>`;
+    $('batalBtn').addEventListener('click', tampilAwal);
+    try {
+      aliran = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: { ideal: 960 }, height: { ideal: 1280 } }, audio: false });
+    } catch (e) {
+      const ditolak = e && (e.name === 'NotAllowedError' || e.name === 'SecurityError');
+      $('kotakKamera').outerHTML = `<div class="notice red"><b>Kamera tidak dapat dibuka</b>${ditolak
+        ? 'Akses kamera ditolak. Izinkan kamera untuk situs ini di pengaturan peramban, lalu muat ulang halaman.'
+        : 'Pastikan kamera tidak sedang dipakai aplikasi lain, lalu coba lagi.'}</div>`;
+      $('jepretBtn').remove();
+      return;
+    }
+    const video = $('video');
+    video.srcObject = aliran;
+    video.addEventListener('loadedmetadata', () => { $('jepretBtn').disabled = false; }, { once: true });
+    $('jepretBtn').addEventListener('click', () => jepret(jenis));
+  }
+
+  function jepret(jenis) {
+    const video = $('video');
+    const kanvas = document.createElement('canvas');
+    kanvas.width = video.videoWidth;
+    kanvas.height = video.videoHeight;
+    kanvas.getContext('2d').drawImage(video, 0, 0);
+    kanvas.toBlob(blob => {
+      fotoBlob = blob;
+      berhentiKamera();
+      $('kotakKamera').innerHTML = `<img src="${URL.createObjectURL(blob)}" alt="Pratinjau swafoto">`;
+      $('tombolKamera').innerHTML = `
+        <button type="button" class="btn btn-outline" id="ulangBtn">Ulangi</button>
+        <button type="button" class="btn btn-primary" id="kirimBtn">${ikon('centang', 16)}Kirim absen</button>`;
+      $('ulangBtn').addEventListener('click', () => langkahKamera(jenis));
+      $('kirimBtn').addEventListener('click', () => kirim(jenis));
+    }, 'image/jpeg', 0.85);
+  }
+
+  // ---------- Langkah 3: kirim ----------
+  async function kirim(jenis) {
+    const btn = $('kirimBtn');
+    btn.disabled = true;
+    btn.textContent = 'Mengirim…';
+    // Token sesi sekali pakai diminta tepat sebelum mengirim
+    const sesi = await api('backend/api/absen/mulai.php', { json: { jenis } });
+    if (!sesi.success) { gagal(sesi.message); return; }
+    const fd = new FormData();
+    fd.append('token', sesi.token);
+    fd.append('foto', fotoBlob, 'absen.jpg');
+    fd.append('lat', posisi.lat);
+    fd.append('lng', posisi.lng);
+    fd.append('akurasi', posisi.akurasi);
+    const res = await api('backend/api/absen/kirim.php', { method: 'POST', body: fd });
+    if (!res.success) { gagal(res.message); return; }
+    toast(res.message);
+    await muat();
+  }
+
+  function gagal(pesan) {
+    toast(pesan || 'Absen gagal dikirim.', true);
+    const btn = $('kirimBtn');
+    if (btn) { btn.disabled = false; btn.innerHTML = `${ikon('centang', 16)}Kirim absen`; }
+  }
+
+  function berhentiKamera() {
+    if (aliran) { aliran.getTracks().forEach(t => t.stop()); aliran = null; }
+  }
+  function berhentiSemua() {
+    berhentiKamera();
+    if (pantauGps !== null) { navigator.geolocation.clearWatch(pantauGps); pantauGps = null; }
+  }
+  window.addEventListener('pagehide', berhentiSemua);
+
+  // Hanya untuk informasi di layar; keputusan radius tetap di server
+  function jarakMeter(lat1, lng1, lat2, lng2) {
+    const r = 6371000, rad = d => d * Math.PI / 180;
+    const a = Math.sin(rad(lat2 - lat1) / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lng2 - lng1) / 2) ** 2;
+    return Math.round(r * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)));
+  }
+  const fmtRibu = n => n.toLocaleString('id-ID');
+</script>
+</body>
+</html>

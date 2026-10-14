@@ -15,6 +15,18 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
       `og:description`, `og:image` (gambar 1200×630) di beranda, supaya tautan yang
       dibagikan tampil sebagai kartu bergambar, bukan teks polos.
 
+- [ ] **Ide lanjutan absen dan fitur peserta** (dibahas 14 Oktober 2026, belum dipilih).
+      Rincian lengkap ada di rencana absen; ringkasnya:
+      - *Anti-manipulasi tambahan:* tantangan acak saat selfie (mis. "tunjukkan 3 jari"),
+        deteksi foto berulang, penanda GPS janggal / lompatan mustahil / satu perangkat banyak
+        akun / absen dari komputer, galeri pemeriksaan admin (Sah/Tidak sah), pernyataan dan
+        sanksi, penghapusan foto otomatis setelah PKL.
+      - *Fitur besar:* dasbor peserta, izin/sakit, rekap kehadiran untuk kampus, logbook di web
+        yang diunduh sebagai Excel, peran pembimbing lapangan, sertifikat dengan QR verifikasi,
+        surat otomatis, pengumuman per batch, aplikasi terpasang (PWA) dengan notifikasi.
+      - *Sampingan:* pengingat lupa absen pulang, info pakaian hari ini, peta dan kontak, kalender
+        libur, hitung mundur, templat laporan, riwayat absen, ubah profil, survei akhir PKL.
+
 ## B. Menunggu data dari pengguna
 
 - [ ] **Foto** gedung KPwBI Provinsi Lampung atau kegiatan magang angkatan
@@ -26,6 +38,15 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
 - [ ] **Data alumni / testimoni** bila ingin ditampilkan (jangan dikarang).
 
 ## C. Wajib sebelum portal online
+
+- [ ] **Atur titik kantor untuk absen** di Batch dan Jadwal → Pengaturan umum (paling mudah
+      dari HP saat berada di kantor, tombol "Gunakan lokasi saya sekarang"). Selama kosong,
+      peserta tidak bisa absen.
+- [ ] **Absen butuh HTTPS.** Kamera dan GPS hanya diizinkan peramban di alamat HTTPS (atau
+      localhost). Uji absen di HP sungguhan baru bisa setelah portal online dengan HTTPS.
+      Keterbatasan yang perlu diketahui kantor: GPS dapat dipalsukan dengan aplikasi khusus;
+      lapisan saat ini (kamera langsung, token sekali pakai, waktu server, stempel foto, radius,
+      riwayat tidak bisa diubah) menyulitkan, tetapi tidak menjamin 100%.
 
 - [ ] **Akun SMTP resmi** (host, port, user, kata sandi, alamat pengirim) diisi di
       `backend/config.local.php`. Selama kosong, email hanya dicatat di

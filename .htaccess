@@ -16,8 +16,8 @@ ErrorDocument 404 /404.html
 <IfModule mod_alias.c>
   RedirectMatch 404 ^/\.git
   RedirectMatch 404 ^/deploy/
-  RedirectMatch 404 ^/backend/(vendor|logs|migrasi|uploads)(/|$)
-  RedirectMatch 404 ^/backend/(config|config\.local|config\.local\.example|app_helpers|mailer|batas_percobaan|atur_password_admin)\.php$
+  RedirectMatch 404 ^/backend/(vendor|logs|migrasi|uploads|font)(/|$)
+  RedirectMatch 404 ^/backend/(config|config\.local|config\.local\.example|app_helpers|absen_helpers|mailer|batas_percobaan|atur_password_admin)\.php$
 </IfModule>
 
 # ---------- Header keamanan ----------
@@ -26,10 +26,10 @@ ErrorDocument 404 /404.html
   # SAMEORIGIN: halaman portal boleh menampilkan pratinjau PDF miliknya sendiri, situs lain tidak
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
-  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()"
+  Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(self), payment=()"
   # CSP tidak dikirim untuk berkas PDF supaya penampil PDF bawaan peramban tidak terblokir
   <If "%{REQUEST_URI} !~ m#^/backend/api/(pkl/)?file\.php#">
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
   </If>
   # Aktifkan setelah HTTPS berjalan stabil:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"

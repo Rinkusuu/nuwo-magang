@@ -13,6 +13,7 @@ const MENU_ADMIN = [
   ['Pelaksanaan', [
     ['penempatan', 'Penempatan dan Pembimbing', null],
     ['peserta', 'Peserta PKL', 'admin_peserta.html'],
+    ['kehadiran', 'Kehadiran', 'admin_kehadiran.html'],
     ['sertifikat', 'Sertifikat', null],
   ]],
   ['Sistem', [
