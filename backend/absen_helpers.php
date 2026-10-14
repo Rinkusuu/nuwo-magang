@@ -31,7 +31,13 @@ function peserta_aktif(PDO $pdo, int $userId): array {
     if (!$batch) return [$app, null, 'Periode PKL Anda tidak ditemukan.'];
     if ($hariIni < $batch['mulai']) return [$app, $batch, 'Periode PKL Anda belum dimulai.'];
     if ($hariIni > $batch['selesai']) return [$app, $batch, 'Periode PKL Anda sudah selesai.'];
+    if (!hari_kerja($hariIni)) return [$app, $batch, 'Absen hanya dapat dilakukan pada hari kerja (Senin–Jumat).'];
     return [$app, $batch, null];
+}
+
+// Senin–Jumat; Sabtu dan Minggu tidak ada absen
+function hari_kerja(string $tanggal): bool {
+    return (int) date('N', strtotime($tanggal)) <= 5;
 }
 
 // Absen hari ini milik pendaftaran ini, dikelompokkan per jenis

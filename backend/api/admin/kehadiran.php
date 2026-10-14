@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ORDER BY a.nama
     ");
     $q->execute([$tanggal, $batchId, $batchId]);
-    $peserta = $q->fetchAll();
+    // Sabtu dan Minggu bukan hari absen: tidak ada yang dihitung belum absen
+    $peserta = hari_kerja($tanggal) ? $q->fetchAll() : [];
 
     $absen = [];
     if ($peserta) {
@@ -38,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     unset($p);
 
     $batch = $pdo->query("SELECT id, nama, mulai, selesai FROM batch ORDER BY mulai DESC, id DESC")->fetchAll();
-    json_out(['success' => true, 'tanggal' => $tanggal, 'data' => $peserta, 'batch' => $batch]);
+    json_out(['success' => true, 'tanggal' => $tanggal, 'hari_kerja' => hari_kerja($tanggal), 'data' => $peserta, 'batch' => $batch]);
 }
 
 // Koreksi: tambah atau ubah jam absen (mis. GPS peserta bermasalah). Alasan wajib dan tercatat.
@@ -51,6 +52,7 @@ $alasan = trim((string) ($data['alasan'] ?? ''));
 if (!in_array($jenis, ['datang', 'pulang'], true)) fail('Jenis absen tidak valid.');
 if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal) || !preg_match('/^\d{2}:\d{2}$/', $jam)) fail('Tanggal dan jam wajib diisi.');
 if (mb_strlen($alasan) < 5) fail('Tuliskan alasan koreksi.');
+if (!hari_kerja($tanggal)) fail('Sabtu dan Minggu bukan hari absen.');
 
 $q = $pdo->prepare("SELECT a.id FROM applications a JOIN batch b ON b.id = a.batch_id
     WHERE a.id = ? AND a.hasil_akhir = 'diterima' AND a.kesediaan = 'bersedia' AND ? BETWEEN b.mulai AND b.selesai");

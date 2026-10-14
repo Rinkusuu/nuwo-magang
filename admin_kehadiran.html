@@ -96,7 +96,7 @@
         <td>${selAbsen(r.datang)}</td>
         <td>${selAbsen(r.pulang)}</td>
         <td><button type="button" class="btn btn-outline btn-sm" data-koreksi="${r.id}">Koreksi</button></td>
-      </tr>`).join('') : '<tr><td colspan="5" class="empty">Tidak ada peserta PKL aktif pada tanggal ini.</td></tr>';
+      </tr>`).join('') : `<tr><td colspan="5" class="empty">${data.hari_kerja ? 'Tidak ada peserta PKL aktif pada tanggal ini.' : 'Sabtu dan Minggu bukan hari absen.'}</td></tr>`;
   }
 
   function selAbsen(a) {
