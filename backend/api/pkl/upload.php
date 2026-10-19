@@ -2,10 +2,9 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Unggah logbook (Excel) atau laporan akhir (PDF) oleh peserta yang sudah menyatakan bersedia.
-// Satu berkas per jenis; unggahan baru menggantikan yang lama.
+// Unggah laporan akhir (PDF) oleh peserta yang sudah menyatakan bersedia; unggahan baru menggantikan
+// yang lama. Logbook tidak lagi diunggah: diisi harian di halaman absen dan diunduh sebagai Excel.
 const BERKAS_PKL = [
-    'logbook' => ['label' => 'Logbook', 'ekstensi' => ['xlsx', 'xls'], 'maks' => 5 * 1024 * 1024],
     'laporan' => ['label' => 'Laporan akhir', 'ekstensi' => ['pdf'], 'maks' => 10 * 1024 * 1024],
 ];
 
@@ -16,7 +15,7 @@ $aturan = BERKAS_PKL[$jenis];
 
 $app = app_by_user($pdo, $userId);
 if (!$app || $app['hasil_akhir'] !== 'diterima' || $app['kesediaan'] !== 'bersedia') {
-    fail('Logbook dan laporan akhir hanya untuk peserta PKL yang sudah menyatakan bersedia.', 403);
+    fail('Laporan akhir hanya untuk peserta PKL yang sudah menyatakan bersedia.', 403);
 }
 
 $file = $_FILES['file'] ?? null;
@@ -27,18 +26,10 @@ if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
 }
 if ($file['size'] > $aturan['maks']) fail("Ukuran berkas melebihi $mb MB.");
 
-// Periksa isi berkas, bukan hanya nama: PDF diawali %PDF-, XLSX adalah arsip ZIP, XLS berformat OLE
+// Periksa isi berkas, bukan hanya nama: PDF diawali %PDF-
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $kepala = file_get_contents($file['tmp_name'], false, null, 0, 8);
-$cocok = match ($ext) {
-    'pdf'  => str_starts_with($kepala, '%PDF-'),
-    'xlsx' => str_starts_with($kepala, "PK\x03\x04"),
-    'xls'  => $kepala === "\xD0\xCF\x11\xE0\xA1\xB1\x1A\xE1",
-    default => false,
-};
-if (!in_array($ext, $aturan['ekstensi'], true) || !$cocok) {
-    fail($jenis === 'logbook' ? 'Logbook harus berupa berkas Excel (.xlsx atau .xls).' : 'Laporan akhir harus berupa berkas PDF.');
-}
+if (!in_array($ext, $aturan['ekstensi'], true) || !str_starts_with($kepala, '%PDF-')) fail('Laporan akhir harus berupa berkas PDF.');
 
 if (!is_dir(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0775, true);
 $simpan = 'pkl_' . $app['id'] . '_' . $jenis . '_' . bin2hex(random_bytes(8)) . '.' . $ext;

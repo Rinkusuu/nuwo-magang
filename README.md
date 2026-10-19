@@ -29,10 +29,15 @@ Selama `SMTP_HOST` kosong, email tidak dikirim melainkan dicatat di `backend/log
    Akun pewawancara dan admin lain dibuat dari menu **Pengguna dan Hak Akses** di backoffice.
 5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis oleh PHP.
    Atur titik kantor untuk absen di **Batch dan Jadwal → Pengaturan umum** (absen memerlukan HTTPS).
-6. Web server:
+6. Pasang cron harian untuk menghapus akun pelamar yang tidak lolos (H+7 setelah keputusan):
+   ```
+   15 1 * * * php /path/portal/backend/bersihkan_akun.php >> /path/portal/backend/logs/pembersihan.log 2>&1
+   ```
+   Cek dulu tanpa menghapus: `php backend/bersihkan_akun.php --uji`.
+7. Web server:
    - **Apache**: `.htaccess` di folder utama sudah berisi aturan (butuh `mod_headers`, `mod_alias`).
    - **Nginx + PHP-FPM**: lihat `deploy/nginx-portal-magang.conf`.
-7. Pasang HTTPS, lalu aktifkan HSTS.
+8. Pasang HTTPS, lalu aktifkan HSTS.
 
 Daftar pekerjaan yang masih tertunda ada di [CATATAN-TINDAK-LANJUT.md](CATATAN-TINDAK-LANJUT.md).
 
@@ -48,4 +53,6 @@ Daftar pekerjaan yang masih tertunda ada di [CATATAN-TINDAK-LANJUT.md](CATATAN-T
 | `backend/config.php` | Koneksi DB, sesi, CSRF, helper |
 | `backend/mailer.php` | Pengiriman dan templat email (PHPMailer) |
 | `backend/api/` | Endpoint JSON |
+| `backend/logbook_excel.php` | Menyusun logbook harian menjadi Excel format kantor (`xlsx_sederhana.php`) |
+| `backend/bersihkan_akun.php` | Skrip cron pembersihan akun pelamar yang tidak lolos |
 | `backend/vendor/` | PHPMailer (disertakan agar tidak perlu Composer di server) |

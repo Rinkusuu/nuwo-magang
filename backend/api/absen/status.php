@@ -17,4 +17,5 @@ json_out([
     'batch' => $batch ? ['nama' => $batch['nama'], 'mulai' => $batch['mulai'], 'selesai' => $batch['selesai']] : null,
     'absen' => $app ? absen_hari_ini($pdo, (int) $app['id']) : ['datang' => null, 'pulang' => null],
     'lokasi' => $siapLokasi ? $atur : null,
+    'logbook' => logbook_status($pdo, $alasan === null ? $app : null),
 ]);

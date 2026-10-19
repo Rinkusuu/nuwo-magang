@@ -46,6 +46,17 @@
   .tombol-kamera{display:flex;gap:10px;}
   .tombol-kamera .btn{flex:1;}
   .catatan-absen{font-size:12.5px;color:var(--ink-3);}
+
+  /* Logbook harian: syarat absen pulang */
+  #kartuLogbook{margin-bottom:16px;}
+  #kartuLogbook .card-title{display:flex;align-items:center;gap:8px;}
+  #kartuLogbook .textarea{min-height:150px;}
+  .logbook-kaki{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap;}
+  .logbook-kaki .hitung{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
+  .logbook-kaki .hitung.kurang{color:var(--red);}
+  .logbook-kaki .simpan-info{display:inline-flex;align-items:center;gap:4px;font-size:12.5px;color:var(--green);font-weight:600;margin-left:auto;}
+  .logbook-isi{white-space:pre-line;font-size:14.5px;line-height:1.6;background:var(--navy-50);border-radius:var(--radius-sm);padding:12px 14px;}
+  .logbook-kunci{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-3);margin-top:10px;}
 </style>
 </head>
 <body>
@@ -70,6 +81,7 @@
     <div class="slot" id="slotDatang"><span>Datang</span><b>–</b><small>&nbsp;</small></div>
     <div class="slot" id="slotPulang"><span>Pulang</span><b>–</b><small>&nbsp;</small></div>
   </div>
+  <section class="card" id="kartuLogbook" hidden></section>
   <section class="card" id="panel"><div class="loading" style="padding:24px;">Memuat…</div></section>
   <p class="catatan-absen" style="margin-top:14px;">Jam absen dicatat menurut waktu server. Foto dan lokasi hanya dapat dilihat oleh Anda dan panitia.</p>
 </main>
@@ -89,6 +101,7 @@
   let st = null;           // status dari server
   let posisi = null;       // { lat, lng, akurasi }
   let pantauGps = null, aliran = null, fotoBlob = null;
+  let logbookTersimpan = null;   // isi logbook hari ini yang sudah tersimpan di server
   const JENIS_LABEL = { datang: 'Absen datang', pulang: 'Absen pulang' };
 
   $('logoutBtn').addEventListener('click', () => logout('login.html'));
@@ -107,6 +120,7 @@
     $('metaTanggal').textContent = fmtTanggal(st.hari_ini) + (st.batch ? ' · ' + st.batch.nama : '');
     isiSlot('slotDatang', st.absen.datang);
     isiSlot('slotPulang', st.absen.pulang);
+    logbookTersimpan = st.logbook.isi;
     tampilAwal();
   }
 
@@ -132,16 +146,88 @@
       return;
     }
     const jenis = jenisBerikut();
+    tampilLogbook();
     if (!jenis) { panel.innerHTML = '<div class="notice green"><b>Absen hari ini lengkap</b>Absen datang dan pulang sudah tercatat. Sampai jumpa besok.</div>'; return; }
     panel.innerHTML = `
       <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
-      <p class="card-sub">Pastikan Anda berada di kantor. Anda akan diminta mengizinkan lokasi dan kamera, lalu mengambil swafoto.</p>
+      <p class="card-sub">${jenis === 'pulang'
+        ? 'Isi dan simpan logbook kegiatan hari ini terlebih dahulu. Setelah absen pulang, logbook tidak dapat diubah lagi.'
+        : 'Pastikan Anda berada di kantor. Anda akan diminta mengizinkan lokasi dan kamera, lalu mengambil swafoto.'}</p>
       <button type="button" class="btn btn-primary btn-block" id="mulaiBtn">${ikon('lokasi', 16)}Mulai ${JENIS_LABEL[jenis].toLowerCase()}</button>`;
     $('mulaiBtn').addEventListener('click', () => langkahLokasi(jenis));
+    if (jenis === 'pulang') perbaruiSyaratPulang();
   }
+
+  // ---------- Logbook harian ----------
+  function tampilLogbook() {
+    const kartu = $('kartuLogbook');
+    const lb = st.logbook;
+    // Logbook muncul setelah absen datang
+    if (!st.absen.datang) { kartu.hidden = true; return; }
+    kartu.hidden = false;
+    if (lb.terkunci) {
+      kartu.innerHTML = `
+        <h2 class="card-title">${ikon('catatan', 18)}Logbook hari ini</h2>
+        <div class="logbook-isi">${esc(lb.isi || 'Tidak ada logbook.')}</div>
+        <div class="logbook-kunci">${ikon('gembok', 14)}Terkunci setelah absen pulang.</div>`;
+      return;
+    }
+    kartu.innerHTML = `
+      <h2 class="card-title">${ikon('catatan', 18)}Logbook hari ini</h2>
+      <p class="card-sub">Tuliskan kegiatan yang Anda kerjakan hari ini, satu kegiatan per baris. Wajib diisi sebelum absen pulang.</p>
+      <div class="field">
+        <textarea class="textarea" id="isiLogbook" aria-label="Kegiatan hari ini" maxlength="${lb.maks}" placeholder="Contoh:&#10;Mengikuti rapat koordinasi tim&#10;Merekap data survei harga komoditas"></textarea>
+      </div>
+      <div class="logbook-kaki">
+        <span class="hitung" id="hitungLogbook"></span>
+        <span class="simpan-info" id="infoLogbook"></span>
+        <button type="button" class="btn btn-outline" id="simpanLogbook">${ikon('centang', 16)}Simpan logbook</button>
+      </div>`;
+    const ta = $('isiLogbook');
+    ta.value = lb.isi || '';
+    ta.addEventListener('input', perbaruiSyaratPulang);
+    $('simpanLogbook').addEventListener('click', simpanLogbook);
+    perbaruiSyaratPulang();
+  }
+
+  const panjangLogbook = teks => teks.split(/\r?\n/).map(b => b.replace(/[ \t]+/g, ' ').trim()).filter(Boolean).join('\n').length;
+
+  // Tombol absen pulang hanya aktif bila logbook valid sudah tersimpan dan tidak ada perubahan yang belum disimpan
+  function perbaruiSyaratPulang() {
+    const ta = $('isiLogbook');
+    if (!ta) return;
+    const n = panjangLogbook(ta.value);
+    const hitung = $('hitungLogbook');
+    hitung.textContent = n < st.logbook.min ? `${n} karakter · minimal ${st.logbook.min}` : `${n} / ${fmtRibu(st.logbook.maks)} karakter`;
+    hitung.classList.toggle('kurang', n > 0 && n < st.logbook.min);
+    const tersimpan = logbookTersimpan !== null && ta.value.trim() === logbookTersimpan.trim();
+    $('infoLogbook').innerHTML = tersimpan ? `${ikon('centang', 14)} Tersimpan` : '';
+    $('simpanLogbook').disabled = tersimpan || n < st.logbook.min;
+    const mulai = $('mulaiBtn');
+    if (mulai && jenisBerikut() === 'pulang') mulai.disabled = !tersimpan;
+  }
+
+  async function simpanLogbook() {
+    const btn = $('simpanLogbook');
+    btn.disabled = true;
+    const res = await api('backend/api/absen/logbook.php', { json: { isi: $('isiLogbook').value } });
+    if (!res.success) { toast(res.message, true); perbaruiSyaratPulang(); return; }
+    st.logbook = res.logbook;
+    logbookTersimpan = res.logbook.isi;
+    $('isiLogbook').value = res.logbook.isi;
+    toast(res.message);
+    perbaruiSyaratPulang();
+  }
+
+  // Peringatkan bila logbook diubah tetapi belum disimpan
+  window.addEventListener('beforeunload', e => {
+    const ta = $('isiLogbook');
+    if (ta && ta.value.trim() !== (logbookTersimpan || '').trim() && ta.value.trim() !== '') { e.preventDefault(); e.returnValue = ''; }
+  });
 
   // ---------- Langkah 1: lokasi ----------
   function langkahLokasi(jenis) {
+    $('kartuLogbook').hidden = true;
     $('panel').innerHTML = `
       <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
       <div class="langkah">

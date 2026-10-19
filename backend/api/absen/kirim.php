@@ -58,17 +58,33 @@ $baris = [
 if (!stempel_foto($file['tmp_name'], UPLOAD_DIR . 'absen/' . $nama, $baris)) fail('Foto gagal diproses. Ambil ulang foto.', 500);
 
 try {
+    $pdo->beginTransaction();
+    // Absen pulang hanya tercatat bila logbook hari ini ada dan valid. Baris logbook dikunci
+    // supaya tidak bisa diubah bersamaan; setelah absen pulang tersimpan, logbook terkunci.
+    if ($jenis === 'pulang') {
+        $l = $pdo->prepare("SELECT isi FROM logbook WHERE application_id = ? AND tanggal = ? FOR UPDATE");
+        $l->execute([$app['id'], substr($waktu, 0, 10)]);
+        $isi = $l->fetchColumn();
+        if ($isi === false || validasi_logbook($isi)[1]) {
+            $pdo->rollBack();
+            @unlink(UPLOAD_DIR . 'absen/' . $nama);
+            fail('Isi dan simpan logbook hari ini sebelum absen pulang.', 409);
+        }
+    }
     $pdo->prepare("INSERT INTO absen (application_id, tanggal, jenis, waktu, lat, lng, akurasi_m, jarak_m, foto, ip, user_agent)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
         ->execute([$app['id'], substr($waktu, 0, 10), $jenis, $waktu, $lat, $lng, (int) round($akurasi), $jarak, $nama,
             substr($_SERVER['REMOTE_ADDR'] ?? '', 0, 45), mb_substr($_SERVER['HTTP_USER_AGENT'] ?? '', 0, 255)]);
+    $pdo->commit();
 } catch (PDOException $e) {
     // Dua kiriman bersamaan: kunci unik mencegah absen ganda
+    if ($pdo->inTransaction()) $pdo->rollBack();
     @unlink(UPLOAD_DIR . 'absen/' . $nama);
     fail('Absen ini sudah tercatat hari ini.', 409);
 }
 
-json_out(['success' => true, 'message' => 'Absen ' . $jenis . ' tercatat pukul ' . substr($waktu, 11, 5) . ' WIB.', 'absen' => absen_hari_ini($pdo, (int) $app['id'])]);
+json_out(['success' => true, 'message' => 'Absen ' . $jenis . ' tercatat pukul ' . substr($waktu, 11, 5) . ' WIB.',
+    'absen' => absen_hari_ini($pdo, (int) $app['id']), 'logbook' => logbook_status($pdo, $app)]);
 
 function tanggal_id_singkat(string $waktu): string {
     $bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];

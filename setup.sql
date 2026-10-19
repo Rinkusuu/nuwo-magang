@@ -137,7 +137,8 @@ CREATE TABLE application_files (
 ) ENGINE=InnoDB;
 
 -- Penilaian wawancara: satu baris per pewawancara per pelamar
--- Berkas selama pelaksanaan PKL: logbook (Excel) dan laporan akhir (PDF), satu berkas per jenis
+-- Berkas selama pelaksanaan PKL: laporan akhir (PDF). Jenis 'logbook' tersisa dari unggahan Excel lama;
+-- logbook kini diisi harian (tabel logbook) dan diunduh sebagai Excel otomatis.
 CREATE TABLE berkas_pkl (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -182,6 +183,26 @@ CREATE TABLE absen_token (
   kedaluwarsa DATETIME NOT NULL,
   dipakai_at DATETIME NULL,
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Logbook harian peserta PKL: wajib diisi sebelum absen pulang, terkunci setelahnya
+CREATE TABLE logbook (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  application_id INT NOT NULL,
+  tanggal DATE NOT NULL,
+  isi TEXT NOT NULL,
+  dibuat_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  diubah_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  UNIQUE KEY uq_logbook_hari (application_id, tanggal),
+  FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
+) ENGINE=InnoDB;
+
+-- Ringkasan pembersihan akun pelamar yang tidak lolos (tanpa nama atau email)
+CREATE TABLE pembersihan_log (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  kategori VARCHAR(40) NOT NULL,
+  jumlah INT NOT NULL
 ) ENGINE=InnoDB;
 
 CREATE TABLE interview_assessments (

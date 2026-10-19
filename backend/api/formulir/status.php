@@ -1,6 +1,7 @@
 <?php
 require '../../config.php';
 require '../../app_helpers.php';
+require '../../pembersihan_helpers.php';
 
 $userId = require_user();
 $app = app_by_user($pdo, $userId);
@@ -8,6 +9,7 @@ $app = app_by_user($pdo, $userId);
 if (!$app) json_out(['success' => true, 'has_application' => false, 'periode' => get_periode($pdo)]);
 
 $app['editable'] = app_editable($app);
+$app['hapus_pada'] = tanggal_hapus_akun($app);   // pelamar yang ditolak: tanggal akun dihapus otomatis
 unset($app['verified_by'], $app['seleksi_by']);
 
 // Informasi batch bertahap: link Zoom hanya untuk yang lolos ke wawancara,

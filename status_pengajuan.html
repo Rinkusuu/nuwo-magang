@@ -46,6 +46,8 @@
   .timeline .box strong{font-size:14px;}
   @media(max-width:600px){.timeline .box{grid-template-columns:1fr;}}
   .timeline .notice{margin-top:10px;}
+  .hapus-akun{display:flex;gap:10px;align-items:flex-start;margin-bottom:18px;}
+  .hapus-akun svg{flex-shrink:0;margin-top:2px;}
 
   .summary .item{margin-top:10px;}
   .summary .item span{display:block;font-size:12.5px;color:var(--ink-2);}
@@ -260,6 +262,7 @@
           <button type="button" class="btn btn-outline btn-sm" id="cetakBtn"><span data-ikon="unduh" data-ikon-ukuran="15"></span>Cetak bukti pendaftaran</button>
         </div>
       </div>
+      ${a.hapus_pada ? `<div class="notice amber hapus-akun">${ikon('peringatan', 16)}<span><b>Akun akan dihapus ${fmtTanggal(a.hapus_pada)}</b>Akun dan seluruh data pendaftaran Anda dihapus otomatis pada tanggal tersebut. Simpan informasi yang Anda perlukan sebelumnya.</span></div>` : ''}
       <div class="cols">
         <section class="card">
           <h2 class="card-title">Perjalanan Seleksi</h2>
@@ -272,9 +275,12 @@
         <div class="side">
           ${bolehUnggah ? `<section class="card berkas-pkl" id="berkasPkl">
             <h2 class="card-title">Logbook dan Laporan Akhir</h2>
-            <p class="card-sub">Unggahan baru menggantikan berkas sebelumnya.</p>
-            ${barisPkl('logbook', 'Logbook', 'Excel (.xlsx/.xls), maks. 5 MB', '.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel', berkasPkl.logbook)}
-            ${barisPkl('laporan', 'Laporan akhir', 'PDF, maks. 10 MB', '.pdf,application/pdf', berkasPkl.laporan)}
+            <p class="card-sub">Logbook diisi setiap hari di halaman absen dan tersusun otomatis menjadi Excel.</p>
+            <div class="baris-pkl">
+              <div class="txt"><b>Logbook</b><span>Excel sesuai format logbook kantor, berisi kegiatan serta jam masuk dan jam keluar.</span></div>
+              <a class="btn btn-outline btn-sm" href="backend/api/pkl/logbook_excel.php" download>${ikon('unduh', 14)}Unduh</a>
+            </div>
+            ${barisPkl('laporan', 'Laporan akhir', 'PDF, maks. 10 MB. Unggahan baru menggantikan berkas sebelumnya.', '.pdf,application/pdf', berkasPkl.laporan)}
           </section>` : ''}
           <section class="card summary">
             <h2 class="card-title">Ringkasan Pendaftaran</h2>
@@ -315,13 +321,13 @@
     else document.querySelectorAll('[data-kesediaan]').forEach(b => { b.disabled = false; });
   });
 
-  // Unggah logbook / laporan akhir
+  // Unggah laporan akhir
   document.addEventListener('change', async e => {
     const input = e.target.closest('[data-unggah-pkl]');
     if (!input || !input.files[0]) return;
     const file = input.files[0];
     const jenis = input.dataset.unggahPkl;
-    const maks = jenis === 'logbook' ? 5 : 10;
+    const maks = 10;
     if (file.size > maks * 1048576) { toast(`Ukuran berkas melebihi ${maks} MB.`, true); input.value = ''; return; }
     const baris = input.closest('.baris-pkl');
     baris.classList.add('sedang');

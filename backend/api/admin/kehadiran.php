@@ -32,9 +32,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $r->execute([$tanggal]);
         foreach ($r->fetchAll() as $a) $absen[$a['application_id']][$a['jenis']] = $a;
     }
+    $logbook = [];
+    if ($peserta) {
+        $l = $pdo->prepare("SELECT application_id, isi, diubah_at FROM logbook WHERE tanggal = ? AND application_id IN ($ids)");
+        $l->execute([$tanggal]);
+        foreach ($l->fetchAll() as $row) $logbook[$row['application_id']] = $row;
+    }
     foreach ($peserta as &$p) {
         $p['datang'] = $absen[$p['id']]['datang'] ?? null;
         $p['pulang'] = $absen[$p['id']]['pulang'] ?? null;
+        $p['logbook'] = isset($logbook[$p['id']]) ? ['isi' => $logbook[$p['id']]['isi'], 'diubah_at' => $logbook[$p['id']]['diubah_at']] : null;
     }
     unset($p);
 

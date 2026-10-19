@@ -1,7 +1,7 @@
 # Catatan Tindak Lanjut — Portal Magang Mahasiswa
 
 Daftar pekerjaan yang **sengaja ditunda** atau **menunggu data/keputusan**, supaya
-pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
+pengerjaan berikutnya jelas mulai dari mana. Diperbarui 19 Oktober 2026.
 
 ---
 
@@ -25,6 +25,13 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
       - *Sampingan:* pengingat lupa absen pulang, info pakaian hari ini, peta dan kontak, kalender
         libur, hitung mundur, templat laporan, riwayat absen, ubah profil, survei akhir PKL.
 
+- [ ] **Ide lanjutan logbook harian** (dibahas 16 Oktober 2026, belum dipilih): riwayat logbook
+      peserta dengan tombol "salin kemarin", tanggapan/paraf pembimbing, rekap mingguan sebagai
+      kerangka laporan akhir, penanda logbook asal-asalan atau salin-tempel, pencarian logbook di
+      backoffice, kategori kegiatan, cetak PDF berkop, pengingat belum absen pulang.
+- [ ] **Kolom Excel logbook yang dibiarkan kosong**: "Email Pembimbing" dan "Unit/Bagian" (belum ada
+      di sistem). Bila nanti diisi admin per peserta, keduanya bisa langsung masuk ke Excel.
+
 ## B. Menunggu data dari pengguna
 
 - [ ] **Foto** gedung KPwBI Provinsi Lampung atau kegiatan magang angkatan
@@ -45,6 +52,10 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
       Keterbatasan yang perlu diketahui kantor: GPS dapat dipalsukan dengan aplikasi khusus;
       lapisan saat ini (kamera langsung, token sekali pakai, waktu server, stempel foto, radius,
       riwayat tidak bisa diubah) menyulitkan, tetapi tidak menjamin 100%.
+
+- [ ] **Pasang cron pembersihan akun** (`backend/bersihkan_akun.php`, contoh baris di README).
+      Tanpa cron, akun pelamar yang tidak lolos tidak pernah terhapus.
+- [ ] **Jalankan migrasi `006`** di database server (tabel `logbook` dan `pembersihan_log`).
 
 - [ ] **Akun SMTP resmi** (host, port, user, kata sandi, alamat pengirim) diisi di
       `backend/config.local.php`. Selama kosong, email hanya dicatat di
@@ -81,6 +92,9 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 30 September 2026.
 
 ## Sudah selesai (untuk rujukan)
 
+- Logbook harian teks sebagai syarat absen pulang (terkunci setelah absen pulang), Excel logbook
+  otomatis sesuai format kantor dengan jam masuk/keluar dari absen, pembersihan akun pelamar yang
+  tidak lolos H+7 lewat cron beserta pemberitahuan tanggal di halaman status.
 - Perombakan tampilan (opsi A, susunan sesuai prototype), motif jalur seleksi,
   animasi halus, footer, logo dan rasio aset untuk HP.
 - Email notifikasi: pendaftaran terkirim, hasil verifikasi (lolos / perbaikan /

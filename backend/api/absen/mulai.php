@@ -15,6 +15,10 @@ if ($atur['kantor_lat'] === null) fail('Lokasi kantor untuk absen belum diatur p
 $hari = absen_hari_ini($pdo, (int) $app['id']);
 if ($hari[$jenis]) fail($jenis === 'datang' ? 'Anda sudah absen datang hari ini.' : 'Anda sudah absen pulang hari ini.', 409);
 if ($jenis === 'pulang' && !$hari['datang']) fail('Absen datang terlebih dahulu sebelum absen pulang.', 409);
+if ($jenis === 'pulang') {
+    $logbook = logbook_hari_ini($pdo, (int) $app['id']);
+    if (!$logbook || validasi_logbook($logbook['isi'])[1]) fail('Isi dan simpan logbook hari ini sebelum absen pulang.', 409);
+}
 
 $pdo->prepare("DELETE FROM absen_token WHERE application_id = ? AND (kedaluwarsa < NOW() OR dipakai_at IS NOT NULL)")->execute([$app['id']]);
 $token = bin2hex(random_bytes(32));

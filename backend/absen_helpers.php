@@ -97,3 +97,45 @@ function stempel_foto(string $sumber, string $tujuan, array $baris): bool {
     imagedestroy($img);
     return $ok;
 }
+
+// ---------- Logbook harian ----------
+const LOGBOOK_MIN = 30;
+const LOGBOOK_MAKS = 2000;
+
+function logbook_hari_ini(PDO $pdo, int $appId): ?array {
+    $q = $pdo->prepare("SELECT isi, dibuat_at, diubah_at FROM logbook WHERE application_id = ? AND tanggal = CURDATE()");
+    $q->execute([$appId]);
+    return $q->fetch() ?: null;
+}
+
+/**
+ * Rapikan isi logbook: satu kegiatan per baris, baris kosong dan spasi berlebih dibuang.
+ * Mengembalikan [teks, pesan galat]; pesan null berarti valid.
+ */
+function validasi_logbook(string $teks): array {
+    $baris = preg_split('/\R/u', $teks);
+    $baris = array_values(array_filter(array_map(fn($b) => trim(preg_replace('/[ \t]+/u', ' ', $b)), $baris), fn($b) => $b !== ''));
+    $rapi = implode("\n", $baris);
+    $panjang = mb_strlen($rapi);
+    if ($panjang < LOGBOOK_MIN) return [$rapi, 'Logbook minimal ' . LOGBOOK_MIN . ' karakter. Tuliskan kegiatan hari ini dengan jelas.'];
+    if ($panjang > LOGBOOK_MAKS) return [$rapi, 'Logbook maksimal ' . number_format(LOGBOOK_MAKS, 0, ',', '.') . ' karakter.'];
+    return [$rapi, null];
+}
+
+// Logbook terkunci begitu absen pulang hari itu tercatat
+function logbook_terkunci(array $absenHari): bool {
+    return $absenHari['pulang'] !== null;
+}
+
+// Status logbook hari ini untuk halaman absen
+function logbook_status(PDO $pdo, ?array $app): array {
+    if (!$app) return ['isi' => null, 'diubah_at' => null, 'terkunci' => false, 'min' => LOGBOOK_MIN, 'maks' => LOGBOOK_MAKS];
+    $l = logbook_hari_ini($pdo, (int) $app['id']);
+    return [
+        'isi' => $l['isi'] ?? null,
+        'diubah_at' => $l['diubah_at'] ?? null,
+        'terkunci' => logbook_terkunci(absen_hari_ini($pdo, (int) $app['id'])),
+        'min' => LOGBOOK_MIN,
+        'maks' => LOGBOOK_MAKS,
+    ];
+}

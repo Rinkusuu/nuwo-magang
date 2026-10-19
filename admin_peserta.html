@@ -28,7 +28,7 @@
     <div class="page-head">
       <div>
         <h1>Peserta PKL</h1>
-        <div class="sub">Peserta yang diterima, konfirmasi kesediaannya, serta logbook dan laporan akhir yang sudah diunggah.</div>
+        <div class="sub">Peserta yang diterima, konfirmasi kesediaannya, serta logbook harian, dan laporan akhir yang sudah diunggah.</div>
       </div>
     </div>
 
@@ -37,7 +37,7 @@
     <div class="stats" style="grid-template-columns:repeat(4,minmax(0,1fr));">
       <div class="stat"><span>Diterima</span><b id="stDiterima">–</b></div>
       <div class="stat"><span>Bersedia</span><b id="stBersedia">–</b></div>
-      <div class="stat"><span>Logbook terunggah</span><b id="stLogbook">–</b></div>
+      <div class="stat"><span>Mengisi logbook</span><b id="stLogbook">–</b></div>
       <div class="stat"><span>Laporan terunggah</span><b id="stLaporan">–</b></div>
     </div>
 
@@ -77,12 +77,19 @@
       <small>${fmtTanggal(f.uploaded_at)}</small></div>`;
   }
 
+  // Logbook diisi harian; admin mengunduhnya sebagai Excel sesuai format kantor
+  function selLogbook(r) {
+    const n = Number(r.hari_logbook);
+    return `<span class="${n ? '' : 'muted'}">${n} hari terisi</span><br>
+      <a class="link" href="backend/api/pkl/logbook_excel.php?id=${encodeURIComponent(r.id)}" download>${ikon('unduh', 13)}Unduh Excel</a>`;
+  }
+
   function render() {
     const id = $('fBatch').value;
     const rows = semua.filter(r => !id || String(r.batch_id) === id);
     $('stDiterima').textContent = rows.length;
     $('stBersedia').textContent = rows.filter(r => r.kesediaan === 'bersedia').length;
-    $('stLogbook').textContent = rows.filter(r => r.berkas_pkl.logbook).length;
+    $('stLogbook').textContent = rows.filter(r => Number(r.hari_logbook) > 0).length;
     $('stLaporan').textContent = rows.filter(r => r.berkas_pkl.laporan).length;
     $('rows').removeAttribute('aria-busy');
     $('rows').innerHTML = rows.length ? rows.map(r => `
@@ -91,7 +98,7 @@
         <td>${esc(r.email)}<br><span class="muted">${esc(r.no_wa || '')}</span></td>
         <td>${esc(r.batch || '-')}${r.mulai ? `<br><span class="muted" style="font-size:12.5px;">${fmtTanggal(r.mulai)} – ${fmtTanggal(r.selesai)}</span>` : ''}</td>
         <td>${r.kesediaan ? pill(LABEL.kesediaan, r.kesediaan) : '<span class="pill gray">Menunggu konfirmasi</span>'}</td>
-        <td>${r.kesediaan === 'bersedia' ? selBerkas(r.berkas_pkl.logbook, 'logbook') : '<span class="muted">—</span>'}</td>
+        <td>${r.kesediaan === 'bersedia' ? selLogbook(r) : '<span class="muted">—</span>'}</td>
         <td>${r.kesediaan === 'bersedia' ? selBerkas(r.berkas_pkl.laporan, 'laporan') : '<span class="muted">—</span>'}</td>
       </tr>`).join('') : '<tr><td colspan="6" class="empty">Belum ada peserta yang diterima di batch ini.</td></tr>';
   }
