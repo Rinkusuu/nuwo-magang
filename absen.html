@@ -290,9 +290,11 @@
   function jepret(jenis) {
     const video = $('video');
     const kanvas = document.createElement('canvas');
-    kanvas.width = video.videoWidth;
-    kanvas.height = video.videoHeight;
-    kanvas.getContext('2d').drawImage(video, 0, 0);
+    // Server menerima paling besar 4.000 px per sisi; foto diperkecil ke 1.600 px bila kamera lebih besar
+    const skala = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
+    kanvas.width = Math.round(video.videoWidth * skala);
+    kanvas.height = Math.round(video.videoHeight * skala);
+    kanvas.getContext('2d').drawImage(video, 0, 0, kanvas.width, kanvas.height);
     kanvas.toBlob(blob => {
       fotoBlob = blob;
       berhentiKamera();

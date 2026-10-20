@@ -1,6 +1,7 @@
 <?php
 // Pembersihan akun pelamar yang tidak lolos: akun, pendaftaran, dan berkasnya dihapus H+7 setelah
-// keputusan. Dipakai skrip harian bersihkan_akun.php dan halaman status pelamar (tanggal penghapusan).
+// keputusan. Dipakai skrip harian bersihkan_akun.php, halaman status pelamar (tanggal penghapusan),
+// dan hapus pelamar oleh admin (hapus_akun_pelamar).
 
 const HARI_SIMPAN_DITOLAK = 7;
 

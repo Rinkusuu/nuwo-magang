@@ -7,7 +7,7 @@ $q = $pdo->prepare("SELECT ab.foto, a.user_id FROM absen ab JOIN applications a 
 $q->execute([$id]);
 $f = $q->fetch();
 
-$pemilik = $f && isset($_SESSION['user_id']) && (int) $f['user_id'] === (int) $_SESSION['user_id'];
+$pemilik = $f && (int) $f['user_id'] === pengguna_aktif();
 $admin = (staf_aktif()['peran'] ?? '') === 'admin';
 if (!$f || !$f['foto'] || (!$pemilik && !$admin)) fail('Foto tidak ditemukan.', 404);
 

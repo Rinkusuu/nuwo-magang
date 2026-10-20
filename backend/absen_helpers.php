@@ -69,8 +69,9 @@ function stempel_foto(string $sumber, string $tujuan, array $baris): bool {
     $h = imagesy($img);
     if ($w > LEBAR_FOTO_MAKS) {
         $nh = (int) round($h * LEBAR_FOTO_MAKS / $w);
-        $kecil = imagescale($img, LEBAR_FOTO_MAKS, $nh, IMG_BICUBIC);
-        imagedestroy($img);
+        // imagecopyresampled, bukan imagescale(IMG_BICUBIC): di sebagian versi GD mode bicubic gagal (false)
+        $kecil = imagecreatetruecolor(LEBAR_FOTO_MAKS, $nh);
+        if (!imagecopyresampled($kecil, $img, 0, 0, 0, 0, LEBAR_FOTO_MAKS, $nh, $w, $h)) return false;
         $img = $kecil;
         $w = LEBAR_FOTO_MAKS;
         $h = $nh;
@@ -94,7 +95,6 @@ function stempel_foto(string $sumber, string $tujuan, array $baris): bool {
     $dir = dirname($tujuan);
     if (!is_dir($dir)) mkdir($dir, 0775, true);
     $ok = imagejpeg($img, $tujuan, 82);
-    imagedestroy($img);
     return $ok;
 }
 

@@ -11,7 +11,7 @@ $stmt = $pdo->prepare("
 $stmt->execute([$id]);
 $f = $stmt->fetch();
 
-$isOwner = $f && isset($_SESSION['user_id']) && (int) $f['user_id'] === (int) $_SESSION['user_id'];
+$isOwner = $f && (int) $f['user_id'] === pengguna_aktif();
 // Berkas pendaftaran: pemilik, admin, atau pewawancara (untuk pelamar yang diundang wawancara)
 $staf = staf_aktif();
 $bolehStaf = $f && $staf && ($staf['peran'] === 'admin' || $f['status_seleksi'] === 'lolos');

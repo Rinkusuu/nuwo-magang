@@ -24,15 +24,19 @@ header('Content-Disposition: attachment; filename="daftar-pelamar-' . date('Ymd'
 $out = fopen('php://output', 'w');
 fwrite($out, "\xEF\xBB\xBF"); // BOM agar Excel membaca UTF-8
 $sep = ';';                    // pemisah kolom Excel berbahasa Indonesia
+
+// Isian pelamar yang diawali = + - @ (atau tab/CR) akan dijalankan Excel sebagai rumus,
+// mis. =HYPERLINK(...). Tanda kutip tunggal di depannya membuat Excel membacanya sebagai teks.
+$sel = fn($v) => is_string($v) && $v !== '' && strpbrk($v[0], "=+-@\t\r") !== false ? "'" . $v : $v;
 fputcsv($out, ['No. Pendaftaran', 'Batch', 'Nama', 'Email', 'No. HP', 'Domisili', 'Perguruan Tinggi', 'Fakultas / Prodi', 'NPM',
     'IPK', 'Jenjang', 'Semester', 'Administrasi', 'Seleksi Wawancara', 'Nilai Wawancara', 'Hasil', 'Kesediaan', 'Tanggal Daftar'], $sep, '"', '');
 foreach ($rows as $r) {
-    fputcsv($out, [
+    fputcsv($out, array_map($sel, [
         $r['no_pendaftaran'], $r['batch'] ?? '', $r['nama'], $r['email'], $r['no_wa'], $r['domisili'], $r['universitas'], $r['fakultas_prodi'],
         $r['nim'], str_replace('.', ',', (string) $r['ipk']), $r['jenjang'], $r['semester'],
         $label[$r['status_admin']] ?? $r['status_admin'], $label[$r['status_seleksi'] ?? ''] ?? '',
         $r['nilai'] !== null ? str_replace('.', ',', (string) $r['nilai']) : '',
         $label[$r['hasil_akhir'] ?? ''] ?? '', $label[$r['kesediaan'] ?? ''] ?? '', $r['submitted_at'],
-    ], $sep, '"', '');
+    ]), $sep, '"', '');
 }
 fclose($out);

@@ -6,9 +6,9 @@ $data = body();
 $email = strtolower(trim((string) ($data['email'] ?? '')));
 $password = (string) ($data['password'] ?? '');
 
-// Backoffice lebih ketat: 5 percobaan gagal per email dan 10 per IP dalam 15 menit
+// Backoffice lebih ketat, dalam 15 menit: 5 percobaan gagal per email dari satu IP, 20 per email dari semua IP, 10 per IP
 $kunci = 'admin:' . $email;
-cek_batas($pdo, $kunci, 5, 15, 10);
+cek_batas($pdo, $kunci, 5, 15, 10, 20);
 
 $stmt = $pdo->prepare("SELECT id, nama, email, password, peran FROM admins WHERE email = ? AND aktif = 1");
 $stmt->execute([$email]);
@@ -25,5 +25,6 @@ mulai_sesi_baru();
 $_SESSION['admin_id'] = (int) $admin['id'];
 $_SESSION['admin_nama'] = $admin['nama'];
 $_SESSION['admin_email'] = $admin['email'];
+$_SESSION['sidik_admin'] = sidik_sandi($hash);
 
 json_out(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $admin['nama'], 'peran' => $admin['peran'], 'csrf' => csrf_token()]);

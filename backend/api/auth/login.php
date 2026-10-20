@@ -6,9 +6,9 @@ $data = body();
 $email = strtolower(trim((string) ($data['email'] ?? '')));
 $password = (string) ($data['password'] ?? '');
 
-// Maksimal 5 percobaan gagal per email dan 20 per IP dalam 15 menit
+// Dalam 15 menit: maksimal 5 percobaan gagal per email dari satu IP, 30 per email dari semua IP, 20 per IP
 $kunci = 'login:' . $email;
-cek_batas($pdo, $kunci, 5, 15, 20);
+cek_batas($pdo, $kunci, 5, 15, 20, 30);
 
 $stmt = $pdo->prepare("SELECT id, nama, email, password FROM users WHERE email = ?");
 $stmt->execute([$email]);
@@ -27,5 +27,6 @@ mulai_sesi_baru();
 $_SESSION['user_id'] = (int) $user['id'];
 $_SESSION['user_nama'] = $user['nama'];
 $_SESSION['user_email'] = $user['email'];
+$_SESSION['sidik_user'] = sidik_sandi($hash);
 
 json_out(['success' => true, 'message' => 'Berhasil masuk.', 'nama' => $user['nama'], 'csrf' => csrf_token()]);

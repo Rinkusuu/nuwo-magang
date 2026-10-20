@@ -17,7 +17,8 @@ ErrorDocument 404 /404.html
   RedirectMatch 404 ^/\.git
   RedirectMatch 404 ^/deploy/
   RedirectMatch 404 ^/backend/(vendor|logs|migrasi|uploads|font)(/|$)
-  RedirectMatch 404 ^/backend/(config|config\.local|config\.local\.example|app_helpers|absen_helpers|mailer|batas_percobaan|atur_password_admin)\.php$
+  # PHP hanya dijalankan di backend/api/ (sama dengan Nginx); helper, config, dan skrip CLI tidak bisa dibuka dari web
+  RedirectMatch 404 "^/(?!backend/api/).*\.php$"
 </IfModule>
 
 # ---------- Header keamanan ----------

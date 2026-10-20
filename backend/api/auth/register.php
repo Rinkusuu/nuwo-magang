@@ -22,7 +22,8 @@ if ($stmt->fetch()) fail('Email sudah terdaftar. Silakan masuk.', 409);
 
 // Nomor HP tidak diminta saat membuat akun; diisi di formulir pendaftaran
 $stmt = $pdo->prepare("INSERT INTO users (nama, email, password) VALUES (?, ?, ?)");
-$stmt->execute([$nama, $email, password_hash($password, PASSWORD_BCRYPT)]);
+$hash = password_hash($password, PASSWORD_BCRYPT);
+$stmt->execute([$nama, $email, $hash]);
 // Ambil ID akun SEBELUM query INSERT lain (catat_percobaan) mengubah lastInsertId
 $userId = (int) $pdo->lastInsertId();
 catat_percobaan($pdo, 'daftar');
@@ -31,5 +32,6 @@ mulai_sesi_baru();
 $_SESSION['user_id'] = $userId;
 $_SESSION['user_nama'] = $nama;
 $_SESSION['user_email'] = $email;
+$_SESSION['sidik_user'] = sidik_sandi($hash);
 
 json_out(['success' => true, 'message' => 'Akun berhasil dibuat.', 'csrf' => csrf_token()]);

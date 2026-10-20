@@ -113,19 +113,19 @@
       <section class="card" id="s1">
         <h2 class="card-title">1. Data Diri</h2>
         <div class="grid-2">
-          <div class="field"><label for="nama">Nama lengkap</label><input class="input" id="nama" name="nama" placeholder="Nama lengkap" autocomplete="name"></div>
-          <div class="field"><label for="email">Email aktif</label><input class="input" id="email" name="email" type="email" placeholder="nama@email.com" autocomplete="email"></div>
-          <div class="field"><label for="no_wa">Nomor HP/WhatsApp</label><input class="input" id="no_wa" name="no_wa" type="tel" placeholder="08xxxxxxxxxx" autocomplete="tel"></div>
-          <div class="field"><label for="domisili">Domisili (kabupaten/kota)</label><input class="input" id="domisili" name="domisili" placeholder="Bandar Lampung"></div>
+          <div class="field"><label for="nama">Nama lengkap</label><input class="input" id="nama" name="nama" maxlength="150" placeholder="Nama lengkap" autocomplete="name"></div>
+          <div class="field"><label for="email">Email aktif</label><input class="input" id="email" name="email" type="email" readonly aria-describedby="emailHint"><span class="hint" id="emailHint">Sama dengan email akun. Pemberitahuan seleksi dikirim ke alamat ini.</span></div>
+          <div class="field"><label for="no_wa">Nomor HP/WhatsApp</label><input class="input" id="no_wa" name="no_wa" maxlength="20" type="tel" placeholder="08xxxxxxxxxx" autocomplete="tel"></div>
+          <div class="field"><label for="domisili">Domisili (kabupaten/kota)</label><input class="input" id="domisili" name="domisili" maxlength="100" placeholder="Bandar Lampung"></div>
         </div>
       </section>
 
       <section class="card" id="s2">
         <h2 class="card-title">2. Data Akademik</h2>
         <div class="grid-2">
-          <div class="field"><label for="universitas">Perguruan tinggi</label><input class="input" id="universitas" name="universitas" placeholder="Nama perguruan tinggi"></div>
-          <div class="field"><label for="fakultas_prodi">Fakultas / Program studi</label><input class="input" id="fakultas_prodi" name="fakultas_prodi" placeholder="Fakultas Ekonomi dan Bisnis / Akuntansi"></div>
-          <div class="field"><label for="nim">NPM</label><input class="input" id="nim" name="nim" placeholder="Nomor pokok mahasiswa"></div>
+          <div class="field"><label for="universitas">Perguruan tinggi</label><input class="input" id="universitas" name="universitas" maxlength="150" placeholder="Nama perguruan tinggi"></div>
+          <div class="field"><label for="fakultas_prodi">Fakultas / Program studi</label><input class="input" id="fakultas_prodi" name="fakultas_prodi" maxlength="200" placeholder="Fakultas Ekonomi dan Bisnis / Akuntansi"></div>
+          <div class="field"><label for="nim">NPM</label><input class="input" id="nim" name="nim" maxlength="30" placeholder="Nomor pokok mahasiswa"></div>
           <div class="field"><label for="ipk">IPK terakhir</label><input class="input" id="ipk" name="ipk" inputmode="decimal" placeholder="3,45"></div>
           <div class="field"><label for="jenjang">Jenjang pendidikan</label>
             <select class="select" id="jenjang" name="jenjang">
@@ -219,6 +219,7 @@
       editable = app.editable;
       FIELDS.forEach(f => { if (app[f] !== null && app[f] !== undefined) $(f).value = f === 'ipk' ? String(app[f]).replace('.', ',') : app[f]; });
       $('pernyataan').checked = !!Number(app.pernyataan);
+      $('email').value = me.user.email;
     } else {
       $('nama').value = me.user.nama;
       $('email').value = me.user.email;

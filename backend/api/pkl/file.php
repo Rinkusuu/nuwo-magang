@@ -10,7 +10,7 @@ $q = $pdo->prepare("
 $q->execute([$id]);
 $f = $q->fetch();
 
-$pemilik = $f && isset($_SESSION['user_id']) && (int) $f['user_id'] === (int) $_SESSION['user_id'];
+$pemilik = $f && (int) $f['user_id'] === pengguna_aktif();
 if (!$f || (!$pemilik && (staf_aktif()['peran'] ?? '') !== 'admin')) fail('Berkas tidak ditemukan.', 404);
 
 $path = UPLOAD_DIR . $f['stored_name'];

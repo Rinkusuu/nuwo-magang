@@ -7,6 +7,15 @@ const FIELD_FORMULIR = [
     'batch_id', 'pernyataan',
 ];
 
+// Panjang maksimal isian teks, sama dengan ukuran kolom di tabel applications
+const PANJANG_MAKS = [
+    'nama' => 150, 'no_wa' => 20, 'domisili' => 100, 'universitas' => 150, 'fakultas_prodi' => 200, 'nim' => 30,
+];
+const LABEL_FORMULIR = [
+    'nama' => 'nama lengkap', 'no_wa' => 'nomor HP/WhatsApp', 'domisili' => 'domisili', 'universitas' => 'perguruan tinggi',
+    'fakultas_prodi' => 'fakultas / program studi', 'nim' => 'NPM',
+];
+
 function app_by_user(PDO $pdo, int $userId): ?array {
     $stmt = $pdo->prepare("SELECT * FROM applications WHERE user_id = ?");
     $stmt->execute([$userId]);

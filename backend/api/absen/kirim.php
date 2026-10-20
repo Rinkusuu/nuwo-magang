@@ -42,11 +42,14 @@ if ($jarak > $atur['radius_m']) {
     fail('Anda berada sekitar ' . number_format($jarak, 0, ',', '.') . ' m dari kantor. Absen hanya bisa dilakukan dalam radius ' . $atur['radius_m'] . ' m.');
 }
 
-// Foto: harus JPEG asli dari kamera, maksimal 3 MB
+// Foto: harus JPEG asli dari kamera, maksimal 3 MB dan 4.000 px per sisi. Batas piksel mencegah
+// JPEG kecil yang mengaku beresolusi raksasa menghabiskan memori server saat dibuka GD.
 $file = $_FILES['foto'] ?? null;
 if (!$file || $file['error'] !== UPLOAD_ERR_OK || $file['size'] > 3 * 1024 * 1024) fail('Foto gagal dikirim. Coba lagi.');
 $info = @getimagesize($file['tmp_name']);
-if (!$info || $info[2] !== IMAGETYPE_JPEG || $info[0] < 200 || $info[1] < 200) fail('Foto tidak valid. Ambil ulang foto dari kamera.');
+if (!$info || $info[2] !== IMAGETYPE_JPEG || $info[0] < 200 || $info[1] < 200 || $info[0] > 4000 || $info[1] > 4000) {
+    fail('Foto tidak valid. Ambil ulang foto dari kamera.');
+}
 
 $waktu = date('Y-m-d H:i:s');
 $nama = date('Y-m') . '/' . $app['id'] . '_' . date('Ymd') . '_' . $jenis . '_' . bin2hex(random_bytes(6)) . '.jpg';

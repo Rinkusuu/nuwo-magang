@@ -1,7 +1,7 @@
 # Catatan Tindak Lanjut — Portal Magang Mahasiswa
 
 Daftar pekerjaan yang **sengaja ditunda** atau **menunggu data/keputusan**, supaya
-pengerjaan berikutnya jelas mulai dari mana. Diperbarui 19 Oktober 2026.
+pengerjaan berikutnya jelas mulai dari mana. Diperbarui 20 Oktober 2026.
 
 ---
 
@@ -68,6 +68,11 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 19 Oktober 2026.
       contoh konfigurasi di `deploy/nginx-portal-magang.conf`. Pasang HTTPS, lalu
       aktifkan HSTS (untuk Apache, hapus tanda komentar di `.htaccess`).
 - [ ] **User database khusus**, bukan `root`, dengan kata sandi kuat.
+- [ ] **IP asli pengunjung** bila portal berada di belakang Cloudflare atau proxy lain: atur
+      `set_real_ip_from` + `real_ip_header` di Nginx. Tanpa itu semua pengunjung terlihat
+      ber-IP sama dan batas percobaan login per IP mengunci semua orang sekaligus.
+- [ ] **Pengamanan server**: firewall hanya membuka port 80, 443, dan SSH; SSH hanya dengan
+      kunci; fail2ban; pembaruan keamanan otomatis.
 - [ ] **Ganti kata sandi admin contoh** (`AdminBI2026` tertulis di `setup.sql`):
       `php backend/atur_password_admin.php admin@bi.go.id`
 - [ ] **Hapus data contoh** dari `setup.sql` sebelum dipakai di server produksi:
@@ -84,6 +89,8 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 19 Oktober 2026.
       **perpanjangan otomatis** domain dan hosting.
 - [ ] **Email dikirim langsung saat tindakan terjadi** (batas tunggu 10 detik). Kalau
       SMTP ternyata lambat, pindahkan ke antrean yang dikirim terpisah.
+- [ ] **Verifikasi dua langkah (2FA) untuk akun backoffice** (kode OTP lewat email atau
+      aplikasi authenticator). Belum diputuskan.
 - [ ] **CSP masih mengizinkan skrip inline** (`'unsafe-inline'`) karena tiap halaman
       memuat skrip di dalam HTML. Memindahkan skrip ke berkas `.js` terpisah
       memungkinkan CSP yang lebih ketat.
@@ -91,6 +98,13 @@ pengerjaan berikutnya jelas mulai dari mana. Diperbarui 19 Oktober 2026.
 ---
 
 ## Sudah selesai (untuk rujukan)
+
+- Audit keamanan 20 Oktober 2026 (diuji di lokal): rumus Excel di ekspor CSV dinetralkan, email
+  pendaftaran dikunci sama dengan email akun, batas login dihitung per email + IP (akun tidak
+  bisa dikunci orang lain hanya dengan 5 kali salah sandi), Apache hanya menjalankan PHP di
+  `backend/api/`, batas panjang isian formulir, batas resolusi foto absen, sesi lain berakhir
+  setelah kata sandi diganti, hapus pelamar ikut menghapus foto absen dan laporan akhir.
+  Ikut diperbaiki: foto absen lebih lebar dari 720 px gagal diproses di sebagian versi GD.
 
 - Logbook harian teks sebagai syarat absen pulang (terkunci setelah absen pulang), Excel logbook
   otomatis sesuai format kantor dengan jam masuk/keluar dari absen, pembersihan akun pelamar yang

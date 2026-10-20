@@ -130,9 +130,36 @@ function body(): array {
     return is_array($data) ? $data : [];
 }
 
+// Sidik kata sandi disimpan di sesi saat masuk. Bila kata sandi diganti (mis. lewat Lupa kata sandi),
+// sidiknya berubah sehingga semua sesi lain yang masih terbuka otomatis berakhir.
+function sidik_sandi(string $hash): string {
+    return hash('sha256', $hash);
+}
+
+// ID pelamar yang sedang masuk, atau null bila belum masuk, akunnya sudah dihapus, atau kata sandinya sudah diganti
+function pengguna_aktif(): ?int {
+    static $id = false;
+    if ($id !== false) return $id;
+    $id = null;
+    if (isset($_SESSION['user_id'])) {
+        $q = $GLOBALS['pdo']->prepare("SELECT password FROM users WHERE id = ?");
+        $q->execute([$_SESSION['user_id']]);
+        $hash = $q->fetchColumn();
+        // Sesi yang dibuat sebelum pemeriksaan ini ada belum punya sidik: dicatat saat ini
+        if ($hash !== false && !isset($_SESSION['sidik_user'])) $_SESSION['sidik_user'] = sidik_sandi($hash);
+        if ($hash !== false && hash_equals($_SESSION['sidik_user'], sidik_sandi($hash))) {
+            $id = (int) $_SESSION['user_id'];
+        } else {
+            unset($_SESSION['user_id'], $_SESSION['user_nama'], $_SESSION['user_email'], $_SESSION['sidik_user']);
+        }
+    }
+    return $id;
+}
+
 function require_user(): int {
-    if (!isset($_SESSION['user_id'])) fail('Anda harus masuk terlebih dahulu.', 401);
-    return (int) $_SESSION['user_id'];
+    $id = pengguna_aktif();
+    if ($id === null) fail('Anda harus masuk terlebih dahulu.', 401);
+    return $id;
 }
 
 // Akun backoffice diperiksa ke database pada setiap permintaan, sehingga akun yang
@@ -142,10 +169,14 @@ function staf_aktif(): ?array {
     if ($staf !== false) return $staf;
     $staf = null;
     if (isset($_SESSION['admin_id'])) {
-        $q = $GLOBALS['pdo']->prepare("SELECT id, nama, email, peran FROM admins WHERE id = ? AND aktif = 1");
+        $q = $GLOBALS['pdo']->prepare("SELECT id, nama, email, peran, password FROM admins WHERE id = ? AND aktif = 1");
         $q->execute([$_SESSION['admin_id']]);
         $staf = $q->fetch() ?: null;
-        if (!$staf) unset($_SESSION['admin_id'], $_SESSION['admin_nama'], $_SESSION['admin_email']);
+        // Kata sandi yang diatur ulang admin lain mengakhiri sesi pemilik akun yang masih terbuka
+        if ($staf && !isset($_SESSION['sidik_admin'])) $_SESSION['sidik_admin'] = sidik_sandi($staf['password']);
+        if ($staf && !hash_equals($_SESSION['sidik_admin'], sidik_sandi($staf['password']))) $staf = null;
+        if ($staf) unset($staf['password']);
+        else unset($_SESSION['admin_id'], $_SESSION['admin_nama'], $_SESSION['admin_email'], $_SESSION['sidik_admin']);
     }
     return $staf;
 }
