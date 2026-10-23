@@ -50,7 +50,11 @@
   /* Logbook harian: syarat absen pulang */
   #kartuLogbook{margin-bottom:16px;}
   #kartuLogbook .card-title{display:flex;align-items:center;gap:8px;}
-  #kartuLogbook .textarea{min-height:150px;}
+  #kartuLogbook [hidden]{display:none;}
+  .daftar-kegiatan{display:flex;flex-direction:column;gap:10px;margin-bottom:8px;}
+  .kegiatan .label{margin-bottom:4px;}
+  .kegiatan-isi{display:flex;gap:8px;align-items:center;}
+  .kegiatan-isi .btn-ikon{flex:none;width:44px;height:44px;}
   .logbook-kaki{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:10px;flex-wrap:wrap;}
   .logbook-kaki .hitung{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums;}
   .logbook-kaki .hitung.kurang{color:var(--red);}
@@ -174,35 +178,63 @@
     }
     kartu.innerHTML = `
       <h2 class="card-title">${ikon('catatan', 18)}Logbook hari ini</h2>
-      <p class="card-sub">Tuliskan kegiatan yang Anda kerjakan hari ini, satu kegiatan per baris. Wajib diisi sebelum absen pulang.</p>
-      <div class="field">
-        <textarea class="textarea" id="isiLogbook" aria-label="Kegiatan hari ini" maxlength="${lb.maks}" placeholder="Contoh:&#10;Mengikuti rapat koordinasi tim&#10;Merekap data survei harga komoditas"></textarea>
-      </div>
+      <p class="card-sub">Tuliskan kegiatan yang Anda kerjakan hari ini, satu kotak untuk satu kegiatan (maksimal ${lb.kegiatan_maks}). Wajib diisi sebelum absen pulang.</p>
+      <div class="daftar-kegiatan" id="daftarKegiatan"></div>
+      <button type="button" class="btn btn-outline btn-sm" id="tambahKegiatan">${ikon('tambah', 16)}Tambah kegiatan</button>
       <div class="logbook-kaki">
         <span class="hitung" id="hitungLogbook"></span>
         <span class="simpan-info" id="infoLogbook"></span>
         <button type="button" class="btn btn-outline" id="simpanLogbook">${ikon('centang', 16)}Simpan logbook</button>
       </div>`;
-    const ta = $('isiLogbook');
-    ta.value = lb.isi || '';
-    ta.addEventListener('input', perbaruiSyaratPulang);
+    const isi = (lb.isi || '').split('\n').filter(Boolean);
+    (isi.length ? isi : ['']).forEach(t => tambahKegiatan(t, false));
+    $('tambahKegiatan').addEventListener('click', () => tambahKegiatan('', true));
     $('simpanLogbook').addEventListener('click', simpanLogbook);
     perbaruiSyaratPulang();
   }
 
-  const panjangLogbook = teks => teks.split(/\r?\n/).map(b => b.replace(/[ \t]+/g, ' ').trim()).filter(Boolean).join('\n').length;
+  // Satu kotak isian per kegiatan; disimpan sebagai teks satu kegiatan per baris
+  function tambahKegiatan(teks, fokus) {
+    const daftar = $('daftarKegiatan');
+    if (daftar.children.length >= st.logbook.kegiatan_maks) return;
+    const baris = document.createElement('div');
+    baris.className = 'kegiatan';
+    baris.innerHTML = `<label class="label"></label>
+      <div class="kegiatan-isi"><input class="input" type="text" maxlength="${st.logbook.maks}" placeholder="Contoh: Merekap data survei harga komoditas">
+      <button type="button" class="btn btn-outline btn-ikon" aria-label="Hapus kegiatan">${ikon('tutup', 16)}</button></div>`;
+    const input = baris.querySelector('input');
+    input.value = teks;
+    input.addEventListener('input', perbaruiSyaratPulang);
+    baris.querySelector('button').addEventListener('click', () => { baris.remove(); perbaruiSyaratPulang(); });
+    daftar.append(baris);
+    perbaruiSyaratPulang();
+    if (fokus) input.focus();
+  }
+
+  const isiKegiatan = () => [...document.querySelectorAll('#daftarKegiatan input')].map(i => i.value.replace(/\s+/g, ' ').trim());
+  const teksLogbook = () => isiKegiatan().filter(Boolean).join('\n');
 
   // Tombol absen pulang hanya aktif bila logbook valid sudah tersimpan dan tidak ada perubahan yang belum disimpan
   function perbaruiSyaratPulang() {
-    const ta = $('isiLogbook');
-    if (!ta) return;
-    const n = panjangLogbook(ta.value);
+    const daftar = $('daftarKegiatan');
+    if (!daftar) return;
+    const { min, kegiatan_maks: maks } = st.logbook;
+    const semua = isiKegiatan();
+    // Penomoran ulang dan tombol hapus hanya bila lebih dari satu kotak
+    [...daftar.children].forEach((b, i) => {
+      b.querySelector('.label').textContent = `Kegiatan ${i + 1}`;
+      b.querySelector('input').setAttribute('aria-label', `Kegiatan ${i + 1}`);
+      b.querySelector('button').hidden = daftar.children.length === 1;
+    });
+    const terisi = semua.filter(Boolean);
+    const pendek = terisi.filter(t => t.length < min).length;
     const hitung = $('hitungLogbook');
-    hitung.textContent = n < st.logbook.min ? `${n} karakter · minimal ${st.logbook.min}` : `${n} / ${fmtRibu(st.logbook.maks)} karakter`;
-    hitung.classList.toggle('kurang', n > 0 && n < st.logbook.min);
-    const tersimpan = logbookTersimpan !== null && ta.value.trim() === logbookTersimpan.trim();
+    hitung.textContent = pendek ? `Setiap kegiatan minimal ${min} karakter` : `${terisi.length} dari ${maks} kegiatan`;
+    hitung.classList.toggle('kurang', pendek > 0);
+    $('tambahKegiatan').hidden = daftar.children.length >= maks;
+    const tersimpan = logbookTersimpan !== null && teksLogbook() === logbookTersimpan;
     $('infoLogbook').innerHTML = tersimpan ? `${ikon('centang', 14)} Tersimpan` : '';
-    $('simpanLogbook').disabled = tersimpan || n < st.logbook.min;
+    $('simpanLogbook').disabled = tersimpan || !terisi.length || pendek > 0;
     const mulai = $('mulaiBtn');
     if (mulai && jenisBerikut() === 'pulang') mulai.disabled = !tersimpan;
   }
@@ -210,19 +242,19 @@
   async function simpanLogbook() {
     const btn = $('simpanLogbook');
     btn.disabled = true;
-    const res = await api('backend/api/absen/logbook.php', { json: { isi: $('isiLogbook').value } });
+    const res = await api('backend/api/absen/logbook.php', { json: { isi: teksLogbook() } });
     if (!res.success) { toast(res.message, true); perbaruiSyaratPulang(); return; }
     st.logbook = res.logbook;
     logbookTersimpan = res.logbook.isi;
-    $('isiLogbook').value = res.logbook.isi;
     toast(res.message);
-    perbaruiSyaratPulang();
+    tampilLogbook();
   }
 
   // Peringatkan bila logbook diubah tetapi belum disimpan
   window.addEventListener('beforeunload', e => {
-    const ta = $('isiLogbook');
-    if (ta && ta.value.trim() !== (logbookTersimpan || '').trim() && ta.value.trim() !== '') { e.preventDefault(); e.returnValue = ''; }
+    if (!$('daftarKegiatan')) return;
+    const t = teksLogbook();
+    if (t !== '' && t !== (logbookTersimpan || '')) { e.preventDefault(); e.returnValue = ''; }
   });
 
   // ---------- Langkah 1: lokasi ----------
@@ -267,7 +299,7 @@
           <div class="info-kamera">Posisikan wajah di dalam bingkai</div></div>
         <div class="tombol-kamera" id="tombolKamera">
           <button type="button" class="btn btn-outline" id="batalBtn">Batal</button>
-          <button type="button" class="btn btn-primary" id="jepretBtn" disabled>${ikon('gambar', 16)}Jepret</button>
+          <button type="button" class="btn btn-primary" id="jepretBtn" disabled>${ikon('gambar', 16)}Ambil foto</button>
         </div>
       </div>`;
     $('batalBtn').addEventListener('click', tampilAwal);

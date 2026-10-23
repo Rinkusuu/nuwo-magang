@@ -99,8 +99,10 @@ function stempel_foto(string $sumber, string $tujuan, array $baris): bool {
 }
 
 // ---------- Logbook harian ----------
-const LOGBOOK_MIN = 30;
-const LOGBOOK_MAKS = 2000;
+// Satu kegiatan = satu baris (juga satu baris di Excel logbook); batas karakter berlaku per kegiatan
+const LOGBOOK_MIN = 10;
+const LOGBOOK_MAKS = 200;
+const LOGBOOK_KEGIATAN_MAKS = 5;
 
 function logbook_hari_ini(PDO $pdo, int $appId): ?array {
     $q = $pdo->prepare("SELECT isi, dibuat_at, diubah_at FROM logbook WHERE application_id = ? AND tanggal = CURDATE()");
@@ -116,9 +118,13 @@ function validasi_logbook(string $teks): array {
     $baris = preg_split('/\R/u', $teks);
     $baris = array_values(array_filter(array_map(fn($b) => trim(preg_replace('/[ \t]+/u', ' ', $b)), $baris), fn($b) => $b !== ''));
     $rapi = implode("\n", $baris);
-    $panjang = mb_strlen($rapi);
-    if ($panjang < LOGBOOK_MIN) return [$rapi, 'Logbook minimal ' . LOGBOOK_MIN . ' karakter. Tuliskan kegiatan hari ini dengan jelas.'];
-    if ($panjang > LOGBOOK_MAKS) return [$rapi, 'Logbook maksimal ' . number_format(LOGBOOK_MAKS, 0, ',', '.') . ' karakter.'];
+    if (!$baris) return [$rapi, 'Tuliskan minimal satu kegiatan hari ini.'];
+    if (count($baris) > LOGBOOK_KEGIATAN_MAKS) return [$rapi, 'Logbook maksimal ' . LOGBOOK_KEGIATAN_MAKS . ' kegiatan.'];
+    foreach ($baris as $i => $b) {
+        $n = mb_strlen($b);
+        if ($n < LOGBOOK_MIN) return [$rapi, 'Kegiatan ' . ($i + 1) . ' terlalu singkat, minimal ' . LOGBOOK_MIN . ' karakter.'];
+        if ($n > LOGBOOK_MAKS) return [$rapi, 'Kegiatan ' . ($i + 1) . ' terlalu panjang, maksimal ' . LOGBOOK_MAKS . ' karakter.'];
+    }
     return [$rapi, null];
 }
 
@@ -129,7 +135,7 @@ function logbook_terkunci(array $absenHari): bool {
 
 // Status logbook hari ini untuk halaman absen
 function logbook_status(PDO $pdo, ?array $app): array {
-    if (!$app) return ['isi' => null, 'diubah_at' => null, 'terkunci' => false, 'min' => LOGBOOK_MIN, 'maks' => LOGBOOK_MAKS];
+    if (!$app) return ['isi' => null, 'diubah_at' => null, 'terkunci' => false, 'min' => LOGBOOK_MIN, 'maks' => LOGBOOK_MAKS, 'kegiatan_maks' => LOGBOOK_KEGIATAN_MAKS];
     $l = logbook_hari_ini($pdo, (int) $app['id']);
     return [
         'isi' => $l['isi'] ?? null,
@@ -137,5 +143,6 @@ function logbook_status(PDO $pdo, ?array $app): array {
         'terkunci' => logbook_terkunci(absen_hari_ini($pdo, (int) $app['id'])),
         'min' => LOGBOOK_MIN,
         'maks' => LOGBOOK_MAKS,
+        'kegiatan_maks' => LOGBOOK_KEGIATAN_MAKS,
     ];
 }
