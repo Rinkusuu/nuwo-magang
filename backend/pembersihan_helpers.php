@@ -1,11 +1,7 @@
 <?php
-// Pembersihan akun pelamar yang tidak lolos: akun, pendaftaran, dan berkasnya dihapus H+7 setelah
-// keputusan. Dipakai skrip harian bersihkan_akun.php, halaman status pelamar (tanggal penghapusan),
-// dan hapus pelamar oleh admin (hapus_akun_pelamar).
 
 const HARI_SIMPAN_DITOLAK = 7;
 
-// Kategori penolakan: kondisi dan kolom waktu keputusannya
 const KATEGORI_DITOLAK = [
     'tidak_memenuhi_administrasi' => ["status_admin = 'tidak_memenuhi'", 'verified_at'],
     'tidak_lolos_wawancara'       => ["status_seleksi = 'tidak_lolos'", 'seleksi_at'],
@@ -13,7 +9,6 @@ const KATEGORI_DITOLAK = [
     'mengundurkan_diri'           => ["kesediaan = 'tidak_bersedia'", 'kesediaan_at'],
 ];
 
-// Tanggal akun pelamar yang ditolak akan dihapus (Y-m-d), atau null bila tidak ditolak
 function tanggal_hapus_akun(array $app): ?string {
     $cocok = [
         'verified_at' => $app['status_admin'] === 'tidak_memenuhi',
@@ -29,13 +24,6 @@ function tanggal_hapus_akun(array $app): ?string {
     return null;
 }
 
-/**
- * Akun yang sudah lewat tenggat: [user_id => kategori].
- * - Empat kategori penolakan: tanggal keputusan + 7 hari sudah tiba.
- * - Akun tanpa pendaftaran terkirim (belum mengisi atau hanya draf): dibuat sebelum penutupan
- *   pendaftaran batch terakhir yang sudah lewat, dan tanggal tutup + 7 hari sudah tiba. Akun yang
- *   dibuat setelah penutupan itu menunggu penutupan batch berikutnya.
- */
 function akun_lewat_tenggat(PDO $pdo): array {
     $hasil = [];
     foreach (KATEGORI_DITOLAK as $kategori => [$kondisi, $kolom]) {
@@ -54,7 +42,6 @@ function akun_lewat_tenggat(PDO $pdo): array {
     return $hasil;
 }
 
-// Hapus satu akun beserta seluruh datanya (FK CASCADE) lalu berkasnya di uploads
 function hapus_akun_pelamar(PDO $pdo, int $userId, string $dirUpload): void {
     $q = $pdo->prepare("
         SELECT f.stored_name FROM application_files f JOIN applications a ON a.id = f.application_id WHERE a.user_id = ?
@@ -69,7 +56,7 @@ function hapus_akun_pelamar(PDO $pdo, int $userId, string $dirUpload): void {
     $pdo->commit();
 
     foreach ($berkas as $nama) {
-        // contoh.pdf dipakai bersama oleh data contoh di setup.sql
+        // contoh.pdf dipakai bersama oleh contoh_data.sql
         if ($nama === 'contoh.pdf' || str_contains($nama, '..')) continue;
         if (is_file($dirUpload . $nama)) unlink($dirUpload . $nama);
     }

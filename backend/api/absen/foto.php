@@ -1,7 +1,6 @@
 <?php
 require '../../config.php';
 
-// Foto absen: hanya pemilik atau admin (pewawancara dan peserta lain tidak)
 $id = (int) ($_GET['id'] ?? 0);
 $q = $pdo->prepare("SELECT ab.foto, a.user_id FROM absen ab JOIN applications a ON a.id = ab.application_id WHERE ab.id = ?");
 $q->execute([$id]);

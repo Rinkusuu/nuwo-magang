@@ -6,7 +6,6 @@ $data = body();
 $email = strtolower(trim((string) ($data['email'] ?? '')));
 $password = (string) ($data['password'] ?? '');
 
-// Backoffice lebih ketat, dalam 15 menit: 5 percobaan gagal per email dari satu IP, 20 per email dari semua IP, 10 per IP
 $kunci = 'admin:' . $email;
 cek_batas($pdo, $kunci, 5, 15, 10, 20);
 

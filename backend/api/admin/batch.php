@@ -2,7 +2,6 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Kelola batch (periode PKL): daftar, simpan (tambah/ubah), dan hapus
 $adminId = require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -22,7 +21,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 
 $data = body();
 
-// Hapus: hanya batch yang belum dipakai pendaftaran mana pun
 if (isset($data['hapus'])) {
     $id = (int) $data['hapus'];
     $q = $pdo->prepare("SELECT COUNT(*) FROM applications WHERE batch_id = ?");

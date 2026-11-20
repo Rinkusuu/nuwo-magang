@@ -2,13 +2,11 @@
 require '../../config.php';
 require '../../absen_helpers.php';
 
-// Kehadiran peserta PKL per tanggal (khusus admin), beserta koreksi absen beralasan
 $adminId = require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $tanggal = preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['tanggal'] ?? '') ? $_GET['tanggal'] : date('Y-m-d');
     $batchId = (int) ($_GET['batch'] ?? 0);
-    // Peserta aktif yang periode PKL-nya mencakup tanggal ini
     $q = $pdo->prepare("
         SELECT a.id, a.no_pendaftaran, a.nama, a.universitas, b.nama AS batch
         FROM applications a JOIN batch b ON b.id = a.batch_id
@@ -17,7 +15,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         ORDER BY a.nama
     ");
     $q->execute([$tanggal, $batchId, $batchId]);
-    // Sabtu dan Minggu bukan hari absen: tidak ada yang dihitung belum absen
     $peserta = hari_kerja($tanggal) ? $q->fetchAll() : [];
 
     $absen = [];
@@ -49,7 +46,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     json_out(['success' => true, 'tanggal' => $tanggal, 'hari_kerja' => hari_kerja($tanggal), 'data' => $peserta, 'batch' => $batch]);
 }
 
-// Koreksi: tambah atau ubah jam absen (mis. GPS peserta bermasalah). Alasan wajib dan tercatat.
 $data = body();
 $appId = (int) ($data['application_id'] ?? 0);
 $jenis = $data['jenis'] ?? '';

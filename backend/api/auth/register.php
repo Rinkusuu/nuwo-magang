@@ -8,7 +8,6 @@ $nama = trim((string) ($data['nama'] ?? ''));
 $email = strtolower(trim((string) ($data['email'] ?? '')));
 $password = (string) ($data['password'] ?? '');
 
-// Mencegah pembuatan akun massal: maksimal 10 akun per IP per jam
 cek_batas($pdo, 'daftar', PHP_INT_MAX, 60, 10);
 
 if (mb_strlen($nama) < 3 || mb_strlen($nama) > 150 || !filter_var($email, FILTER_VALIDATE_EMAIL)
@@ -20,11 +19,10 @@ $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ?");
 $stmt->execute([$email]);
 if ($stmt->fetch()) fail('Email sudah terdaftar. Silakan masuk.', 409);
 
-// Nomor HP tidak diminta saat membuat akun; diisi di formulir pendaftaran
 $stmt = $pdo->prepare("INSERT INTO users (nama, email, password) VALUES (?, ?, ?)");
 $hash = password_hash($password, PASSWORD_BCRYPT);
 $stmt->execute([$nama, $email, $hash]);
-// Ambil ID akun SEBELUM query INSERT lain (catat_percobaan) mengubah lastInsertId
+// ambil sebelum catat_percobaan() menimpa lastInsertId
 $userId = (int) $pdo->lastInsertId();
 catat_percobaan($pdo, 'daftar');
 

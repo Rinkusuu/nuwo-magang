@@ -3,8 +3,7 @@ require '../../config.php';
 require '../../batas_percobaan.php';
 require '../../mailer.php';
 
-// Kirim tautan atur ulang kata sandi. Jawaban selalu sama, baik email terdaftar
-// maupun tidak, supaya formulir ini tidak bisa dipakai menebak email pelamar.
+// jawaban selalu sama supaya form ini tidak bisa dipakai menebak email terdaftar
 $email = strtolower(trim((string) (body()['email'] ?? '')));
 if (!filter_var($email, FILTER_VALIDATE_EMAIL)) fail('Masukkan alamat email yang valid.');
 

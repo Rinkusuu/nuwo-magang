@@ -2,7 +2,6 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Peserta yang diterima beserta kesediaan, jumlah hari logbook terisi, dan laporan akhir
 require_admin();
 
 $rows = $pdo->query("

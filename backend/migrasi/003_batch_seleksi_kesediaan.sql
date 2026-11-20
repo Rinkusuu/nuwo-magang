@@ -1,8 +1,4 @@
--- Perubahan alur seleksi (6 Oktober 2026):
--- batch PKL dikelola admin, screening manual ke wawancara, hasil tanpa cadangan,
--- kesediaan peserta, logbook dan laporan akhir. Jalankan sekali setelah 002.
 
--- Batch (periode) PKL. Dikelola admin dari tahun ke tahun.
 CREATE TABLE batch (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(100) NOT NULL,
@@ -37,7 +33,6 @@ ALTER TABLE applications
   ADD CONSTRAINT fk_app_seleksi FOREIGN KEY (seleksi_by) REFERENCES admins(id) ON DELETE SET NULL,
   ADD INDEX idx_batch (batch_id);
 
--- Hasil "cadangan" dihapus dari alur; data lama dikembalikan ke "belum ditetapkan"
 UPDATE applications SET hasil_akhir = NULL, decided_at = NULL WHERE hasil_akhir = 'cadangan';
 ALTER TABLE applications MODIFY hasil_akhir ENUM('diterima','tidak_diterima') NULL;
 

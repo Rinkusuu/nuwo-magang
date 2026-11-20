@@ -2,8 +2,6 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Peserta yang diterima menyatakan bersedia atau tidak bersedia mengikuti PKL.
-// Pilihan hanya bisa dibuat sekali; perubahan setelahnya melalui panitia.
 $userId = require_user();
 $pilihan = body()['kesediaan'] ?? '';
 if (!in_array($pilihan, ['bersedia', 'tidak_bersedia'], true)) fail('Pilihan kesediaan tidak valid.');

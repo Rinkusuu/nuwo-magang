@@ -2,7 +2,6 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Simpan draf formulir (dipanggil otomatis saat pelamar mengisi)
 $userId = require_user();
 $app = app_ensure($pdo, $userId);
 if (!app_editable($app)) fail('Pendaftaran sudah dikirim dan tidak dapat diubah.', 409);

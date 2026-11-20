@@ -1,5 +1,3 @@
-// Sidebar backoffice + cek sesi admin. Halaman menandai menu aktif lewat <body data-menu="...">
-// Item: [kunci, label, tautan, peran yang boleh melihat]. Tanpa peran = khusus admin.
 const MENU_ADMIN = [
   ['Seleksi', [
     ['periode', 'Batch dan Jadwal', 'admin_periode.html'],
@@ -23,11 +21,10 @@ function renderSidebar(admin) {
   const active = document.body.dataset.menu;
   const side = document.getElementById('sidebar');
   const boleh = (peranItem) => (peranItem || ['admin']).includes(admin.peran);
-  // Pewawancara hanya melihat menu yang diizinkan untuk perannya
   const grup = MENU_ADMIN.map(([nama, items]) => [nama, items.filter(([, , , peran]) => boleh(peran))])
     .filter(([, items]) => items.length);
   side.innerHTML = `
-    <div class="brand"><span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="32" height="32"></span><span><b>Backoffice Magang</b><span>KPwBI Provinsi Lampung</span></span></div>
+    <div class="brand"><span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="32" height="32"></span><span><b>Nuwo Magang</b><span>Backoffice KPwBI Provinsi Lampung</span></span></div>
     ${grup.map(([group, items]) => `
       <div class="group">${group}</div>
       ${items.map(([key, label, href]) => {
@@ -41,16 +38,12 @@ function renderSidebar(admin) {
   document.getElementById('logoutBtn').addEventListener('click', () => logout('login_admin.html'));
   document.getElementById('sandiBtn').addEventListener('click', bukaGantiSandi);
 
-  // Delegasi: tombol Menu (HP) tetap berfungsi walau isi halaman digambar ulang setelah sidebar dipasang
   document.addEventListener('click', e => {
     if (e.target.closest('#menuBtn')) { side.classList.toggle('open'); return; }
     if (!side.contains(e.target)) side.classList.remove('open');
   });
 }
 
-// Cek sesi dan peran. Halaman yang juga terbuka untuk pewawancara memanggil
-// requireAdmin(['admin', 'pewawancara']); pewawancara yang membuka halaman khusus admin
-// dialihkan ke halaman wawancara. Server tetap memeriksa peran di setiap permintaan.
 async function requireAdmin(izin = ['admin']) {
   const data = await api('backend/api/auth/admin_me.php');
   if (!data.success) { window.location.href = 'login_admin.html'; return null; }
@@ -59,7 +52,6 @@ async function requireAdmin(izin = ['admin']) {
   return data.admin;
 }
 
-// Ganti kata sandi akun sendiri
 function bukaGantiSandi() {
   const d = document.createElement('dialog');
   d.className = 'dialog';
@@ -91,7 +83,6 @@ function bukaGantiSandi() {
   d.querySelector('#sandiLama').focus();
 }
 
-// Kategori nilai wawancara sesuai ketentuan rubrik
 function kategoriNilai(nilai, skorSikap) {
   if (nilai === null || nilai === undefined) return null;
   if (skorSikap === 1) return 'tidak';

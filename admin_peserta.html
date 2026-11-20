@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Peserta PKL — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Peserta PKL · Backoffice Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -71,13 +71,11 @@
 
   function selBerkas(f, jenis) {
     if (!f) return '<span class="muted">Belum diunggah</span>';
-    // PDF dipratinjau di dialog; Excel langsung diunduh
     const pratinjau = jenis === 'laporan' ? ` data-pratinjau="Laporan akhir · ${esc(f.original_name)}"` : '';
     return `<div class="berkas-sel"><a href="backend/api/pkl/file.php?id=${f.id}" target="_blank" rel="noopener"${pratinjau}>${ikon(jenis === 'laporan' ? 'dokumen' : 'unduh', 14)}${esc(f.original_name)}</a>
       <small>${fmtTanggal(f.uploaded_at)}</small></div>`;
   }
 
-  // Logbook diisi harian; admin mengunduhnya sebagai Excel sesuai format kantor
   function selLogbook(r) {
     const n = Number(r.hari_logbook);
     return `<span class="${n ? '' : 'muted'}">${n} hari terisi</span><br>

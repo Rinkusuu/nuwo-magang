@@ -6,7 +6,6 @@ $data = body();
 $email = strtolower(trim((string) ($data['email'] ?? '')));
 $password = (string) ($data['password'] ?? '');
 
-// Dalam 15 menit: maksimal 5 percobaan gagal per email dari satu IP, 30 per email dari semua IP, 20 per IP
 $kunci = 'login:' . $email;
 cek_batas($pdo, $kunci, 5, 15, 20, 30);
 
@@ -14,8 +13,7 @@ $stmt = $pdo->prepare("SELECT id, nama, email, password FROM users WHERE email =
 $stmt->execute([$email]);
 $user = $stmt->fetch();
 
-// password_verify tetap dijalankan walau email tidak terdaftar, supaya waktu respons
-// tidak membedakan email yang ada dan yang tidak
+// tetap verifikasi walau email tidak ada, supaya waktu respons tidak membocorkan email terdaftar
 $hash = $user['password'] ?? '$2y$12$Rv3ny1DkB0MXm4Pkgn4S9e4dAV/aaULJi1TKq/oVc8DLpN/UtxGK6';
 if (!password_verify($password, $hash) || !$user) {
     catat_percobaan($pdo, $kunci);

@@ -1,12 +1,4 @@
 <?php
-// Pengiriman email notifikasi.
-//
-// Email dikirim lewat SMTP yang diatur di config.local.php. Selama SMTP_HOST
-// kosong (mis. di laptop pengembang), email tidak dikirim melainkan dicatat di
-// backend/logs/email.log supaya isinya tetap bisa diperiksa.
-//
-// Kegagalan kirim tidak pernah menggagalkan tindakan pengguna: pendaftaran tetap
-// terkirim dan keputusan admin tetap tersimpan; kegagalannya dicatat di log server.
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception as PHPMailerException;
@@ -17,13 +9,6 @@ function e_html(?string $s): string {
     return htmlspecialchars((string) $s, ENT_QUOTES, 'UTF-8');
 }
 
-/**
- * @param string     $judul     judul besar di badan email
- * @param string[]   $paragraf  paragraf HTML (nilai dinamis wajib sudah di-escape dengan e_html)
- * @param array|null $rincian   pasangan [label, nilai] yang ditampilkan sebagai tabel ringkas (teks biasa)
- * @param array|null $tombol    [label, url]
- * @param string[]   $penutup   paragraf HTML setelah tabel rincian
- */
 function kirim_email(string $ke, string $nama, string $subjek, string $judul, array $paragraf,
                      ?array $rincian = null, ?array $tombol = null, array $penutup = []): bool {
     if (!filter_var($ke, FILTER_VALIDATE_EMAIL)) return false;
@@ -100,7 +85,7 @@ function susun_email(string $nama, string $judul, array $paragraf, ?array $rinci
         . $isi
         . '</td></tr>'
         . '<tr><td style="padding:18px 28px 24px;border-top:1px solid #DEE7F1;font-size:12px;line-height:1.5;color:#6F7F93;">'
-        . 'Email ini dikirim otomatis oleh Portal Magang Mahasiswa, Kantor Perwakilan Bank Indonesia Provinsi Lampung. Mohon tidak membalas email ini.'
+        . 'Email ini dikirim otomatis oleh Nuwo Magang, Kantor Perwakilan Bank Indonesia Provinsi Lampung. Mohon tidak membalas email ini.'
         . '</td></tr></table></td></tr></table></body></html>';
 
     $teks = "Yth. $nama,\n\n" . $judul . "\n\n";
@@ -108,11 +93,10 @@ function susun_email(string $nama, string $judul, array $paragraf, ?array $rinci
     if ($rincian) foreach ($rincian as [$label, $nilai]) $teks .= "$label: $nilai\n";
     foreach ($penutup as $p) $teks .= "\n" . trim(html_entity_decode(strip_tags($p), ENT_QUOTES, 'UTF-8')) . "\n";
     if ($tombol) $teks .= "\n{$tombol[0]}: {$tombol[1]}\n";
-    $teks .= "\n--\nPortal Magang Mahasiswa\nKantor Perwakilan Bank Indonesia Provinsi Lampung\n(email otomatis, mohon tidak dibalas)";
+    $teks .= "\n--\nNuwo Magang\nKantor Perwakilan Bank Indonesia Provinsi Lampung\n(email otomatis, mohon tidak dibalas)";
     return [$html, $teks];
 }
 
-// Tautan ke halaman portal; tanpa APP_URL tautan dihilangkan dari email
 function tautan_portal(string $halaman): ?string {
     return APP_URL ? APP_URL . '/' . ltrim($halaman, '/') : null;
 }
@@ -128,8 +112,6 @@ function tanggal_id(?string $ymd): string {
     [$y, $m, $d] = array_map('intval', explode('-', substr($ymd, 0, 10)));
     return "$d {$bulan[$m - 1]} $y";
 }
-
-// ---------- Notifikasi seleksi ----------
 
 function periode_pkl(?array $batch): string {
     return $batch ? $batch['nama'] . ' (' . tanggal_id($batch['mulai']) . ' – ' . tanggal_id($batch['selesai']) . ')' : '-';
@@ -173,8 +155,6 @@ function email_hasil_verifikasi(array $app, string $hasil, string $catatan, ?str
     }
 }
 
-// Lolos screening berkas: undangan wawancara daring. Link Zoom sengaja tidak dicantumkan
-// di email; pelamar membukanya di halaman status (satu link per batch).
 function email_lolos_wawancara(array $app, ?array $batch): void {
     $jadwal = $batch && $batch['wawancara_tanggal']
         ? tanggal_id($batch['wawancara_tanggal']) . ($batch['wawancara_jam'] ? ', pukul ' . substr($batch['wawancara_jam'], 0, 5) . ' WIB' : '')
@@ -204,8 +184,8 @@ function email_hasil_akhir(array $app, string $hasil, ?array $batch): void {
 }
 
 function email_atur_ulang_sandi(string $email, string $nama, string $url): void {
-    kirim_email($email, $nama, 'Atur ulang kata sandi Portal Magang', 'Atur ulang kata sandi',
-        ['Kami menerima permintaan untuk mengatur ulang kata sandi akun Portal Magang Mahasiswa Anda.',
+    kirim_email($email, $nama, 'Atur ulang kata sandi Nuwo Magang', 'Atur ulang kata sandi',
+        ['Kami menerima permintaan untuk mengatur ulang kata sandi akun Nuwo Magang Anda.',
          'Tautan di bawah berlaku selama 60 menit dan hanya dapat dipakai sekali.',
          'Jika Anda tidak meminta ini, abaikan email ini; kata sandi Anda tidak berubah.'],
         null, ['Atur kata sandi baru', $url]);

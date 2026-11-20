@@ -12,8 +12,6 @@ $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
 
 try {
-    // Menghapus akun ikut menghapus pendaftaran, berkas, penilaian, absen, logbook, dan log (ON DELETE CASCADE);
-    // berkas di disk (dokumen pendaftaran, laporan akhir, foto absen) dihapus sesudahnya
     hapus_akun_pelamar($pdo, (int) $app['user_id'], UPLOAD_DIR);
 } catch (PDOException $e) {
     if ($pdo->inTransaction()) $pdo->rollBack();

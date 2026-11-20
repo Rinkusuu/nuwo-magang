@@ -1,10 +1,4 @@
 <?php
-// Ganti (atau buat) akun admin dari terminal server. Tidak bisa diakses lewat web.
-//
-//   php backend/atur_password_admin.php admin@bi.go.id              -> ganti kata sandi
-//   php backend/atur_password_admin.php baru@bi.go.id "Nama Admin"  -> buat admin baru
-//
-// Kata sandi diketik tersembunyi, minimal 12 karakter.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 
 $email = strtolower(trim($argv[1] ?? ''));
@@ -14,7 +8,6 @@ if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     exit(1);
 }
 
-// Muat koneksi database tanpa logika sesi/CSRF milik config.php
 $lokal = is_file(__DIR__ . '/config.local.php') ? require __DIR__ . '/config.local.php' : [];
 $ambil = fn($k, $d) => $lokal[$k] ?? (getenv('MAGANG_' . $k) !== false ? getenv('MAGANG_' . $k) : $d);
 $pdo = new PDO(

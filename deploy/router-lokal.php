@@ -1,13 +1,5 @@
 <?php
-// Router untuk server uji PHP, meniru aturan .htaccess di laptop:
-//
-//   php -S 0.0.0.0:8740 deploy/router-lokal.php
-//
-// - "/" membuka beranda (dashboard.html)
-// - berkas sensitif (setup.sql, config, vendor, logs, .git, ...) dijawab 404
-// - PHP hanya dijalankan di backend/api/
-// - alamat yang tidak ada menampilkan 404.html
-// Tidak dipakai di server produksi (Apache memakai .htaccess, Nginx memakai konfigurasinya sendiri).
+// Hanya untuk php -S di laptop: php -S tidak membaca .htaccess.
 
 $akar = dirname(__DIR__);
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
@@ -26,7 +18,7 @@ if ($path === '/' || $path === '') {
 }
 
 $diblokir = [
-    '#(^|/)\.#',                                    // .git, .htaccess, berkas tersembunyi
+    '#(^|/)\.#',
     '#\.(sql|md|log|lock|dist)$#i',
     '#^/deploy/#',
     '#^/backend/(vendor|logs|migrasi|uploads|font)(/|$)#',
@@ -41,4 +33,4 @@ $berkas = realpath($akar . $path);
 if ($berkas === false || strpos($berkas, $akar) !== 0 || !is_file($berkas)) return tidak_ditemukan($akar);
 if (str_ends_with($berkas, '.php') && !preg_match('#^/backend/api/.+\.php$#', $path)) return tidak_ditemukan($akar);
 
-return false;   // biarkan server PHP melayani berkas statis atau menjalankan endpoint API
+return false;

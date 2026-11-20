@@ -1,13 +1,10 @@
--- Absen harian selfie + GPS (14 Oktober 2026). Jalankan sekali setelah 004.
 
--- Titik kantor dan batas lokasi absen (pengaturan umum, baris id=1)
 ALTER TABLE periode
   ADD COLUMN kantor_lat DECIMAL(10,7) NULL,
   ADD COLUMN kantor_lng DECIMAL(10,7) NULL,
   ADD COLUMN radius_m SMALLINT NOT NULL DEFAULT 150,
   ADD COLUMN akurasi_maks_m SMALLINT NOT NULL DEFAULT 100;
 
--- Absen harian peserta PKL (selfie + GPS). Waktu dicatat dari server.
 CREATE TABLE absen (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -30,7 +27,6 @@ CREATE TABLE absen (
   FOREIGN KEY (dikoreksi_by) REFERENCES admins(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- Token sesi absen sekali pakai (hash SHA-256, berlaku 2 menit)
 CREATE TABLE absen_token (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,

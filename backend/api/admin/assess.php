@@ -22,7 +22,6 @@ foreach (array_keys(BOBOT_ASPEK) as $i) $catatanAspek[$i] = mb_substr(trim($data
 $nilai = hitung_nilai($skor);
 if ($nilai === null) fail('Semua aspek wajib diberi skor.');
 
-// Rekomendasi ditetapkan sistem dari nilai akhir (skor 1 pada aspek sikap otomatis tidak direkomendasikan)
 $rekomendasi = kategori_nilai($nilai, $skor[6]);
 
 $pdo->prepare("

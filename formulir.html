@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Formulir Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<title>Formulir Pendaftaran · Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -16,7 +16,6 @@
 <style>
   .layout{display:grid;grid-template-columns:236px minmax(0,1fr);gap:24px;align-items:start;padding-top:40px;padding-bottom:72px;}
   @media(max-width:900px){.layout{grid-template-columns:minmax(0,1fr);}.steps-card{display:none;}}
-  /* Langkah pendaftaran sebagai halte pada satu jalur vertikal */
   .steps-card{position:sticky;top:92px;padding:20px 18px;}
   .steps-card .kicker{color:var(--ink-2);margin-bottom:12px;}
   .steps-card .jalur{position:relative;}
@@ -52,7 +51,6 @@
   .file-row .btn{min-width:96px;}
   @media(max-width:640px){.file-row{flex-wrap:wrap;}.file-row .act{width:100%;justify-content:flex-end;}}
   .upload-foot{font-size:12.5px;color:var(--ink-2);margin-top:12px;}
-  /* Selama data dimuat, isi kolom disamarkan dengan kilau kerangka */
   .memuat .input,.memuat .select{color:transparent !important;background:linear-gradient(90deg,#EEF3F8 25%,#F7F9FC 40%,#EEF3F8 60%);background-size:300% 100%;animation:kilau 1.5s ease-in-out infinite;pointer-events:none;}
   .memuat .input::placeholder{color:transparent;}
   .periode-terpilih{align-self:end;font-size:13.5px;color:var(--ink-2);padding-bottom:10px;}
@@ -82,7 +80,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title" aria-label="Nuwo Magang, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Nuwo Magang</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <span class="autosave" id="autosave">Tersimpan otomatis sebagai draf</span>
       <a href="status_pengajuan.html" class="nav-link">Status</a>
@@ -190,7 +188,7 @@
   const $ = id => document.getElementById(id);
   const form = $('form');
   const FIELDS = ['nama','email','no_wa','domisili','universitas','fakultas_prodi','nim','ipk','jenjang','semester','batch_id'];
-  let daftarBatch = [];   // batch dari info.php (yang belum selesai)
+  let daftarBatch = [];
   let app = null;
   let files = {};
   let editable = true;
@@ -198,8 +196,6 @@
 
   $('logoutBtn').addEventListener('click', () => logout('login.html'));
 
-  // ---------- Muat data ----------
-  // Kerangka baris berkas selama data dimuat
   $('fileList').innerHTML = BERKAS.map(() => `<div class="file-row" aria-hidden="true">
     <span class="kerangka" style="width:32px;height:32px;border-radius:50%;flex-shrink:0"></span>
     <div class="txt"><span class="kerangka" style="width:45%;margin-bottom:8px"></span><span class="kerangka" style="width:72%"></span></div></div>`).join('');
@@ -230,7 +226,6 @@
     renderBanner();
     form.classList.remove('memuat');
     form.removeAttribute('aria-busy');
-    // Draf tersimpan yang isinya belum benar langsung ditandai, kolom kosong belum
     FIELDS.forEach(id => { if (ATURAN[id] && val(id) !== '') disentuh.add(id); });
     if (!editable) form.querySelectorAll('input, select, textarea, button').forEach(el => el.disabled = true);
     renderFiles();
@@ -252,13 +247,11 @@
     }
   }
 
-  // ---------- Periode PKL ----------
   const batchDipilih = () => daftarBatch.find(b => String(b.id) === val('batch_id'))
     || (app && String(app.batch_id) === val('batch_id') ? st_batch : null);
-  let st_batch = null;   // batch milik pendaftaran ini (bisa saja sudah tidak tampil di info publik)
+  let st_batch = null;
   const rentangTanggal = (a, b) => `${fmtTanggal(a)} – ${fmtTanggal(b)}`;
 
-  // Pilihan hanya periode yang pendaftarannya sedang dibuka, ditambah periode yang sudah tersimpan
   function isiPilihanBatch() {
     const sel = $('batch_id');
     const terbuka = daftarBatch.filter(b => b.terbuka);
@@ -267,7 +260,6 @@
     sel.insertAdjacentHTML('beforeend', pilihan.map(b =>
       `<option value="${b.id}">${esc(b.nama)}${b.terbuka ? '' : ' (pendaftaran ditutup)'}</option>`).join(''));
     if (app && app.batch_id) sel.value = String(app.batch_id);
-    // Satu-satunya periode yang dibuka langsung dipilihkan untuk pendaftar baru
     if (!sel.value && terbuka.length === 1) { sel.value = String(terbuka[0].id); queueSave(); }
     const info = $('periodeInfo');
     if (!terbuka.length && !(app && app.status_admin === 'perbaikan')) {
@@ -282,12 +274,9 @@
     $('periodeTerpilih').innerHTML = b ? `Pelaksanaan PKL: <b>${rentangTanggal(b.mulai, b.selesai)}</b> (2 bulan)` : '';
   }
 
-  // ---------- Validasi & langkah ----------
   const val = id => $(id).value.trim();
   const eligible = () => val('jenjang') === 'S1' && Number(val('semester')) >= 4;
 
-  // Satu sumber aturan untuk pesan galat per kolom maupun tanda selesai tiap langkah.
-  // Mengembalikan true bila valid, atau teks galat bila belum.
   const ATURAN = {
     nama: v => v.length >= 3 || 'Nama lengkap minimal 3 huruf.',
     email: v => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v) || 'Format email belum benar, contoh: nama@email.com.',
@@ -299,7 +288,6 @@
     ipk: v => { const n = Number(v.replace(',', '.')); return (v !== '' && !isNaN(n) && n >= 0 && n <= 4) || 'IPK berupa angka 0–4, contoh 3,45.'; },
     jenjang: v => !!v || 'Pilih jenjang pendidikan.',
     semester: v => (Number.isInteger(Number(v)) && Number(v) >= 1 && Number(v) <= 14) || 'Semester berupa angka 1–14.',
-    // Periode harus yang pendaftarannya sedang dibuka (pelamar yang memperbaiki berkas tetap memakai periodenya)
     batch_id: v => !v ? 'Pilih periode PKL.' : (batchDipilih()?.terbuka || app?.status_admin === 'perbaikan') || 'Pendaftaran periode ini sudah ditutup. Pilih periode lain.',
   };
   const LANGKAH_KOLOM = {
@@ -309,7 +297,6 @@
   };
   const valid = id => ATURAN[id](val(id)) === true;
 
-  // Galat hanya tampil untuk kolom yang sudah disentuh, supaya formulir kosong tidak langsung "merah"
   const disentuh = new Set();
   function periksaKolom(id) {
     const input = $(id);
@@ -352,16 +339,12 @@
       if (!sudah && !pertamaBelum) pertamaBelum = a;
       a.classList.toggle('aktif', a === pertamaBelum);
     });
-    // Garis jalur terisi sampai langkah terakhir yang berurutan selesai
     let beruntun = 0;
     while (beruntun < 5 && s[beruntun + 1]) beruntun++;
     $('jalur').style.setProperty('--progres', Math.max(0, beruntun - 1) / 4);
 
-    // Kolom yang sudah disentuh diperiksa ulang setiap ada perubahan
     disentuh.forEach(periksaKolom);
 
-    // Cek syarat akademik. Kotak hanya digambar ulang bila isinya berubah, supaya
-    // animasinya tidak berkedip setiap kali pengguna mengetik.
     const el = $('eligibility');
     const kunciSyarat = val('jenjang') && val('semester') ? `${eligible()}-${val('semester')}` : '';
     if (el.dataset.kunci !== kunciSyarat) {
@@ -371,7 +354,6 @@
         : `<div class="notice red"><b>Belum memenuhi syarat akademik</b>Program ini khusus mahasiswa jenjang S1 yang sedang menempuh minimal semester 4.</div>`;
     }
 
-    // Daftar kekurangan; tiap butir menuju langkahnya dan menyorot kolom yang belum benar
     const missing = [];
     if (!s[1]) missing.push([1, 'Lengkapi data diri']);
     if (!s[2]) missing.push([2, eligible() || !val('jenjang') ? 'Lengkapi data akademik' : 'Syarat akademik belum terpenuhi']);
@@ -397,7 +379,6 @@
     $(pertama).closest('.card').scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
 
-  // ---------- Draf otomatis ----------
   let saveTimer;
   let belumTersimpan = false;
   function queueSave() {
@@ -418,7 +399,6 @@
     if (res.success) belumTersimpan = false;
     return res.success;
   }
-  // Peringatkan bila halaman ditutup saat draf belum tersimpan atau berkas masih diunggah
   window.addEventListener('beforeunload', e => {
     if (!belumTersimpan && !uploadingJenis) return;
     e.preventDefault();
@@ -427,8 +407,7 @@
   form.addEventListener('input', () => { refresh(); queueSave(); });
   form.addEventListener('change', () => { refresh(); queueSave(); });
 
-  // ---------- Berkas ----------
-  let baruTerunggah = null;     // jenis berkas yang baru saja berhasil, untuk animasi umpan balik
+  let baruTerunggah = null;
   function renderFiles() {
     const flagged = app && app.status_admin === 'perbaikan';
     $('fileList').innerHTML = BERKAS.map((b, i) => {
@@ -460,7 +439,6 @@
     }));
   }
 
-  // Seret-dan-lepas: setiap baris berkas menjadi area jatuhan untuk jenisnya sendiri
   let hitungSeret = 0;
   $('fileList').addEventListener('dragenter', e => {
     const row = e.target.closest('.file-row');
@@ -485,7 +463,6 @@
     const file = e.dataTransfer.files[0];
     if (file) unggah(row.dataset.jenis, file);
   });
-  // Berkas yang dijatuhkan di luar baris tidak membuat peramban membuka PDF dan meninggalkan formulir
   window.addEventListener('dragover', e => { if (!e.target.closest?.('.file-row')) e.preventDefault(); });
   window.addEventListener('drop', e => { if (!e.target.closest?.('.file-row')) e.preventDefault(); });
 
@@ -539,7 +516,6 @@
     refresh();
   }
 
-  // ---------- Kirim ----------
   form.addEventListener('submit', async e => {
     e.preventDefault();
     if (!editable) return;

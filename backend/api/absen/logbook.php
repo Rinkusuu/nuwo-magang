@@ -2,8 +2,6 @@
 require '../../config.php';
 require '../../absen_helpers.php';
 
-// Logbook hari ini: dibaca (GET) atau disimpan (POST {isi}) oleh peserta PKL yang aktif.
-// Bisa diubah berkali-kali sampai absen pulang; setelah itu terkunci.
 $userId = require_user();
 [$app, , $alasan] = peserta_aktif($pdo, $userId);
 if ($alasan) fail($alasan, 403);
@@ -19,7 +17,7 @@ if (!$hari['datang']) fail('Absen datang terlebih dahulu sebelum mengisi logbook
 if ($galat) fail($galat);
 
 $pdo->beginTransaction();
-// Kunci baris absen pulang hari ini (bila ada) agar tidak bersilang dengan kirim.php
+// FOR UPDATE: jangan sampai logbook berubah bersamaan dengan absen pulang di kirim.php
 $k = $pdo->prepare("SELECT id FROM absen WHERE application_id = ? AND tanggal = CURDATE() AND jenis = 'pulang' FOR UPDATE");
 $k->execute([$app['id']]);
 if ($k->fetch()) { $pdo->rollBack(); fail('Logbook hari ini sudah terkunci karena Anda sudah absen pulang.', 409); }

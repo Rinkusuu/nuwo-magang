@@ -1,11 +1,4 @@
 <?php
-// ==========================================================
-// Konfigurasi bersama seluruh endpoint API.
-//
-// Nilai rahasia (kata sandi database, SMTP) TIDAK ditulis di sini.
-// Isi di backend/config.local.php (salin dari config.local.example.php,
-// berkas itu diabaikan git) atau lewat variabel lingkungan server.
-// ==========================================================
 
 $lokal = is_file(__DIR__ . '/config.local.php') ? require __DIR__ . '/config.local.php' : [];
 function cfg(array $lokal, string $kunci, $bawaan = null) {
@@ -14,15 +7,13 @@ function cfg(array $lokal, string $kunci, $bawaan = null) {
     return $env !== false ? $env : $bawaan;
 }
 
-define('APP_URL', rtrim((string) cfg($lokal, 'APP_URL', ''), '/'));   // mis. https://magang.contoh.go.id
+define('APP_URL', rtrim((string) cfg($lokal, 'APP_URL', ''), '/'));
 define('APP_DEBUG', (bool) cfg($lokal, 'DEBUG', false));
-// Batas percobaan login dan sejenisnya; hanya boleh dimatikan di laptop untuk demo
 define('BATAS_PERCOBAAN_AKTIF', (bool) cfg($lokal, 'BATAS_PERCOBAAN', true));
 
-// Seluruh tanggal (periode pendaftaran, batas perbaikan) dihitung dalam WIB
 date_default_timezone_set('Asia/Jakarta');
 
-// Galat PHP tidak pernah dicetak ke respons (akan merusak JSON dan membocorkan detail server)
+// galat dicetak akan merusak JSON dan membocorkan detail server
 ini_set('display_errors', APP_DEBUG ? '1' : '0');
 ini_set('log_errors', '1');
 error_reporting(E_ALL);
@@ -50,14 +41,12 @@ try {
     die(json_encode(['success' => false, 'message' => 'Layanan sedang tidak tersedia. Coba beberapa saat lagi.']));
 }
 
-// Galat tak terduga: catat di log server, kirim pesan umum ke pengguna
 set_exception_handler(function (Throwable $e) {
     error_log('[magang] ' . $e);
     if (!headers_sent()) http_response_code(500);
     echo json_encode(['success' => false, 'message' => 'Terjadi kesalahan di server. Coba beberapa saat lagi.']);
 });
 
-// ---------- Sesi ----------
 $https = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off')
     || ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
 session_name('magang_sesi');
@@ -72,22 +61,17 @@ ini_set('session.use_strict_mode', '1');
 ini_set('session.gc_maxlifetime', '7200');
 session_start();
 
-// Sesi menganggur lebih dari 2 jam dianggap berakhir
 if (isset($_SESSION['aktif_terakhir']) && time() - $_SESSION['aktif_terakhir'] > 7200) {
     session_unset();
     session_regenerate_id(true);
 }
 $_SESSION['aktif_terakhir'] = time();
 
-// Dipanggil setiap kali seseorang berhasil masuk, mencegah session fixation
 function mulai_sesi_baru(): void {
     session_regenerate_id(true);
     $_SESSION['csrf'] = bin2hex(random_bytes(32));
 }
 
-// ---------- CSRF ----------
-// Semua permintaan yang mengubah data wajib membawa header X-CSRF-Token yang
-// cocok dengan token di sesi. common.js mengambil token dari api/auth/csrf.php.
 function csrf_token(): string {
     if (empty($_SESSION['csrf'])) $_SESSION['csrf'] = bin2hex(random_bytes(32));
     return $_SESSION['csrf'];
@@ -103,7 +87,6 @@ if (!in_array($_SERVER['REQUEST_METHOD'] ?? 'GET', ['GET', 'HEAD', 'OPTIONS'], t
 define('UPLOAD_DIR', __DIR__ . '/uploads/');
 define('MAX_FILE_SIZE', 2 * 1024 * 1024);
 
-// Lima berkas administrasi wajib
 const JENIS_BERKAS = [
     'cv'         => 'Curriculum Vitae',
     'motivation' => 'Motivation Letter',
@@ -112,7 +95,6 @@ const JENIS_BERKAS = [
     'ktm'        => 'Kartu Tanda Mahasiswa (KTM)',
 ];
 
-// Bobot tujuh aspek penilaian wawancara (%)
 const BOBOT_ASPEK = [15, 15, 15, 15, 15, 10, 15];
 
 function json_out(array $data, int $code = 200): void {
@@ -130,13 +112,11 @@ function body(): array {
     return is_array($data) ? $data : [];
 }
 
-// Sidik kata sandi disimpan di sesi saat masuk. Bila kata sandi diganti (mis. lewat Lupa kata sandi),
-// sidiknya berubah sehingga semua sesi lain yang masih terbuka otomatis berakhir.
+// sidik berubah saat kata sandi diganti, sehingga sesi lain ikut berakhir
 function sidik_sandi(string $hash): string {
     return hash('sha256', $hash);
 }
 
-// ID pelamar yang sedang masuk, atau null bila belum masuk, akunnya sudah dihapus, atau kata sandinya sudah diganti
 function pengguna_aktif(): ?int {
     static $id = false;
     if ($id !== false) return $id;
@@ -145,7 +125,6 @@ function pengguna_aktif(): ?int {
         $q = $GLOBALS['pdo']->prepare("SELECT password FROM users WHERE id = ?");
         $q->execute([$_SESSION['user_id']]);
         $hash = $q->fetchColumn();
-        // Sesi yang dibuat sebelum pemeriksaan ini ada belum punya sidik: dicatat saat ini
         if ($hash !== false && !isset($_SESSION['sidik_user'])) $_SESSION['sidik_user'] = sidik_sandi($hash);
         if ($hash !== false && hash_equals($_SESSION['sidik_user'], sidik_sandi($hash))) {
             $id = (int) $_SESSION['user_id'];
@@ -162,8 +141,7 @@ function require_user(): int {
     return $id;
 }
 
-// Akun backoffice diperiksa ke database pada setiap permintaan, sehingga akun yang
-// dinonaktifkan atau diturunkan perannya langsung kehilangan akses tanpa menunggu sesi habis.
+// cek ke database tiap permintaan: akun yang dinonaktifkan langsung kehilangan akses
 function staf_aktif(): ?array {
     static $staf = false;
     if ($staf !== false) return $staf;
@@ -172,7 +150,6 @@ function staf_aktif(): ?array {
         $q = $GLOBALS['pdo']->prepare("SELECT id, nama, email, peran, password FROM admins WHERE id = ? AND aktif = 1");
         $q->execute([$_SESSION['admin_id']]);
         $staf = $q->fetch() ?: null;
-        // Kata sandi yang diatur ulang admin lain mengakhiri sesi pemilik akun yang masih terbuka
         if ($staf && !isset($_SESSION['sidik_admin'])) $_SESSION['sidik_admin'] = sidik_sandi($staf['password']);
         if ($staf && !hash_equals($_SESSION['sidik_admin'], sidik_sandi($staf['password']))) $staf = null;
         if ($staf) unset($staf['password']);
@@ -181,14 +158,12 @@ function staf_aktif(): ?array {
     return $staf;
 }
 
-// Admin maupun pewawancara
 function require_staf(): int {
     $s = staf_aktif();
     if (!$s) fail('Silakan masuk ke backoffice terlebih dahulu.', 401);
     return (int) $s['id'];
 }
 
-// Khusus peran admin
 function require_admin(): int {
     $s = staf_aktif();
     if (!$s) fail('Silakan masuk ke backoffice terlebih dahulu.', 401);
@@ -209,7 +184,6 @@ function log_status(PDO $pdo, int $appId, ?string $from, string $to, ?int $admin
         ->execute([$appId, $from, $to, $adminId, $note]);
 }
 
-// Nilai akhir = Σ(skor × bobot); null bila ada aspek yang belum dinilai
 function hitung_nilai(array $skor): ?float {
     $total = 0;
     foreach (BOBOT_ASPEK as $i => $bobot) {
@@ -226,7 +200,6 @@ function kategori_nilai(float $nilai, ?int $skorSikap): string {
     return 'tidak';
 }
 
-// Tambah N hari kerja (Senin–Jumat) dari hari ini
 function tambah_hari_kerja(int $n): string {
     $d = new DateTime('today');
     while ($n > 0) {
@@ -236,14 +209,13 @@ function tambah_hari_kerja(int $n): string {
     return $d->format('Y-m-d');
 }
 
-// Konfigurasi SMTP dibaca oleh mailer.php
 $GLOBALS['SMTP'] = [
     'host'   => cfg($lokal, 'SMTP_HOST', ''),
     'port'   => (int) cfg($lokal, 'SMTP_PORT', 587),
-    'secure' => cfg($lokal, 'SMTP_SECURE', 'tls'),     // 'tls' (STARTTLS), 'ssl', atau 'none' (relay internal)
+    'secure' => cfg($lokal, 'SMTP_SECURE', 'tls'),
     'user'   => cfg($lokal, 'SMTP_USER', ''),
     'pass'   => cfg($lokal, 'SMTP_PASS', ''),
     'from'   => cfg($lokal, 'SMTP_FROM', ''),
-    'nama'   => cfg($lokal, 'SMTP_FROM_NAME', 'Portal Magang Mahasiswa KPwBI Provinsi Lampung'),
+    'nama'   => cfg($lokal, 'SMTP_FROM_NAME', 'Nuwo Magang KPwBI Provinsi Lampung'),
 ];
 unset($lokal);

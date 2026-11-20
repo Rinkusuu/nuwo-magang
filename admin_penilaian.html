@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Penilaian Wawancara — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Penilaian Wawancara · Backoffice Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -210,7 +210,6 @@
       <span class="tag">${complete ? esc(LABEL.rekomendasi[saran]) : `Lengkapi ${7 - n} aspek lagi`}</span>
       <ul>${ASPEK.map((a, i) => `<li><span>${esc(a.singkat)} (${a.bobot}%)</span><b>${skor[i] ? `${skor[i]} → ${fmtAngka(skor[i] * a.bobot / 100)}` : '– → –'}</b></li>`).join('')}</ul>`;
 
-    // Rekomendasi tidak dipilih pewawancara: selalu mengikuti kategori nilai akhir
     rekomendasi = saran;
     const kotak = document.getElementById('saran');
     kotak.className = 'reco-otomatis ' + (saran || '');

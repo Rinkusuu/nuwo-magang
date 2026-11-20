@@ -4,7 +4,6 @@ require '../../app_helpers.php';
 
 $adminId = require_staf();
 
-// Hanya pendaftaran yang sudah dikirim (draf tidak tampil)
 $q = $pdo->prepare("
     SELECT a.id, a.no_pendaftaran, a.nama, a.email, a.universitas, a.fakultas_prodi, a.nim, a.ipk,
            a.jenjang, a.semester, a.batch_id, b.nama AS batch, a.status_admin,
@@ -18,7 +17,6 @@ $q = $pdo->prepare("
 $q->execute([staf_pewawancara() ? 1 : 0]);
 $rows = $q->fetchAll();
 
-// Rekap penilaian wawancara per pelamar (hanya penilaian lengkap)
 $nilai = [];
 foreach ($pdo->query("
     SELECT application_id, AVG(nilai_akhir) AS rata, COUNT(*) AS jumlah,
@@ -38,7 +36,6 @@ foreach ($rows as &$r) {
     $r['kategori'] = $n ? kategori_nilai((float) $n['rata'], (int) $n['min_sikap']) : null;
     $r['sudah_saya_nilai'] = isset($sudahSaya[$r['id']]);
 
-    // Alasan singkat bila tidak memenuhi syarat
     $r['alasan'] = null;
     if ($r['status_admin'] === 'tidak_memenuhi') {
         if ($r['syarat_s1'] === 'tidak') $r['alasan'] = 'Bukan jenjang S1';

@@ -2,8 +2,6 @@
 require '../../config.php';
 require '../../batas_percobaan.php';
 
-// Tetapkan kata sandi baru dari tautan email. Token hanya disimpan sebagai hash,
-// berlaku 60 menit, dan langsung hangus setelah dipakai.
 $data = body();
 $token = (string) ($data['token'] ?? '');
 $password = (string) ($data['password'] ?? '');

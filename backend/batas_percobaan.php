@@ -1,14 +1,9 @@
 <?php
-// Pembatasan percobaan untuk login dan permintaan atur ulang kata sandi.
-// Dihitung per kunci (mis. "login:email") dan per alamat IP, dalam jendela waktu bergulir.
 
 function ip_klien(): string {
     return substr($_SERVER['REMOTE_ADDR'] ?? '0.0.0.0', 0, 45);
 }
 
-// Hentikan permintaan bila percobaan untuk kunci ini atau dari IP ini sudah melewati batas.
-// Dengan $maksKunci > 0, $maks berlaku per kunci per IP dan $maksKunci untuk kunci itu dari semua IP:
-// orang lain tidak bisa mengunci akun hanya dengan 5 kali salah sandi, tetapi tebakan dari banyak IP tetap dibatasi.
 function cek_batas(PDO $pdo, string $kunci, int $maks, int $menit, int $maksIp = 0, int $maksKunci = 0): void {
     if (!BATAS_PERCOBAAN_AKTIF) return;
     $pdo->prepare("DELETE FROM batas_percobaan WHERE waktu < NOW() - INTERVAL 1 DAY")->execute();

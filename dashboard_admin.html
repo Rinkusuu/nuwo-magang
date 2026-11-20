@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Daftar Pelamar — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Daftar Pelamar · Backoffice Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -84,8 +84,7 @@
   let rows = [];
   const PER_HALAMAN = 20;
   let halaman = 1;
-  let urut = { kunci: null, arah: 1 };   // arah 1 = naik, -1 = turun
-  // Urutan status mengikuti alur kerja, bukan abjad
+  let urut = { kunci: null, arah: 1 };
   const URUTAN_STATUS = { menunggu: 0, perbaikan: 1, memenuhi: 2, tidak_memenuhi: 3 };
 
   (async () => {
@@ -109,7 +108,6 @@
 
   ['q', 'fPt', 'fBatch', 'fStatus'].forEach(id => document.getElementById(id).addEventListener('input', () => { halaman = 1; render(); }));
 
-  // Klik judul kolom: urut naik, klik lagi: turun, klik ketiga: kembali ke urutan masuk
   document.querySelectorAll('th[data-urut] button').forEach(btn => btn.addEventListener('click', () => {
     const kunci = btn.parentElement.dataset.urut;
     if (urut.kunci !== kunci) urut = { kunci, arah: 1 };
@@ -190,7 +188,6 @@
         : status === 'lolos' || status === 'tidak_lolos' ? r.status_seleksi === status : r.status_admin === status))
     );
     if (urut.kunci) {
-      // Nilai kosong (mis. belum dinilai) selalu di bawah, apa pun arahnya
       list.sort((a, b) => {
         const x = nilaiUrut(a, urut.kunci), y = nilaiUrut(b, urut.kunci);
         if (x === null && y === null) return 0;

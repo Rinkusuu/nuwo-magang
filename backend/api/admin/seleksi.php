@@ -3,8 +3,6 @@ require '../../config.php';
 require '../../app_helpers.php';
 require '../../mailer.php';
 
-// Screening manual setelah berkas dinyatakan lengkap: lolos ke wawancara, tidak lolos,
-// atau dibatalkan (null). Email hanya dikirim saat pelamar baru dinyatakan lolos.
 $adminId = require_admin();
 $data = body();
 $id = (int) ($data['id'] ?? 0);

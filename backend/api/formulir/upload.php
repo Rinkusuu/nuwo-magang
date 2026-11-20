@@ -23,7 +23,6 @@ if (!is_dir(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0775, true);
 $stored = $app['id'] . '_' . $jenis . '_' . bin2hex(random_bytes(8)) . '.pdf';
 if (!move_uploaded_file($file['tmp_name'], UPLOAD_DIR . $stored)) fail('Berkas gagal disimpan di server.', 500);
 
-// Hapus berkas lama dengan jenis yang sama (kecuali berkas contoh bawaan)
 $old = $pdo->prepare("SELECT stored_name FROM application_files WHERE application_id = ? AND jenis = ?");
 $old->execute([$app['id'], $jenis]);
 $oldName = $old->fetchColumn();

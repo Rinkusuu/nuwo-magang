@@ -1,17 +1,10 @@
 <?php
-// Hapus akun pelamar yang tidak lolos, H+7 setelah keputusan. Dijalankan cron setiap hari:
-//
-//   15 1 * * * php /path/portal/backend/bersihkan_akun.php
-//   php backend/bersihkan_akun.php --uji     -> hanya tampilkan daftar, tidak menghapus
-//
-// Yang dihapus: akun, pendaftaran, berkas, penilaian, dan riwayatnya. Yang dicatat hanya jumlah
-// per kategori (tabel pembersihan_log), tanpa nama atau email.
+// Cron harian. --uji untuk melihat daftar tanpa menghapus.
 if (PHP_SAPI !== 'cli') { http_response_code(404); exit; }
 
 require __DIR__ . '/pembersihan_helpers.php';
 date_default_timezone_set('Asia/Jakarta');
 
-// Muat koneksi database tanpa logika sesi/CSRF milik config.php
 $lokal = is_file(__DIR__ . '/config.local.php') ? require __DIR__ . '/config.local.php' : [];
 $ambil = fn($k, $d) => $lokal[$k] ?? (getenv('MAGANG_' . $k) !== false ? getenv('MAGANG_' . $k) : $d);
 $pdo = new PDO(

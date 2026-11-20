@@ -1,7 +1,3 @@
--- ============================================
--- DATABASE: Portal Magang Mahasiswa
--- Kantor Perwakilan Bank Indonesia Provinsi Lampung
--- ============================================
 -- PERHATIAN: skrip ini menghapus lalu membuat ulang database magang_bi.
 DROP DATABASE IF EXISTS magang_bi;
 CREATE DATABASE magang_bi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -22,12 +18,11 @@ CREATE TABLE admins (
   nama VARCHAR(150) NOT NULL,
   email VARCHAR(150) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
-  peran ENUM('admin','pewawancara') NOT NULL DEFAULT 'admin',   -- pewawancara hanya menilai wawancara
-  aktif TINYINT(1) NOT NULL DEFAULT 1,                         -- akun nonaktif tidak bisa masuk; riwayat nilai tetap ada
+  peran ENUM('admin','pewawancara') NOT NULL DEFAULT 'admin',
+  aktif TINYINT(1) NOT NULL DEFAULT 1,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
--- Satu baris pengaturan periode yang sedang berjalan (id = 1)
 CREATE TABLE periode (
   id INT PRIMARY KEY,
   tahun SMALLINT NOT NULL,
@@ -36,7 +31,7 @@ CREATE TABLE periode (
   durasi VARCHAR(100) NULL,
   kuota INT NULL,
   hari_perbaikan TINYINT NOT NULL DEFAULT 3,
-  kantor_lat DECIMAL(10,7) NULL,               -- titik kantor untuk absen (diatur admin)
+  kantor_lat DECIMAL(10,7) NULL,
   kantor_lng DECIMAL(10,7) NULL,
   radius_m SMALLINT NOT NULL DEFAULT 150,
   akurasi_maks_m SMALLINT NOT NULL DEFAULT 100,
@@ -51,7 +46,6 @@ CREATE TABLE bidang (
   urutan TINYINT NOT NULL DEFAULT 0
 ) ENGINE=InnoDB;
 
--- Batch (periode) PKL. Dikelola admin dari tahun ke tahun.
 CREATE TABLE batch (
   id INT AUTO_INCREMENT PRIMARY KEY,
   nama VARCHAR(100) NOT NULL,
@@ -100,7 +94,7 @@ CREATE TABLE applications (
   jadwal_tanggal DATE NULL,
   jadwal_jam TIME NULL,
   jadwal_lokasi VARCHAR(255) NULL,
-  status_seleksi ENUM('lolos','tidak_lolos') NULL,   -- screening manual: lolos ke wawancara atau tidak
+  status_seleksi ENUM('lolos','tidak_lolos') NULL,
   seleksi_at TIMESTAMP NULL,
   seleksi_by INT NULL,
   hasil_akhir ENUM('diterima','tidak_diterima') NULL,
@@ -122,7 +116,6 @@ CREATE TABLE applications (
   INDEX idx_batch (batch_id)
 ) ENGINE=InnoDB;
 
--- Lima berkas administrasi (PDF, maks. 2 MB)
 CREATE TABLE application_files (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -136,9 +129,6 @@ CREATE TABLE application_files (
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Penilaian wawancara: satu baris per pewawancara per pelamar
--- Berkas selama pelaksanaan PKL: laporan akhir (PDF). Jenis 'logbook' tersisa dari unggahan Excel lama;
--- logbook kini diisi harian (tabel logbook) dan diunduh sebagai Excel otomatis.
 CREATE TABLE berkas_pkl (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -151,7 +141,6 @@ CREATE TABLE berkas_pkl (
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Absen harian peserta PKL (selfie + GPS). Waktu dicatat dari server.
 CREATE TABLE absen (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -174,7 +163,6 @@ CREATE TABLE absen (
   FOREIGN KEY (dikoreksi_by) REFERENCES admins(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- Token sesi absen sekali pakai (hash SHA-256, berlaku 2 menit)
 CREATE TABLE absen_token (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -185,7 +173,6 @@ CREATE TABLE absen_token (
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Logbook harian peserta PKL: wajib diisi sebelum absen pulang, terkunci setelahnya
 CREATE TABLE logbook (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
@@ -197,7 +184,6 @@ CREATE TABLE logbook (
   FOREIGN KEY (application_id) REFERENCES applications(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- Ringkasan pembersihan akun pelamar yang tidak lolos (tanpa nama atau email)
 CREATE TABLE pembersihan_log (
   id INT AUTO_INCREMENT PRIMARY KEY,
   waktu TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -233,7 +219,6 @@ CREATE TABLE application_status_log (
   FOREIGN KEY (changed_by) REFERENCES admins(id) ON DELETE SET NULL
 ) ENGINE=InnoDB;
 
--- Pembatasan percobaan login, pendaftaran akun, dan lupa kata sandi
 CREATE TABLE IF NOT EXISTS batas_percobaan (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   kunci VARCHAR(190) NOT NULL,
@@ -243,7 +228,6 @@ CREATE TABLE IF NOT EXISTS batas_percobaan (
   INDEX idx_ip_waktu (ip, waktu)
 ) ENGINE=InnoDB;
 
--- Token atur ulang kata sandi (disimpan sebagai hash SHA-256, berlaku 60 menit)
 CREATE TABLE IF NOT EXISTS reset_sandi (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,
@@ -253,19 +237,9 @@ CREATE TABLE IF NOT EXISTS reset_sandi (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
--- ============================================
--- DATA AWAL
--- ============================================
-
--- Kata sandi admin contoh: AdminBI2026 — WAJIB diganti sebelum online:
---   php backend/atur_password_admin.php admin@bi.go.id
-INSERT INTO admins (nama, email, password) VALUES
-('Admin Seleksi', 'admin@bi.go.id', '$2y$12$hL5kVeYAwz7HvJOG0jWXmufBCNn5MCbtG2wx0/VMTtC3GnozxXgvW');
-
 INSERT INTO periode (id, tahun, tanggal_buka, tanggal_tutup, durasi, kuota, hari_perbaikan) VALUES
 (1, 2027, NULL, NULL, NULL, NULL, 3);
 
--- Periode PKL 2027 (sesuai tabel dari kantor, 6 Oktober 2026). Dapat diubah admin.
 INSERT INTO batch (nama, daftar_buka, daftar_tutup, mulai, selesai) VALUES
 ('Periode 1 2027', '2027-01-01', '2027-01-20', '2027-02-01', '2027-03-31'),
 ('Periode 2 2027', '2027-03-01', '2027-03-20', '2027-04-01', '2027-05-31'),
@@ -279,44 +253,3 @@ INSERT INTO bidang (nama, singkat, deskripsi, urutan) VALUES
 ('Pengembangan UMKM dan Ekonomi Syariah', 'UMKM dan Ekonomi Syariah', 'Mendukung program pengembangan UMKM binaan dan ekonomi-keuangan syariah. Relevan untuk Ekonomi Syariah, Manajemen, dan Agribisnis.', 3),
 ('Komunikasi dan Hubungan Masyarakat', 'Komunikasi dan Humas', 'Membantu publikasi, kehumasan, dan edukasi kebanksentralan kepada masyarakat. Relevan untuk Ilmu Komunikasi dan Desain Komunikasi Visual.', 4),
 ('Manajemen Intern', 'Manajemen Intern', 'Mendukung administrasi, logistik, keuangan internal, dan sumber daya manusia. Relevan untuk Akuntansi, Manajemen, Hukum, dan Administrasi.', 5);
-
--- Akun pelamar contoh, kata sandi: Demo1234
-INSERT INTO users (nama, email, password, no_wa) VALUES
-('Rahmat Hidayat', 'rahmat@email.com', '$2y$12$QtviQDqeHCkfSibYoxhBhOqVH.SyTMJbMk2KexH0h0WGX7/7XGT6G', '0812-3456-7890'),
-('Siti Aisyah', 'siti@email.com', '$2y$12$QtviQDqeHCkfSibYoxhBhOqVH.SyTMJbMk2KexH0h0WGX7/7XGT6G', '0813-2211-4455'),
-('Dewi Anggraini', 'dewi@email.com', '$2y$12$QtviQDqeHCkfSibYoxhBhOqVH.SyTMJbMk2KexH0h0WGX7/7XGT6G', '0857-9988-1122');
-
-INSERT INTO applications
-(user_id, no_pendaftaran, nama, email, no_wa, domisili, universitas, fakultas_prodi, nim, ipk, jenjang, semester,
- batch_id, pernyataan, submitted_at,
- syarat_s1, syarat_semester, syarat_aktif, status_admin, verified_at, verified_by,
- status_seleksi, seleksi_at, seleksi_by)
-VALUES
-(1, 'MG-2026-0001', 'Rahmat Hidayat', 'rahmat@email.com', '0812-3456-7890', 'Bandar Lampung',
- 'Universitas Lampung', 'Fakultas Ekonomi dan Bisnis / Ekonomi Pembangunan', '2211021001', 3.52, 'S1', 6,
- 1, 1, NOW(),
- 'memenuhi', 'memenuhi', 'memenuhi', 'memenuhi', NOW(), 1,
- 'lolos', NOW(), 1);
-
-INSERT INTO applications
-(user_id, no_pendaftaran, nama, email, no_wa, domisili, universitas, fakultas_prodi, nim, ipk, jenjang, semester,
- batch_id, pernyataan, submitted_at)
-VALUES
-(2, 'MG-2026-0002', 'Siti Aisyah', 'siti@email.com', '0813-2211-4455', 'Lampung Selatan',
- 'Institut Teknologi Sumatera', 'Fakultas Sains / Sains Data', '122450011', 3.61, 'S1', 5,
- 1, 1, NOW());
-
-
-
--- Berkas contoh (menunjuk ke backend/uploads/contoh.pdf)
-INSERT INTO application_files (application_id, jenis, stored_name, original_name, size, status_verifikasi) VALUES
-(1, 'cv', 'contoh.pdf', 'CV_Rahmat_Hidayat.pdf', 600, 'sesuai'),
-(1, 'motivation', 'contoh.pdf', 'Motivation_Letter.pdf', 600, 'sesuai'),
-(1, 'pengantar', 'contoh.pdf', 'Surat_Pengantar.pdf', 600, 'sesuai'),
-(1, 'transkrip', 'contoh.pdf', 'Transkrip.pdf', 600, 'sesuai'),
-(1, 'ktm', 'contoh.pdf', 'KTM_Rahmat_Hidayat.pdf', 600, 'sesuai'),
-(2, 'cv', 'contoh.pdf', 'CV_Siti_Aisyah.pdf', 600, NULL),
-(2, 'motivation', 'contoh.pdf', 'Motivation_Letter.pdf', 600, NULL),
-(2, 'pengantar', 'contoh.pdf', 'Surat_Pengantar.pdf', 600, NULL),
-(2, 'transkrip', 'contoh.pdf', 'Transkrip.pdf', 600, NULL),
-(2, 'ktm', 'contoh.pdf', 'KTM_Siti_Aisyah.pdf', 600, NULL);

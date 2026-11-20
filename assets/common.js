@@ -1,4 +1,3 @@
-// Helper bersama untuk seluruh halaman portal
 const BULAN = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 
 const LABEL = {
@@ -13,7 +12,6 @@ const LABEL = {
     perbaikan: ['Perlu perbaikan', 'amber'],
     tidak_sesuai: ['Tidak sesuai', 'red'],
   },
-  // Screening manual setelah berkas lengkap: diundang wawancara atau tidak
   seleksi: {
     lolos: ['Lolos ke wawancara', 'green'],
     tidak_lolos: ['Tidak lolos ke wawancara', 'red'],
@@ -30,7 +28,7 @@ const LABEL = {
     sangat: 'Sangat direkomendasikan',
     direkomendasikan: 'Direkomendasikan',
     tidak: 'Tidak direkomendasikan',
-    cadangan: 'Dipertimbangkan (cadangan)',   // hanya untuk penilaian lama sebelum Oktober 2026
+    cadangan: 'Dipertimbangkan (cadangan)',
   },
 };
 
@@ -52,8 +50,6 @@ const BERKAS = [
     periksa: 'nama dan NPM sesuai data pendaftaran; terbaca jelas.' },
 ];
 
-// Token CSRF sesi ini. Diambil sekali sebelum permintaan pertama yang mengubah data,
-// lalu diperbarui dari respons login/daftar (sesi baru = token baru).
 let csrfToken = null;
 async function ambilCsrf(paksa = false) {
   if (csrfToken && !paksa) return csrfToken;
@@ -82,7 +78,6 @@ async function api(url, options = {}, ulang = true) {
   } catch (e) {
     return { success: false, message: 'Tidak dapat terhubung ke server. Periksa koneksi internet Anda lalu coba lagi.', status: 0 };
   }
-  // Token kedaluwarsa (mis. sesi berakhir): ambil token baru lalu ulangi sekali
   if (res.status === 419 && ulang) {
     await ambilCsrf(true);
     return api(url, options, false);
@@ -130,7 +125,6 @@ function toast(message, isError = false) {
     el.setAttribute('role', 'status');
     document.body.appendChild(el);
   }
-  // Ikon membedakan berhasil dan gagal selain lewat warna
   el.innerHTML = (window.ikon ? ikon(isError ? 'peringatan' : 'centang', 16) : '') + `<span>${esc(message)}</span>`;
   el.classList.toggle('error', isError);
   el.classList.add('show');
@@ -143,14 +137,11 @@ async function logout(target) {
   window.location.href = target;
 }
 
-// Tanggal hari ini (zona waktu lokal) dalam format YYYY-MM-DD
 function todayISO() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-// Indikator kekuatan kata sandi. Skor 1–4 dari panjang dan keragaman karakter;
-// hanya sebagai panduan, syarat minimal tetap 8 karakter (diperiksa server).
 function skorSandi(v) {
   if (!v) return 0;
   if (v.length < 8) return 1;
@@ -176,7 +167,6 @@ function pasangKekuatanSandi(input, wadah) {
   input.addEventListener('input', perbarui);
   perbarui();
 }
-// Tanda centang saat format email sudah benar (tanpa memeriksa apakah email terdaftar)
 function pasangCekEmail(input, field) {
   const pola = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   const cek = () => {
@@ -188,7 +178,6 @@ function pasangCekEmail(input, field) {
   input.addEventListener('blur', () => { if (input.value.trim()) field.classList.toggle('has-error', !pola.test(input.value.trim())); });
 }
 
-// ---------- Kerangka saat memuat ----------
 function kerangkaTabel(kolom, baris = 5) {
   const lebar = [62, 48, 70, 40, 55, 35, 28];
   return Array.from({ length: baris }, (_, r) => `<tr class="kerangka-baris" aria-hidden="true">${
@@ -206,9 +195,6 @@ function kerangkaHalaman() {
   </div>`;
 }
 
-// ---------- Dialog konfirmasi ----------
-// Pengganti confirm() bawaan peramban: tampil sesuai gaya portal, bisa diberi
-// penanda bahaya, dan menunggu jawaban lewat Promise.
 function konfirmasi({ judul, pesan, ya = 'Lanjutkan', batal = 'Batal', bahaya = false }) {
   return new Promise(selesai => {
     const d = document.createElement('dialog');
@@ -231,9 +217,6 @@ function konfirmasi({ judul, pesan, ya = 'Lanjutkan', batal = 'Batal', bahaya = 
   });
 }
 
-// ---------- Pratinjau PDF ----------
-// Di layar lebar berkas dibuka dalam dialog tanpa meninggalkan halaman. Di HP
-// (peramban seluler umumnya tidak menampilkan PDF di dalam iframe) dibuka di tab baru.
 function pratinjauPdf(url, judul) {
   const seluler = window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
   if (seluler) { window.open(url, '_blank', 'noopener'); return; }
@@ -251,7 +234,6 @@ function pratinjauPdf(url, judul) {
   d.addEventListener('click', e => { if (e.target === d) tutup(); });
   d.showModal();
 }
-// Tautan berkas cukup diberi atribut data-pratinjau
 document.addEventListener('click', e => {
   const a = e.target.closest('a[data-pratinjau]');
   if (!a || e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
@@ -259,7 +241,6 @@ document.addEventListener('click', e => {
   pratinjauPdf(a.getAttribute('href'), a.dataset.pratinjau || a.textContent.trim());
 });
 
-// Placeholder "Memuat…" bertanda data-kerangka langsung diganti kerangka halaman
 document.querySelectorAll('[data-kerangka]').forEach(el => { el.outerHTML = kerangkaHalaman(); });
 document.querySelectorAll('[data-kerangka-tabel]').forEach(tb => {
   tb.innerHTML = kerangkaTabel(+tb.dataset.kerangkaTabel);

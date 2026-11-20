@@ -1,58 +1,58 @@
-# Portal Magang Mahasiswa — KPwBI Provinsi Lampung
+# Nuwo Magang
 
-Pendaftaran, seleksi, dan pengumuman Program Magang Mahasiswa S1.
-Frontend HTML/CSS/JavaScript tanpa proses build, backend PHP 8 + MySQL/MariaDB.
+Portal pendaftaran dan pengelolaan magang mahasiswa S1 di Kantor Perwakilan Bank Indonesia Provinsi Lampung: pendaftaran, verifikasi berkas, wawancara, pengumuman, lalu absen harian dan logbook selama magang.
 
-## Menjalankan di laptop
+HTML, CSS, dan JavaScript biasa tanpa build. Backend PHP 8 dengan MySQL/MariaDB. Email lewat PHPMailer, yang ikut disimpan di `backend/vendor/` supaya server tidak perlu Composer.
+
+## Jalan di laptop
 
 ```bash
-mysql -uroot < setup.sql                       # membuat ulang database magang_bi + data contoh
-cp backend/config.local.example.php backend/config.local.php   # lalu sesuaikan DB_USER/DB_PASS
-php -d upload_max_filesize=11M -d post_max_size=12M -S 0.0.0.0:8740 deploy/router-lokal.php   # buka http://127.0.0.1:8740
+mysql -uroot < setup.sql
+mysql -uroot < contoh_data.sql
+cp backend/config.local.example.php backend/config.local.php
+php -d upload_max_filesize=11M -d post_max_size=12M -S 0.0.0.0:8740 deploy/router-lokal.php
 ```
 
-Akun contoh: pelamar `rahmat@email.com` / `Demo1234`, admin `admin@bi.go.id` / `AdminBI2026`.
-Selama `SMTP_HOST` kosong, email tidak dikirim melainkan dicatat di `backend/logs/email.log`.
+Buka http://127.0.0.1:8740. Admin `admin@bi.go.id` / `AdminBI2026`, pelamar `rahmat@email.com` / `Demo1234`. Backoffice ada di `/login_admin.html`.
 
-> `php -S` tidak membaca `.htaccess`. Karena itu server uji dijalankan bersama
-> `deploy/router-lokal.php`, yang meniru aturannya: `/` membuka beranda, alamat salah
-> menampilkan 404, dan berkas sensitif diblokir. Dari HP di Wi-Fi yang sama, buka
-> `http://<IP laptop>:8740` (cek IP dengan `ipconfig getifaddr en0`).
+Selama `SMTP_HOST` kosong, email tidak dikirim dan hanya ditulis ke `backend/logs/email.log`.
 
-## Memasang di server
+## Pasang di server
 
-1. Salin seluruh folder ke server (portal diasumsikan di akar domain).
-2. Buat database dan user khusus, lalu impor `setup.sql` (hapus data contoh terlebih dahulu).
-   Database yang sudah ada sebelumnya: jalankan berkas di `backend/migrasi/` secara berurutan (001, 002, …).
-3. Buat `backend/config.local.php` dari contohnya: `APP_URL`, kredensial database, SMTP.
-4. Ganti kata sandi admin: `php backend/atur_password_admin.php admin@bi.go.id`.
-   Akun pewawancara dan admin lain dibuat dari menu **Pengguna dan Hak Akses** di backoffice.
-5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis oleh PHP.
-   Atur titik kantor untuk absen di **Batch dan Jadwal → Pengaturan umum** (absen memerlukan HTTPS).
-6. Pasang cron harian untuk menghapus akun pelamar yang tidak lolos (H+7 setelah keputusan):
+1. Salin repo ke akar domain. Kalau dipasang di subfolder, path di `404.html` dan `.htaccess` perlu diubah.
+2. Buat database dan user khusus (jangan `root`), lalu impor `setup.sql`. Jangan impor `contoh_data.sql`.
+3. Buat `backend/config.local.php` dari contohnya, lalu isi `APP_URL`, database, dan SMTP.
+4. Buat admin pertama: `php backend/atur_password_admin.php email@bi.go.id "Nama"`. Akun admin dan pewawancara lain dibuat dari menu Pengguna dan Hak Akses.
+5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis PHP.
+6. Web server: Apache cukup dengan `.htaccess` (butuh `mod_headers` dan `mod_alias`). Untuk Nginx + PHP-FPM, lihat `deploy/nginx-portal-magang.conf`.
+7. Pasang HTTPS. Kamera dan GPS untuk absen hanya jalan di HTTPS.
+8. Cron harian untuk menghapus akun pelamar yang tidak lolos (H+7 setelah keputusan):
+
    ```
-   15 1 * * * php /path/portal/backend/bersihkan_akun.php >> /path/portal/backend/logs/pembersihan.log 2>&1
+   15 1 * * * php /path/nuwo-magang/backend/bersihkan_akun.php >> /path/nuwo-magang/backend/logs/pembersihan.log 2>&1
    ```
-   Cek dulu tanpa menghapus: `php backend/bersihkan_akun.php --uji`.
-7. Web server:
-   - **Apache**: `.htaccess` di folder utama sudah berisi aturan (butuh `mod_headers`, `mod_alias`).
-   - **Nginx + PHP-FPM**: lihat `deploy/nginx-portal-magang.conf`.
-8. Pasang HTTPS, lalu aktifkan HSTS.
 
-Daftar pekerjaan yang masih tertunda ada di [CATATAN-TINDAK-LANJUT.md](CATATAN-TINDAK-LANJUT.md).
+   `php backend/bersihkan_akun.php --uji` menampilkan daftarnya tanpa menghapus.
 
-## Struktur singkat
+Database yang dibuat dari versi lama diperbarui dengan menjalankan `backend/migrasi/` secara berurutan.
+
+## Sebelum online
+
+- Atur titik kantor, radius, dan akurasi GPS di Batch dan Jadwal → Pengaturan umum. Selama kosong, peserta tidak bisa absen.
+- Isi SMTP resmi dan pastikan domain pengirim punya SPF/DKIM.
+- Kalau di belakang Cloudflare atau proxy lain, atur `set_real_ip_from` dan `real_ip_header` di Nginx. Tanpa itu semua pengunjung terbaca ber-IP sama, dan batas login per IP mengunci semua orang sekaligus.
+- Aktifkan HSTS setelah HTTPS stabil (untuk Apache, baris yang dikomentari di `.htaccess`).
+- Siapkan backup harian untuk database dan `backend/uploads/`.
+
+## Struktur
 
 | Lokasi | Isi |
 | --- | --- |
-| `*.html` | Halaman pelamar dan backoffice |
-| `assets/portal.css` | Token desain dan komponen bersama |
-| `assets/gerak.js` | Animasi (mati otomatis bila "kurangi gerakan" aktif) |
-| `assets/common.js` | `api()` dengan token CSRF, format tanggal, toast, indikator kata sandi |
-| `assets/ikon.js` | Set ikon garis (sama dengan TUMBUH) |
-| `backend/config.php` | Koneksi DB, sesi, CSRF, helper |
-| `backend/mailer.php` | Pengiriman dan templat email (PHPMailer) |
-| `backend/api/` | Endpoint JSON |
-| `backend/logbook_excel.php` | Menyusun logbook harian menjadi Excel format kantor (`xlsx_sederhana.php`) |
-| `backend/bersihkan_akun.php` | Skrip cron pembersihan akun pelamar yang tidak lolos |
-| `backend/vendor/` | PHPMailer (disertakan agar tidak perlu Composer di server) |
+| `*.html` | Halaman pelamar (`dashboard`, `formulir`, `status_pengajuan`, `absen`, ...) dan backoffice (`admin_*`) |
+| `assets/` | `portal.css`, `common.js` (fetch dengan CSRF, toast, dialog), `admin.js` (sidebar dan cek peran), `ikon.js`, `gerak.js` |
+| `backend/api/` | Endpoint JSON. Hanya folder ini yang menjalankan PHP dari web |
+| `backend/config.php` | Koneksi database, sesi, CSRF, helper umum |
+| `backend/mailer.php` | Templat dan pengiriman email |
+| `backend/logbook_excel.php` | Excel logbook format kantor, ditulis dengan `xlsx_sederhana.php` |
+| `backend/migrasi/` | Perubahan skema untuk database lama |
+| `deploy/` | Contoh konfigurasi Nginx dan router untuk `php -S` |

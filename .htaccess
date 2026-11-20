@@ -1,15 +1,9 @@
-# ==========================================================
-# Portal Magang Mahasiswa — konfigurasi Apache
-# (untuk Nginx, lihat deploy/nginx-portal-magang.conf)
-# Portal diasumsikan dipasang di akar domain, mis. https://magang.contoh.go.id/
-# ==========================================================
+# Nuwo Magang, Apache. Untuk Nginx lihat deploy/nginx-portal-magang.conf.
 
 Options -Indexes
 DirectoryIndex dashboard.html
 ErrorDocument 404 /404.html
 
-# ---------- Berkas yang tidak boleh diakses dari web ----------
-# Skema database (berisi hash kata sandi admin contoh), catatan, berkas tersembunyi
 <FilesMatch "(^\.|\.(sql|md|log|lock|dist)$|^composer\.json$)">
   Require all denied
 </FilesMatch>
@@ -17,26 +11,22 @@ ErrorDocument 404 /404.html
   RedirectMatch 404 ^/\.git
   RedirectMatch 404 ^/deploy/
   RedirectMatch 404 ^/backend/(vendor|logs|migrasi|uploads|font)(/|$)
-  # PHP hanya dijalankan di backend/api/ (sama dengan Nginx); helper, config, dan skrip CLI tidak bisa dibuka dari web
   RedirectMatch 404 "^/(?!backend/api/).*\.php$"
 </IfModule>
 
-# ---------- Header keamanan ----------
 <IfModule mod_headers.c>
   Header always set X-Content-Type-Options "nosniff"
-  # SAMEORIGIN: halaman portal boleh menampilkan pratinjau PDF miliknya sendiri, situs lain tidak
+  # SAMEORIGIN: pratinjau PDF ditampilkan di iframe halaman sendiri
   Header always set X-Frame-Options "SAMEORIGIN"
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
   Header always set Permissions-Policy "camera=(self), microphone=(), geolocation=(self), payment=()"
-  # CSP tidak dikirim untuk berkas PDF supaya penampil PDF bawaan peramban tidak terblokir
+  # tanpa CSP untuk PDF, penampil PDF bawaan peramban terblokir CSP
   <If "%{REQUEST_URI} !~ m#^/backend/api/(pkl/)?file\.php#">
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' blob:; font-src 'self'; connect-src 'self'; frame-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self'"
   </If>
   # Aktifkan setelah HTTPS berjalan stabil:
   # Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 
-  # ---------- Cache aset ----------
-  # Font dan gambar jarang berubah; CSS/JS/HTML selalu dicek ulang (cepat berkat ETag)
   <FilesMatch "\.(woff2|png|jpe?g|svg|ico|webp)$">
     Header set Cache-Control "public, max-age=2592000"
   </FilesMatch>
@@ -49,7 +39,7 @@ ErrorDocument 404 /404.html
   AddOutputFilterByType DEFLATE text/html text/css application/javascript application/json image/svg+xml
 </IfModule>
 
-# Batas unggah: berkas pendaftaran 2 MB, logbook 5 MB, laporan akhir 10 MB (+ overhead multipart)
+# laporan akhir maksimal 10 MB
 <IfModule mod_php.c>
   php_value upload_max_filesize 11M
   php_value post_max_size 12M

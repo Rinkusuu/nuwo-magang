@@ -7,8 +7,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     json_out(['success' => true, 'periode' => get_periode($pdo)]);
 }
 
-// Jadwal kini diatur per batch (batch.php); di sini pengaturan umum:
-// batas perbaikan berkas serta titik kantor, radius, dan akurasi GPS untuk absen
 $data = body();
 $hari = (int) ($data['hari_perbaikan'] ?? 3);
 if ($hari < 1 || $hari > 30) fail('Batas perbaikan harus 1–30 hari kerja.');

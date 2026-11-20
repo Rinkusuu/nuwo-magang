@@ -4,15 +4,12 @@ require '../../app_helpers.php';
 require '../../mailer.php';
 
 $userId = require_user();
-// Email pendaftaran disamakan dengan email akun sebelum diperiksa dan dipakai mengirim email
 $pdo->prepare("UPDATE applications a JOIN users u ON u.id = a.user_id SET a.email = u.email WHERE a.user_id = ? AND a.email <> u.email")
     ->execute([$userId]);
 $app = app_by_user($pdo, $userId);
 if (!$app) fail('Lengkapi formulir terlebih dahulu.');
 if (!app_editable($app)) fail('Pendaftaran sudah dikirim.', 409);
 
-// Pendaftaran baru hanya diterima selama pendaftaran batch yang dipilih dibuka;
-// perbaikan berkas tetap boleh dikirim setelahnya
 $batch = batch_by_id($pdo, $app['batch_id'] ? (int) $app['batch_id'] : null);
 if (!$batch) fail('Pilih periode PKL terlebih dahulu.');
 if (!batch_terbuka($batch) && $app['status_admin'] !== 'perbaikan') {

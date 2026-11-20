@@ -2,8 +2,6 @@
 require '../../config.php';
 require '../../app_helpers.php';
 
-// Unggah laporan akhir (PDF) oleh peserta yang sudah menyatakan bersedia; unggahan baru menggantikan
-// yang lama. Logbook tidak lagi diunggah: diisi harian di halaman absen dan diunduh sebagai Excel.
 const BERKAS_PKL = [
     'laporan' => ['label' => 'Laporan akhir', 'ekstensi' => ['pdf'], 'maks' => 10 * 1024 * 1024],
 ];
@@ -26,7 +24,6 @@ if (!$file || $file['error'] !== UPLOAD_ERR_OK) {
 }
 if ($file['size'] > $aturan['maks']) fail("Ukuran berkas melebihi $mb MB.");
 
-// Periksa isi berkas, bukan hanya nama: PDF diawali %PDF-
 $ext = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
 $kepala = file_get_contents($file['tmp_name'], false, null, 0, 8);
 if (!in_array($ext, $aturan['ekstensi'], true) || !str_starts_with($kepala, '%PDF-')) fail('Laporan akhir harus berupa berkas PDF.');

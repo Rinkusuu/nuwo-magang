@@ -2,8 +2,6 @@
 require '../../config.php';
 require '../../absen_helpers.php';
 
-// Menyimpan absen: token sekali pakai + foto dari kamera + lokasi GPS.
-// Waktu absen selalu waktu server; foto dibuat ulang dan diberi stempel oleh server.
 $userId = require_user();
 [$app, $batch, $alasan] = peserta_aktif($pdo, $userId);
 if ($alasan) fail($alasan, 403);
@@ -16,7 +14,7 @@ $q = $pdo->prepare("SELECT id, jenis FROM absen_token WHERE token_hash = ? AND a
 $q->execute([hash('sha256', $token), $app['id']]);
 $sesi = $q->fetch();
 if (!$sesi) { $pdo->rollBack(); fail('Sesi absen sudah kedaluwarsa atau sudah dipakai. Mulai ulang absen.', 409); }
-// Token langsung hangus, apa pun hasil pemeriksaan berikutnya
+// token dihapus sebelum pemeriksaan lain supaya tidak bisa dipakai ulang
 $pdo->prepare("UPDATE absen_token SET dipakai_at = NOW() WHERE id = ?")->execute([$sesi['id']]);
 $pdo->commit();
 $jenis = $sesi['jenis'];
@@ -25,7 +23,6 @@ $hari = absen_hari_ini($pdo, (int) $app['id']);
 if ($hari[$jenis]) fail('Absen ini sudah tercatat hari ini.', 409);
 if ($jenis === 'pulang' && !$hari['datang']) fail('Absen datang terlebih dahulu sebelum absen pulang.', 409);
 
-// Lokasi
 $atur = pengaturan_absen($pdo);
 if ($atur['kantor_lat'] === null) fail('Lokasi kantor untuk absen belum diatur panitia.', 403);
 $lat = filter_var($_POST['lat'] ?? null, FILTER_VALIDATE_FLOAT);
@@ -42,8 +39,7 @@ if ($jarak > $atur['radius_m']) {
     fail('Anda berada sekitar ' . number_format($jarak, 0, ',', '.') . ' m dari kantor. Absen hanya bisa dilakukan dalam radius ' . $atur['radius_m'] . ' m.');
 }
 
-// Foto: harus JPEG asli dari kamera, maksimal 3 MB dan 4.000 px per sisi. Batas piksel mencegah
-// JPEG kecil yang mengaku beresolusi raksasa menghabiskan memori server saat dibuka GD.
+// batas piksel: JPEG kecil bisa mengaku beresolusi raksasa dan menghabiskan memori GD
 $file = $_FILES['foto'] ?? null;
 if (!$file || $file['error'] !== UPLOAD_ERR_OK || $file['size'] > 3 * 1024 * 1024) fail('Foto gagal dikirim. Coba lagi.');
 $info = @getimagesize($file['tmp_name']);
@@ -62,8 +58,6 @@ if (!stempel_foto($file['tmp_name'], UPLOAD_DIR . 'absen/' . $nama, $baris)) fai
 
 try {
     $pdo->beginTransaction();
-    // Absen pulang hanya tercatat bila logbook hari ini ada dan valid. Baris logbook dikunci
-    // supaya tidak bisa diubah bersamaan; setelah absen pulang tersimpan, logbook terkunci.
     if ($jenis === 'pulang') {
         $l = $pdo->prepare("SELECT isi FROM logbook WHERE application_id = ? AND tanggal = ? FOR UPDATE");
         $l->execute([$app['id'], substr($waktu, 0, 10)]);

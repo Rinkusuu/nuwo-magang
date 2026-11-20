@@ -1,7 +1,4 @@
--- Jalankan sekali pada database yang dibuat dengan setup.sql versi sebelum 1 Oktober 2026.
--- Aman dijalankan ulang (CREATE TABLE IF NOT EXISTS).
 
--- Pembatasan percobaan login, pendaftaran akun, dan lupa kata sandi
 CREATE TABLE IF NOT EXISTS batas_percobaan (
   id BIGINT AUTO_INCREMENT PRIMARY KEY,
   kunci VARCHAR(190) NOT NULL,
@@ -11,7 +8,6 @@ CREATE TABLE IF NOT EXISTS batas_percobaan (
   INDEX idx_ip_waktu (ip, waktu)
 ) ENGINE=InnoDB;
 
--- Token atur ulang kata sandi (disimpan sebagai hash SHA-256, berlaku 60 menit)
 CREATE TABLE IF NOT EXISTS reset_sandi (
   id INT AUTO_INCREMENT PRIMARY KEY,
   user_id INT NOT NULL,

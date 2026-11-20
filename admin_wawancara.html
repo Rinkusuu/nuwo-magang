@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Seleksi dan Wawancara — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Seleksi dan Wawancara · Backoffice Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -85,7 +85,6 @@
     if (!daftarBatch.length) {
       daftarBatch = data.batch;
       $('fBatch').innerHTML = '<option value="">Semua batch</option>' + daftarBatch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join('');
-      // Bawaan: batch dari tautan, atau batch terbaru yang punya pelamar berkas lengkap
       const awal = params.get('batch') || (semua[0] && semua[0].batch_id) || '';
       $('fBatch').value = String(awal);
     }
@@ -130,7 +129,6 @@
     const btn = e.target.closest('[data-putus]');
     if (!btn) return;
     const r = semua.find(x => String(x.id) === btn.closest('tr').dataset.id);
-    // Klik pilihan yang sedang aktif = batalkan keputusan
     const keputusan = r.status_seleksi === btn.dataset.putus ? null : btn.dataset.putus;
     if (keputusan === 'lolos' && !await konfirmasi({ judul: `Loloskan ${r.nama}?`, pesan: 'Pelamar akan menerima email bahwa ia lolos ke tahap wawancara, berisi tautan ke halaman status.', ya: 'Loloskan' })) return;
     btn.closest('.seg').querySelectorAll('button').forEach(b => { b.disabled = true; });

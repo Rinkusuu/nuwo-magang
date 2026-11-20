@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Status Pendaftaran — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<title>Status Pendaftaran · Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -59,7 +59,6 @@
   .head-aksi{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
   .kop-cetak,.nama-cetak{display:none;}
 
-  /* Cetak / simpan PDF: satu halaman bukti tanpa navigasi, tombol, atau animasi */
   @media print{
     @page{size:A4;margin:16mm 14mm;}
     body{background:#fff !important;font-size:12px;}
@@ -101,7 +100,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title" aria-label="Nuwo Magang, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Nuwo Magang</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <a href="formulir.html" class="nav-link">Formulir</a>
       <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
@@ -151,10 +150,8 @@
     const steps = [];
     let tahap;
 
-    // 1. Pendaftaran dikirim
     steps.push({ cls: 'done', title: 'Pendaftaran dikirim', text: `Lima berkas administrasi terunggah lengkap · ${fmtTanggal(a.submitted_at)}.` });
 
-    // 2. Verifikasi administrasi
     if (a.status_admin === 'menunggu') {
       tahap = 'Verifikasi Administrasi';
       steps.push({ cls: 'current', n: 2, title: 'Verifikasi administrasi sedang diproses', text: 'Tim memeriksa kelengkapan berkas dan syarat akademik Anda.' });
@@ -172,7 +169,6 @@
       steps.push({ cls: 'done', title: 'Verifikasi administrasi: Berkas lengkap', text: `Jenjang ${esc(a.jenjang)}, semester ${esc(a.semester)}, dan seluruh berkas dinyatakan sesuai.` });
     }
 
-    // 3. Seleksi berkas untuk wawancara (screening manual oleh tim)
     if (a.status_admin !== 'memenuhi') {
       steps.push({ cls: 'pending', n: 3, title: 'Seleksi berkas', text: 'Untuk pelamar yang berkasnya lengkap.' });
     } else if (!a.status_seleksi) {
@@ -185,7 +181,6 @@
       steps.push({ cls: 'done', title: 'Seleksi berkas: Lolos ke tahap wawancara' });
     }
 
-    // 4. Wawancara daring: satu jadwal dan satu link Zoom untuk seluruh pelamar di batch ini
     if (a.status_seleksi !== 'lolos') {
       steps.push({ cls: 'pending', n: 4, title: 'Wawancara daring', text: 'Untuk pelamar yang lolos seleksi berkas.' });
     } else {
@@ -203,7 +198,6 @@
       else { tahap = 'Wawancara'; steps.push({ cls: 'current', n: 4, title: 'Wawancara daring', extra: box + zoom }); }
     }
 
-    // 5. Pengumuman
     if (a.hasil_akhir === 'diterima') {
       steps.push({ cls: 'done', title: 'Pengumuman: Diterima', text: 'Selamat, Anda diterima sebagai peserta PKL.' });
     } else if (a.hasil_akhir === 'tidak_diterima') {
@@ -213,7 +207,6 @@
       steps.push({ cls: 'pending', n: 5, title: 'Pengumuman', text: 'Hasil diumumkan melalui halaman ini dan email.' });
     }
 
-    // 6. Kesediaan dan pelaksanaan PKL
     const periodePkl = batch ? rentangTanggal(batch.mulai, batch.selesai) : '';
     if (a.hasil_akhir !== 'diterima') {
       steps.push({ cls: 'pending', n: 6, title: 'Konfirmasi kesediaan dan pelaksanaan PKL', text: 'Peserta yang diterima mengonfirmasi kesediaan, lalu menjalani PKL selama 2 bulan.' });
@@ -305,7 +298,6 @@
     </div>`;
   }
 
-  // Kesediaan: konfirmasi dulu, karena pilihan hanya dapat dibuat sekali
   document.addEventListener('click', async e => {
     const btn = e.target.closest('[data-kesediaan]');
     if (!btn) return;
@@ -321,7 +313,6 @@
     else document.querySelectorAll('[data-kesediaan]').forEach(b => { b.disabled = false; });
   });
 
-  // Unggah laporan akhir
   document.addEventListener('change', async e => {
     const input = e.target.closest('[data-unggah-pkl]');
     if (!input || !input.files[0]) return;
@@ -348,7 +339,6 @@
 
   document.addEventListener('click', e => { if (e.target.closest('#cetakBtn')) window.print(); });
 
-  // "Fakultas Ekonomi dan Bisnis / Ekonomi Pembangunan" → "Ekonomi Pembangunan"
   function prodi(s) { const parts = String(s || '').split('/'); return parts[parts.length - 1].trim(); }
 </script>
 </body>

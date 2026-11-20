@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Absen Harian — Portal Magang Mahasiswa KPwBI Provinsi Lampung</title>
+<title>Absen Harian · Nuwo Magang</title>
 <meta name="robots" content="noindex">
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
@@ -20,7 +20,6 @@
   .head .meta{font-size:13.5px;color:var(--ink-3);font-weight:600;margin-bottom:4px;}
   .head h1{font-size:clamp(28px,6vw,36px);line-height:1.1;margin-bottom:18px;}
 
-  /* Kartu hari ini: jam datang dan pulang berdampingan */
   .hari-ini{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;}
   .slot{background:#fff;border:1px solid var(--line);border-radius:var(--radius);padding:16px 18px;box-shadow:var(--shadow-sm);}
   .slot span{display:block;font-size:12.5px;color:var(--ink-3);font-weight:600;}
@@ -30,7 +29,6 @@
   .slot.ada b{color:var(--green);}
   .slot a{font-size:12.5px;font-weight:600;color:var(--navy-700);}
 
-  /* Langkah absen */
   .langkah{display:flex;flex-direction:column;gap:14px;}
   .baris-lokasi{display:flex;align-items:flex-start;gap:12px;}
   .baris-lokasi .ikon{width:38px;height:38px;border-radius:10px;background:var(--navy-50);color:var(--navy-700);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
@@ -47,7 +45,6 @@
   .tombol-kamera .btn{flex:1;}
   .catatan-absen{font-size:12.5px;color:var(--ink-3);}
 
-  /* Logbook harian: syarat absen pulang */
   #kartuLogbook{margin-bottom:16px;}
   #kartuLogbook .card-title{display:flex;align-items:center;gap:8px;}
   #kartuLogbook [hidden]{display:none;}
@@ -67,7 +64,7 @@
 
 <header class="topbar">
   <div class="wrap">
-    <a href="dashboard.html" class="title" aria-label="Portal Magang Mahasiswa, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Portal Magang Mahasiswa</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
+    <a href="dashboard.html" class="title" aria-label="Nuwo Magang, ke beranda"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="" width="30" height="30"></span><span class="teks">Nuwo Magang</span> <span class="full">· KPwBI Provinsi Lampung</span></a>
     <div class="right">
       <a href="status_pengajuan.html" class="nav-link">Status</a>
       <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
@@ -102,10 +99,10 @@
 <script src="assets/common.js"></script>
 <script>
   const $ = id => document.getElementById(id);
-  let st = null;           // status dari server
-  let posisi = null;       // { lat, lng, akurasi }
+  let st = null;
+  let posisi = null;
   let pantauGps = null, aliran = null, fotoBlob = null;
-  let logbookTersimpan = null;   // isi logbook hari ini yang sudah tersimpan di server
+  let logbookTersimpan = null;
   const JENIS_LABEL = { datang: 'Absen datang', pulang: 'Absen pulang' };
 
   $('logoutBtn').addEventListener('click', () => logout('login.html'));
@@ -162,11 +159,9 @@
     if (jenis === 'pulang') perbaruiSyaratPulang();
   }
 
-  // ---------- Logbook harian ----------
   function tampilLogbook() {
     const kartu = $('kartuLogbook');
     const lb = st.logbook;
-    // Logbook muncul setelah absen datang
     if (!st.absen.datang) { kartu.hidden = true; return; }
     kartu.hidden = false;
     if (lb.terkunci) {
@@ -193,7 +188,6 @@
     perbaruiSyaratPulang();
   }
 
-  // Satu kotak isian per kegiatan; disimpan sebagai teks satu kegiatan per baris
   function tambahKegiatan(teks, fokus) {
     const daftar = $('daftarKegiatan');
     if (daftar.children.length >= st.logbook.kegiatan_maks) return;
@@ -214,13 +208,11 @@
   const isiKegiatan = () => [...document.querySelectorAll('#daftarKegiatan input')].map(i => i.value.replace(/\s+/g, ' ').trim());
   const teksLogbook = () => isiKegiatan().filter(Boolean).join('\n');
 
-  // Tombol absen pulang hanya aktif bila logbook valid sudah tersimpan dan tidak ada perubahan yang belum disimpan
   function perbaruiSyaratPulang() {
     const daftar = $('daftarKegiatan');
     if (!daftar) return;
     const { min, kegiatan_maks: maks } = st.logbook;
     const semua = isiKegiatan();
-    // Penomoran ulang dan tombol hapus hanya bila lebih dari satu kotak
     [...daftar.children].forEach((b, i) => {
       b.querySelector('.label').textContent = `Kegiatan ${i + 1}`;
       b.querySelector('input').setAttribute('aria-label', `Kegiatan ${i + 1}`);
@@ -250,14 +242,12 @@
     tampilLogbook();
   }
 
-  // Peringatkan bila logbook diubah tetapi belum disimpan
   window.addEventListener('beforeunload', e => {
     if (!$('daftarKegiatan')) return;
     const t = teksLogbook();
     if (t !== '' && t !== (logbookTersimpan || '')) { e.preventDefault(); e.returnValue = ''; }
   });
 
-  // ---------- Langkah 1: lokasi ----------
   function langkahLokasi(jenis) {
     $('kartuLogbook').hidden = true;
     $('panel').innerHTML = `
@@ -290,7 +280,6 @@
     }, { enableHighAccuracy: true, maximumAge: 0, timeout: 20000 });
   }
 
-  // ---------- Langkah 2: kamera ----------
   async function langkahKamera(jenis) {
     $('panel').innerHTML = `
       <h2 class="card-title">${JENIS_LABEL[jenis]}</h2>
@@ -322,7 +311,6 @@
   function jepret(jenis) {
     const video = $('video');
     const kanvas = document.createElement('canvas');
-    // Server menerima paling besar 4.000 px per sisi; foto diperkecil ke 1.600 px bila kamera lebih besar
     const skala = Math.min(1, 1600 / Math.max(video.videoWidth, video.videoHeight));
     kanvas.width = Math.round(video.videoWidth * skala);
     kanvas.height = Math.round(video.videoHeight * skala);
@@ -339,12 +327,10 @@
     }, 'image/jpeg', 0.85);
   }
 
-  // ---------- Langkah 3: kirim ----------
   async function kirim(jenis) {
     const btn = $('kirimBtn');
     btn.disabled = true;
     btn.textContent = 'Mengirim…';
-    // Token sesi sekali pakai diminta tepat sebelum mengirim
     const sesi = await api('backend/api/absen/mulai.php', { json: { jenis } });
     if (!sesi.success) { gagal(sesi.message); return; }
     const fd = new FormData();

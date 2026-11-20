@@ -12,13 +12,11 @@ $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app) fail('Data pelamar tidak ditemukan.', 404);
 
-// A. Syarat akademik (syarat gugur)
 $syarat = $data['syarat'] ?? [];
 foreach (['s1', 'semester', 'aktif'] as $k) {
     if (!in_array($syarat[$k] ?? null, ['memenuhi', 'tidak'], true)) fail('Tetapkan seluruh syarat akademik.');
 }
 
-// B. Status tiap berkas
 $berkas = $data['berkas'] ?? [];
 foreach (array_keys(JENIS_BERKAS) as $jenis) {
     if (!in_array($berkas[$jenis] ?? null, ['sesuai', 'perbaikan', 'tidak_sesuai'], true)) {
@@ -26,7 +24,6 @@ foreach (array_keys(JENIS_BERKAS) as $jenis) {
     }
 }
 
-// Hasil otomatis sesuai aturan
 $files = (array) app_files($pdo, $id);
 $adaTidak = in_array('tidak', $syarat, true) || in_array('tidak_sesuai', $berkas, true) || count($files) < count(JENIS_BERKAS);
 if ($adaTidak) $hasil = 'tidak_memenuhi';

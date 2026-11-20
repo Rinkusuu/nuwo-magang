@@ -1,7 +1,7 @@
 <?php
 require '../../config.php';
 
-// Hanya lewat POST (dengan token CSRF), supaya tautan dari situs lain tidak bisa mengeluarkan pengguna
+// POST + CSRF supaya tautan dari situs lain tidak bisa me-logout pengguna
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') fail('Metode tidak diizinkan.', 405);
 
 $_SESSION = [];

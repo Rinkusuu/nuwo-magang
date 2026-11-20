@@ -1,19 +1,8 @@
 <?php
-// Penulis .xlsx kecil tanpa library: satu lembar, teks dan angka, sel gabung, lebar kolom,
-// huruf, isian warna, perataan, dan garis tepi. Gaya tiap sel dideduplikasi menjadi cellXfs.
-//
-//   $x = new XlsxSederhana('Logbook');
-//   $x->lebar(['A' => 9.8, 'C' => 21.2]);
-//   $x->sel('A1', 'Judul', ['tebal' => true, 'rata' => 'center', 'garis' => ['t' => 'thin']]);
-//   $x->gabung('A1:I1');
-//   $x->simpan('/tmp/hasil.xlsx');
-//
-// Gaya: huruf (nama), ukuran, tebal, isi (warna latar RRGGBB), rata (left|center|right),
-// tegak (top|center|bottom), bungkus (wrap), garis ['l'|'r'|'t'|'b' => 'thin'|'hair'|'medium'].
 
 class XlsxSederhana {
     private string $namaLembar;
-    private array $sel = [];        // [baris][kolom] => [nilai, idGaya]
+    private array $sel = [];
     private array $gabungan = [];
     private array $lebarKolom = [];
     private array $fonts = [];
@@ -47,11 +36,6 @@ class XlsxSederhana {
         $this->gabungan[] = $rentang;
     }
 
-    /**
-     * Isi rentang (mis. "B10:C12") dengan satu nilai di sel kiri atas, gaya yang sama di semua sel,
-     * dan garis luar sesuai $garis (hanya sisi luar rentang yang diberi garis). Rentang lebih dari
-     * satu sel otomatis digabung.
-     */
     public function kotak(string $rentang, $nilai, array $gaya = [], array $garis = []): void {
         [$awal, $akhir] = array_pad(explode(':', $rentang), 2, null);
         $akhir ??= $awal;
@@ -98,7 +82,6 @@ class XlsxSederhana {
         $zip->close();
     }
 
-    // ---------- XML ----------
     private function xmlLembar(): string {
         $x = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
             . '<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
@@ -149,7 +132,6 @@ class XlsxSederhana {
             . '</styleSheet>';
     }
 
-    // ---------- Gaya ----------
     private function idGaya(array $g): int {
         $font = $this->idFont(['huruf' => $g['huruf'] ?? $this->hurufBawaan, 'ukuran' => $g['ukuran'] ?? $this->ukuranBawaan, 'tebal' => !empty($g['tebal'])]);
         $fill = isset($g['isi']) ? $this->idFill($g['isi']) : 0;
@@ -184,7 +166,6 @@ class XlsxSederhana {
         return $this->borders[$xml] ??= count($this->borders);
     }
 
-    // ---------- Alamat sel ----------
     private static function urai(string $ref): array {
         if (!preg_match('/^([A-Z]+)(\d+)$/', $ref, $m)) throw new InvalidArgumentException("Alamat sel tidak valid: $ref");
         return [self::indeksKolom($m[1]), (int) $m[2]];

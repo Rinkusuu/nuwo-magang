@@ -1,20 +1,3 @@
-/**
- * Gerak halus untuk seluruh portal.
- *
- * Dimuat di <head> tanpa defer supaya kelas "gerak" terpasang sebelum halaman
- * tergambar; dengan begitu elemen yang akan dianimasikan tidak sempat tampil
- * lalu menghilang. Kelas itu tidak dipasang bila pengguna memilih "kurangi
- * gerakan" atau peramban tidak mendukung IntersectionObserver — halaman lalu
- * tampil apa adanya tanpa animasi masuk.
- *
- * Yang diatur di sini:
- *  - [data-kata]    judul dipecah per kata, tiap kata naik bergantian
- *  - [data-muncul]  elemen tampil saat masuk layar (urutan antar-saudara bertahap)
- *  - .rute          panjang garis rute diukur supaya animasi gambarnya pas
- *  - .flow          garis alur seleksi terisi saat bagian itu terlihat
- *  - details.faq    buka-tutup FAQ dengan tinggi yang beranimasi
- *  - header.nav, .topbar  mendapat bayangan setelah halaman digulir
- */
 (function () {
   const akar = document.documentElement;
   const kurangiGerak = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -33,9 +16,6 @@
     el.dataset.kataSiap = '1';
   }
 
-  // Mengukur panjang garis rute dan menaruh titik halte tepat di atas garisnya.
-  // data-halte berisi posisi relatif (0–1) sepanjang garis; halte pertama menandai
-  // tahap yang sedang berjalan, yaitu pendaftaran.
   function ukurRute(root) {
     (root || document).querySelectorAll('svg.rute').forEach(svg => {
       const garis = svg.querySelector('path.garis');
@@ -62,7 +42,6 @@
     });
   }
 
-  // Dipanggil juga oleh halaman setelah menyisipkan markup baru (mis. kartu bidang dari API)
   function amati(root) {
     if (!aktif) return;
     const scope = root || document;
@@ -118,7 +97,6 @@
     perbarui();
   }
 
-  // Pola titik di latar navy bergeser sedikit lebih lambat dari gulir, memberi kesan kedalaman.
   function geserPola() {
     if (!aktif) return;
     const pola = document.querySelector('.hero .pola-titik');

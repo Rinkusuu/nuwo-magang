@@ -3,7 +3,6 @@ require '../../config.php';
 require '../../app_helpers.php';
 require '../../mailer.php';
 
-// Hasil akhir setelah wawancara: diterima, tidak diterima, atau dibatalkan (null)
 $adminId = require_admin();
 $data = body();
 $id = (int) ($data['id'] ?? 0);
@@ -23,7 +22,6 @@ $pdo->prepare("UPDATE applications SET hasil_akhir = ?, decided_at = ? WHERE id 
     ->execute([$hasil, $hasil ? date('Y-m-d H:i:s') : null, $id]);
 log_status($pdo, $id, $app['hasil_akhir'] ?? 'dinilai', $hasil ?? 'dibatalkan', $adminId);
 
-// Email hanya saat hasil ditetapkan atau berubah (bukan saat dibatalkan)
 if ($hasil !== null && $hasil !== $app['hasil_akhir']) {
     email_hasil_akhir($app, $hasil, batch_by_id($pdo, $app['batch_id'] ? (int) $app['batch_id'] : null));
 }

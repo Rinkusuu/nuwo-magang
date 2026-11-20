@@ -1,9 +1,6 @@
 <?php
 require '../../config.php';
 
-// Kelola akun backoffice (khusus admin): daftar, tambah, ubah nama/peran,
-// atur ulang kata sandi, serta aktifkan/nonaktifkan. Akun tidak dihapus agar
-// riwayat penilaian wawancara tetap utuh.
 $adminId = require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
@@ -23,7 +20,6 @@ $sandiValid = function (string $sandi): void {
     if (strlen($sandi) < 12) fail('Kata sandi minimal 12 karakter.');
     if (strlen($sandi) > 72) fail('Kata sandi maksimal 72 karakter.');
 };
-// Harus selalu tersisa minimal satu admin aktif
 $sisaAdminLain = function (int $kecuali) use ($pdo): int {
     $q = $pdo->prepare("SELECT COUNT(*) FROM admins WHERE peran = 'admin' AND aktif = 1 AND id <> ?");
     $q->execute([$kecuali]);

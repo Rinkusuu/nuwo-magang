@@ -3,7 +3,6 @@ require '../../config.php';
 require '../../app_helpers.php';
 require '../../logbook_excel.php';
 
-// Unduh logbook sebagai Excel: peserta untuk miliknya sendiri, admin untuk peserta mana pun (?id=)
 $admin = (staf_aktif()['peran'] ?? '') === 'admin';
 if ($admin && isset($_GET['id'])) {
     $q = $pdo->prepare("SELECT * FROM applications WHERE id = ?");

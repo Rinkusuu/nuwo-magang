@@ -1,7 +1,6 @@
 <?php
 require '../../config.php';
 
-// Unduh logbook atau laporan akhir: hanya pemilik atau admin
 $id = (int) ($_GET['id'] ?? 0);
 $q = $pdo->prepare("
     SELECT b.stored_name, b.original_name, a.user_id
@@ -23,7 +22,6 @@ $ascii = preg_replace('/[^\x20-\x7E]/', '_', $nama);
 
 header('Content-Type: ' . $tipe);
 header('Content-Length: ' . filesize($path));
-// PDF dibuka di peramban, Excel diunduh
 header('Content-Disposition: ' . ($ext === 'pdf' ? 'inline' : 'attachment') . '; filename="' . $ascii . '"; filename*=UTF-8\'\'' . rawurlencode($nama));
 header('Cache-Control: private, no-store');
 readfile($path);

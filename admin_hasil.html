@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Hasil dan Pengumuman — Backoffice Magang KPwBI Provinsi Lampung</title>
+<title>Hasil dan Pengumuman · Backoffice Nuwo Magang</title>
 <meta name="theme-color" content="#0A2A4A">
 <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
@@ -67,7 +67,6 @@
   async function muat(pertama = false) {
     const data = await api('backend/api/admin/applications.php');
     if (!data.success) { toast(data.message, true); return; }
-    // Hanya pelamar yang lolos ke wawancara
     semua = data.data.filter(r => r.status_seleksi === 'lolos').sort((a, b) => (b.nilai ?? -1) - (a.nilai ?? -1));
     if (pertama) {
       $('fBatch').insertAdjacentHTML('beforeend', data.batch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join(''));

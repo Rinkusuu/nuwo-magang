@@ -2,7 +2,6 @@
 require '../../config.php';
 require '../../absen_helpers.php';
 
-// Membuka sesi absen: memeriksa aturan, lalu menerbitkan token sekali pakai (berlaku 2 menit)
 $userId = require_user();
 $jenis = body()['jenis'] ?? '';
 if (!in_array($jenis, ['datang', 'pulang'], true)) fail('Jenis absen tidak valid.');

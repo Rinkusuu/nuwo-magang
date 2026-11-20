@@ -2,7 +2,6 @@
 require '../../config.php';
 require '../../absen_helpers.php';
 
-// Status absen hari ini untuk halaman absen peserta
 $userId = require_user();
 [$app, $batch, $alasan] = peserta_aktif($pdo, $userId);
 $atur = pengaturan_absen($pdo);

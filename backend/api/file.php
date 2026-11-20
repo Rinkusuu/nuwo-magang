@@ -1,7 +1,6 @@
 <?php
 require '../config.php';
 
-// Lihat berkas PDF: hanya pemilik pendaftaran atau admin
 $id = (int) ($_GET['id'] ?? 0);
 $stmt = $pdo->prepare("
     SELECT f.stored_name, f.original_name, a.user_id, a.status_seleksi
@@ -12,7 +11,6 @@ $stmt->execute([$id]);
 $f = $stmt->fetch();
 
 $isOwner = $f && (int) $f['user_id'] === pengguna_aktif();
-// Berkas pendaftaran: pemilik, admin, atau pewawancara (untuk pelamar yang diundang wawancara)
 $staf = staf_aktif();
 $bolehStaf = $f && $staf && ($staf['peran'] === 'admin' || $f['status_seleksi'] === 'lolos');
 if (!$f || (!$isOwner && !$bolehStaf)) fail('Berkas tidak ditemukan.', 404);
