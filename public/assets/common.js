@@ -105,7 +105,7 @@ function fmtAngka(n, digits = 2) {
 }
 
 function initials(name) {
-  return String(name || '').trim().split(/\s+/).slice(0, 2).map(w => w[0] || '').join('').toUpperCase() || '–';
+  return String(name || '').split(/[^\p{L}]+/u).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '–';
 }
 
 function pill(map, key, fallback = '') {

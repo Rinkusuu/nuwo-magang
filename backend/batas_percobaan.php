@@ -15,7 +15,9 @@ function cek_batas(PDO $pdo, string $kunci, int $maks, int $menit, int $maksIp =
     $lewat = $maksKunci > 0
         ? $hitung('kunci = ? AND ip = ?', [$kunci, ip_klien()]) >= $maks || $hitung('kunci = ?', [$kunci]) >= $maksKunci
         : $hitung('kunci = ?', [$kunci]) >= $maks;
-    if (!$lewat && $maksIp > 0) $lewat = $hitung('ip = ?', [ip_klien()]) >= $maksIp;
+    // per jenis endpoint: salah sandi pelamar tidak boleh ikut mengunci login admin dari IP kantor yang sama
+    $jenis = str_contains($kunci, ':') ? strtok($kunci, ':') . ':%' : $kunci;
+    if (!$lewat && $maksIp > 0) $lewat = $hitung('ip = ? AND kunci LIKE ?', [ip_klien(), $jenis]) >= $maksIp;
     if ($lewat) fail("Terlalu banyak percobaan. Coba lagi dalam $menit menit.", 429);
 }
 
