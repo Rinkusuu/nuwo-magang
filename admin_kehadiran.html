@@ -74,9 +74,9 @@
   (async () => {
     if (!await requireAdmin()) return;
     $('fTanggal').value = todayISO();
-    const p = await api('backend/api/admin/periode.php');
-    if (!p.periode || p.periode.kantor_lat === null) {
-      $('peringatanLokasi').innerHTML = '<div class="notice amber peringatan-lokasi"><b>Lokasi kantor belum diatur</b>Peserta belum bisa absen. Atur titik kantor di <a class="link" href="admin_periode.html">Batch dan Jadwal → Pengaturan umum</a>.</div>';
+    const p = await api('backend/api/admin/pengaturan.php');
+    if (!p.pengaturan || p.pengaturan.kantor_lat === null) {
+      $('peringatanLokasi').innerHTML = '<div class="notice amber peringatan-lokasi"><b>Lokasi kantor belum diatur</b>Peserta belum bisa absen. Atur titik kantor di <a class="link" href="admin_batch.html">Batch dan Jadwal → Pengaturan umum</a>.</div>';
     }
     muat(true);
   })();

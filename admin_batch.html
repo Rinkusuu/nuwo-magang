@@ -32,7 +32,7 @@
   .lokasi-aksi{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;}
 </style>
 </head>
-<body data-menu="periode">
+<body data-menu="batch">
 <div class="bo">
   <aside class="bo-side" id="sidebar"></aside>
   <main class="bo-main">
@@ -172,8 +172,8 @@
   (async () => {
     if (!await requireAdmin()) return;
     muat();
-    const p = await api('backend/api/admin/periode.php');
-    const umum = p.periode || {};
+    const p = await api('backend/api/admin/pengaturan.php');
+    const umum = p.pengaturan || {};
     $('hari_perbaikan').value = umum.hari_perbaikan || 3;
     $('kantor_lat').value = umum.kantor_lat ?? '';
     $('kantor_lng').value = umum.kantor_lng ?? '';
@@ -199,7 +199,7 @@
     const btn = $('simpanUmum');
     btn.disabled = true;
     const kunci = ['hari_perbaikan', 'kantor_lat', 'kantor_lng', 'radius_m', 'akurasi_maks_m'];
-    const res = await api('backend/api/admin/periode.php', { json: Object.fromEntries(kunci.map(k => [k, $(k).value.trim().replace(',', '.')])) });
+    const res = await api('backend/api/admin/pengaturan.php', { json: Object.fromEntries(kunci.map(k => [k, $(k).value.trim().replace(',', '.')])) });
     btn.disabled = false;
     toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
   });

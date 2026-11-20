@@ -1,5 +1,5 @@
 <?php
-// Salin ke config.local.php. Tiap kunci juga bisa diisi lewat env MAGANG_<KUNCI>.
+// Salin ke config.local.php. Env MAGANG_<KUNCI> mengalahkan isi berkas ini.
 return [
     'APP_URL'  => 'https://magang.contoh.go.id',
     'DEBUG'    => false,

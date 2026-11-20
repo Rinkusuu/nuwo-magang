@@ -4,7 +4,7 @@ require '../../config.php';
 $adminId = require_admin();
 
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    json_out(['success' => true, 'periode' => get_periode($pdo)]);
+    json_out(['success' => true, 'pengaturan' => get_pengaturan($pdo)]);
 }
 
 $data = body();
@@ -22,8 +22,8 @@ if ($radius < 20 || $radius > 2000) fail('Radius absen harus 20–2.000 meter.')
 if ($akurasi < 10 || $akurasi > 1000) fail('Akurasi GPS maksimal harus 10–1.000 meter.');
 
 $pdo->prepare("
-    INSERT INTO periode (id, tahun, hari_perbaikan, kantor_lat, kantor_lng, radius_m, akurasi_maks_m)
-    VALUES (1, YEAR(CURDATE()), ?, ?, ?, ?, ?)
+    INSERT INTO pengaturan (id, hari_perbaikan, kantor_lat, kantor_lng, radius_m, akurasi_maks_m)
+    VALUES (1, ?, ?, ?, ?, ?)
     ON DUPLICATE KEY UPDATE hari_perbaikan = VALUES(hari_perbaikan), kantor_lat = VALUES(kantor_lat),
         kantor_lng = VALUES(kantor_lng), radius_m = VALUES(radius_m), akurasi_maks_m = VALUES(akurasi_maks_m)
 ")->execute([$hari, $lat, $lng, $radius, $akurasi]);

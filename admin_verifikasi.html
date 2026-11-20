@@ -58,13 +58,13 @@
     ['aktif', 'Mahasiswa aktif', () => 'Surat pengantar diterbitkan dan ditandatangani pejabat berwenang.'],
   ];
   const state = { syarat: {}, berkas: {} };
-  let app, files, periode;
+  let app, files, pengaturan;
 
   (async () => {
     if (!await requireAdmin()) return;
     const data = await api(`backend/api/admin/application.php?id=${id}`);
     if (!data.success) { document.getElementById('main').innerHTML = `<div class="notice red">${esc(data.message)}</div>`; return; }
-    ({ application: app, files, periode } = data);
+    ({ application: app, files, pengaturan } = data);
     SYARAT.forEach(([k]) => state.syarat[k] = app[`syarat_${k}`]);
     BERKAS.forEach(b => state.berkas[b.jenis] = files[b.jenis] ? files[b.jenis].status_verifikasi : 'tidak_sesuai');
     render();
@@ -129,7 +129,7 @@
           <section class="card rules">
             <h3 style="font-size:14px;">Aturan hasil</h3>
             <p>Memenuhi syarat: seluruh syarat akademik terpenuhi dan kelima berkas sesuai.</p>
-            <p>Perlu perbaikan: ada berkas berstatus perbaikan; pelamar diberi batas waktu ${esc(periode.hari_perbaikan ?? 3)} hari kerja.</p>
+            <p>Perlu perbaikan: ada berkas berstatus perbaikan; pelamar diberi batas waktu ${esc(pengaturan.hari_perbaikan ?? 3)} hari kerja.</p>
             <p>Tidak memenuhi: ada syarat akademik tidak terpenuhi atau berkas tidak ada.</p>
           </section>
           <section class="card info-list">

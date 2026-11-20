@@ -16,7 +16,7 @@ $path = UPLOAD_DIR . $f['stored_name'];
 if (!is_file($path)) fail('Berkas tidak ditemukan di server.', 404);
 
 $ext = strtolower(pathinfo($f['stored_name'], PATHINFO_EXTENSION));
-$tipe = ['pdf' => 'application/pdf', 'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'xls' => 'application/vnd.ms-excel'][$ext] ?? 'application/octet-stream';
+$tipe = $ext === 'pdf' ? 'application/pdf' : 'application/octet-stream';
 $nama = str_replace(['"', "\r", "\n", '\\'], '', $f['original_name']);
 $ascii = preg_replace('/[^\x20-\x7E]/', '_', $nama);
 

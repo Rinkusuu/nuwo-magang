@@ -1,4 +1,3 @@
-// Bobot harus sama dengan BOBOT_ASPEK di backend/config.php.
 const SKALA = { 5: 'Sangat baik', 4: 'Baik', 3: 'Cukup', 2: 'Kurang', 1: 'Sangat kurang' };
 
 const ASPEK = [

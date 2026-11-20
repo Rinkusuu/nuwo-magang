@@ -33,5 +33,5 @@ json_out([
     'files' => app_files($pdo, $id),
     'penilaian' => $penilaian,
     'admin' => ['id' => $adminId, 'nama' => $_SESSION['admin_nama']],
-    'periode' => get_periode($pdo),
+    'pengaturan' => get_pengaturan($pdo),
 ]);

@@ -100,7 +100,7 @@
     $('detailBatch').innerHTML = b ? `
       <div><span>Jadwal wawancara</span><b>${b.wawancara_tanggal ? fmtTanggal(b.wawancara_tanggal) + (b.wawancara_jam ? ', ' + esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : '') : 'Belum diatur'}</b></div>
       <div><span>Link Zoom</span><b>${b.link_zoom ? `<a class="link" href="${esc(b.link_zoom)}" target="_blank" rel="noopener">Buka Zoom</a>` : 'Belum diatur'}</b></div>
-      ${peran === 'admin' ? '<div><span>Pengaturan</span><b><a class="link" href="admin_periode.html">Ubah di Batch dan Jadwal</a></b></div>' : ''}`
+      ${peran === 'admin' ? '<div><span>Pengaturan</span><b><a class="link" href="admin_batch.html">Ubah di Batch dan Jadwal</a></b></div>' : ''}`
       : '<div><span>Batch</span><b>Pilih batch untuk melihat jadwal dan link Zoom</b></div>';
 
     const rows = semua.filter(r => !id || String(r.batch_id) === id);

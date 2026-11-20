@@ -6,7 +6,7 @@ require '../../pembersihan_helpers.php';
 $userId = require_user();
 $app = app_by_user($pdo, $userId);
 
-if (!$app) json_out(['success' => true, 'has_application' => false, 'periode' => get_periode($pdo)]);
+if (!$app) json_out(['success' => true, 'has_application' => false]);
 
 $app['editable'] = app_editable($app);
 $app['hapus_pada'] = tanggal_hapus_akun($app);
@@ -29,5 +29,4 @@ json_out([
     'files' => app_files($pdo, (int) $app['id']),
     'batch' => $batch,
     'berkas_pkl' => berkas_pkl($pdo, (int) $app['id']),
-    'periode' => get_periode($pdo),
 ]);

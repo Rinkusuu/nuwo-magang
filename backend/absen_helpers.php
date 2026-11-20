@@ -6,7 +6,7 @@ const FONT_STEMPEL = __DIR__ . '/font/PlusJakartaSans-Bold.ttf';
 const LEBAR_FOTO_MAKS = 720;
 
 function pengaturan_absen(PDO $pdo): array {
-    $p = $pdo->query("SELECT kantor_lat, kantor_lng, radius_m, akurasi_maks_m FROM periode WHERE id = 1")->fetch() ?: [];
+    $p = $pdo->query("SELECT kantor_lat, kantor_lng, radius_m, akurasi_maks_m FROM pengaturan WHERE id = 1")->fetch() ?: [];
     return [
         'kantor_lat' => isset($p['kantor_lat']) ? (float) $p['kantor_lat'] : null,
         'kantor_lng' => isset($p['kantor_lng']) ? (float) $p['kantor_lng'] : null,

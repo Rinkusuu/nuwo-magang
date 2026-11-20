@@ -23,13 +23,8 @@ CREATE TABLE admins (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB;
 
-CREATE TABLE periode (
+CREATE TABLE pengaturan (
   id INT PRIMARY KEY,
-  tahun SMALLINT NOT NULL,
-  tanggal_buka DATE NULL,
-  tanggal_tutup DATE NULL,
-  durasi VARCHAR(100) NULL,
-  kuota INT NULL,
   hari_perbaikan TINYINT NOT NULL DEFAULT 3,
   kantor_lat DECIMAL(10,7) NULL,
   kantor_lng DECIMAL(10,7) NULL,
@@ -132,7 +127,7 @@ CREATE TABLE application_files (
 CREATE TABLE berkas_pkl (
   id INT AUTO_INCREMENT PRIMARY KEY,
   application_id INT NOT NULL,
-  jenis ENUM('logbook','laporan') NOT NULL,
+  jenis ENUM('laporan') NOT NULL,
   stored_name VARCHAR(255) NOT NULL,
   original_name VARCHAR(255) NOT NULL,
   size INT NOT NULL,
@@ -197,7 +192,7 @@ CREATE TABLE interview_assessments (
   admin_id INT NOT NULL,
   skor TEXT NOT NULL,          -- JSON: [s1..s7], nilai 1-5 atau null
   catatan_aspek TEXT NULL,     -- JSON: [c1..c7]
-  rekomendasi ENUM('sangat','direkomendasikan','cadangan','tidak') NULL,
+  rekomendasi ENUM('sangat','direkomendasikan','tidak') NULL,
   catatan TEXT NULL,
   nilai_akhir DECIMAL(4,2) NULL,
   lengkap TINYINT(1) NOT NULL DEFAULT 0,
@@ -237,8 +232,7 @@ CREATE TABLE IF NOT EXISTS reset_sandi (
   FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 ) ENGINE=InnoDB;
 
-INSERT INTO periode (id, tahun, tanggal_buka, tanggal_tutup, durasi, kuota, hari_perbaikan) VALUES
-(1, 2027, NULL, NULL, NULL, NULL, 3);
+INSERT INTO pengaturan (id, hari_perbaikan) VALUES (1, 3);
 
 INSERT INTO batch (nama, daftar_buka, daftar_tutup, mulai, selesai) VALUES
 ('Periode 1 2027', '2027-01-01', '2027-01-20', '2027-02-01', '2027-03-31'),

@@ -1,6 +1,6 @@
 const MENU_ADMIN = [
   ['Seleksi', [
-    ['periode', 'Batch dan Jadwal', 'admin_periode.html'],
+    ['batch', 'Batch dan Jadwal', 'admin_batch.html'],
     ['pelamar', 'Daftar Pelamar', 'dashboard_admin.html'],
     ['verifikasi', 'Verifikasi Administrasi', 'dashboard_admin.html?status=menunggu'],
     ['wawancara', 'Seleksi dan Wawancara', 'admin_wawancara.html', ['admin', 'pewawancara']],

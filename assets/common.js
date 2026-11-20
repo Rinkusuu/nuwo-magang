@@ -28,7 +28,6 @@ const LABEL = {
     sangat: 'Sangat direkomendasikan',
     direkomendasikan: 'Direkomendasikan',
     tidak: 'Tidak direkomendasikan',
-    cadangan: 'Dipertimbangkan (cadangan)',
   },
 };
 

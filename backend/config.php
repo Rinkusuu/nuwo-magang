@@ -2,9 +2,9 @@
 
 $lokal = is_file(__DIR__ . '/config.local.php') ? require __DIR__ . '/config.local.php' : [];
 function cfg(array $lokal, string $kunci, $bawaan = null) {
-    if (array_key_exists($kunci, $lokal)) return $lokal[$kunci];
     $env = getenv('MAGANG_' . $kunci);
-    return $env !== false ? $env : $bawaan;
+    if ($env !== false) return $env;
+    return array_key_exists($kunci, $lokal) ? $lokal[$kunci] : $bawaan;
 }
 
 define('APP_URL', rtrim((string) cfg($lokal, 'APP_URL', ''), '/'));
@@ -175,8 +175,8 @@ function staf_pewawancara(): bool {
     return (staf_aktif()['peran'] ?? '') === 'pewawancara';
 }
 
-function get_periode(PDO $pdo): array {
-    return $pdo->query("SELECT * FROM periode WHERE id = 1")->fetch() ?: [];
+function get_pengaturan(PDO $pdo): array {
+    return $pdo->query("SELECT * FROM pengaturan WHERE id = 1")->fetch() ?: [];
 }
 
 function log_status(PDO $pdo, int $appId, ?string $from, string $to, ?int $adminId, ?string $note = null): void {

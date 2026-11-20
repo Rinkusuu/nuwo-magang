@@ -33,8 +33,8 @@ else $hasil = 'memenuhi';
 $catatan = trim($data['catatan'] ?? '');
 if ($hasil !== 'memenuhi' && $catatan === '') fail('Catatan untuk pelamar wajib diisi.');
 
-$periode = get_periode($pdo);
-$batas = $hasil === 'perbaikan' ? tambah_hari_kerja((int) ($periode['hari_perbaikan'] ?? 3)) : null;
+$pengaturan = get_pengaturan($pdo);
+$batas = $hasil === 'perbaikan' ? tambah_hari_kerja((int) ($pengaturan['hari_perbaikan'] ?? 3)) : null;
 
 $pdo->beginTransaction();
 $pdo->prepare("

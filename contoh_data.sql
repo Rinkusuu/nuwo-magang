@@ -1,8 +1,8 @@
--- Data contoh untuk laptop, jangan diimpor di server. Admin: admin@bi.go.id / AdminBI2026, pelamar: Demo1234.
+-- Data contoh untuk laptop, jangan diimpor di server. Admin: admin@contoh.test / AdminBI2026, pelamar: Demo1234.
 USE magang_bi;
 
 INSERT INTO admins (nama, email, password) VALUES
-('Admin Seleksi', 'admin@bi.go.id', '$2y$12$hL5kVeYAwz7HvJOG0jWXmufBCNn5MCbtG2wx0/VMTtC3GnozxXgvW');
+('Admin Seleksi', 'admin@contoh.test', '$2y$12$hL5kVeYAwz7HvJOG0jWXmufBCNn5MCbtG2wx0/VMTtC3GnozxXgvW');
 
 INSERT INTO users (nama, email, password, no_wa) VALUES
 ('Rahmat Hidayat', 'rahmat@email.com', '$2y$12$QtviQDqeHCkfSibYoxhBhOqVH.SyTMJbMk2KexH0h0WGX7/7XGT6G', '0812-3456-7890'),

@@ -1,0 +1,28 @@
+name: uji
+
+on: [push, pull_request]
+
+jobs:
+  uji:
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: uji
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -puji" --health-interval=5s --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_mysql, gd, zip, curl, mbstring
+      - name: Sintaks PHP
+        run: find . -name '*.php' -not -path './backend/vendor/*' -print0 | xargs -0 -n1 php -l > /dev/null
+      - name: Uji asap
+        env:
+          MAGANG_DB_HOST: 127.0.0.1
+          MAGANG_DB_USER: root
+          MAGANG_DB_PASS: uji
+        run: php tests/asap.php

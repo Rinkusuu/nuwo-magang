@@ -1,7 +1,7 @@
-# Nuwo Magang, Apache. Untuk Nginx lihat deploy/nginx-portal-magang.conf.
+# Nuwo Magang, Apache. Untuk Nginx lihat deploy/nginx.conf.
 
 Options -Indexes
-DirectoryIndex dashboard.html
+DirectoryIndex index.html
 ErrorDocument 404 /404.html
 
 <FilesMatch "(^\.|\.(sql|md|log|lock|dist)$|^composer\.json$)">

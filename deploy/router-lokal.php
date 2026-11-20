@@ -13,7 +13,7 @@ function tidak_ditemukan(string $akar): bool {
 
 if ($path === '/' || $path === '') {
     header('Content-Type: text/html; charset=utf-8');
-    readfile($akar . '/dashboard.html');
+    readfile($akar . '/index.html');
     return true;
 }
 

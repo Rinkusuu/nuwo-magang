@@ -2,6 +2,8 @@
 
 Portal pendaftaran dan pengelolaan magang mahasiswa S1 di Kantor Perwakilan Bank Indonesia Provinsi Lampung: pendaftaran, verifikasi berkas, wawancara, pengumuman, lalu absen harian dan logbook selama magang.
 
+Dikembangkan untuk KPwBI Provinsi Lampung. Bukan untuk didistribusikan ulang.
+
 HTML, CSS, dan JavaScript biasa tanpa build. Backend PHP 8 dengan MySQL/MariaDB. Email lewat PHPMailer, yang ikut disimpan di `backend/vendor/` supaya server tidak perlu Composer.
 
 ## Jalan di laptop
@@ -13,18 +15,24 @@ cp backend/config.local.example.php backend/config.local.php
 php -d upload_max_filesize=11M -d post_max_size=12M -S 0.0.0.0:8740 deploy/router-lokal.php
 ```
 
-Buka http://127.0.0.1:8740. Admin `admin@bi.go.id` / `AdminBI2026`, pelamar `rahmat@email.com` / `Demo1234`. Backoffice ada di `/login_admin.html`.
+Buka http://127.0.0.1:8740. Admin `admin@contoh.test` / `AdminBI2026`, pelamar `rahmat@email.com` / `Demo1234`. Backoffice ada di `/login_admin.html`.
 
 Selama `SMTP_HOST` kosong, email tidak dikirim dan hanya ditulis ke `backend/logs/email.log`.
+
+Uji asap membuat database `magang_uji` sendiri, jadi data di `magang_bi` tidak tersentuh. GitHub Actions menjalankannya di setiap push.
+
+```bash
+MAGANG_DB_USER=root MAGANG_DB_PASS=... php tests/asap.php
+```
 
 ## Pasang di server
 
 1. Salin repo ke akar domain. Kalau dipasang di subfolder, path di `404.html` dan `.htaccess` perlu diubah.
 2. Buat database dan user khusus (jangan `root`), lalu impor `setup.sql`. Jangan impor `contoh_data.sql`.
 3. Buat `backend/config.local.php` dari contohnya, lalu isi `APP_URL`, database, dan SMTP.
-4. Buat admin pertama: `php backend/atur_password_admin.php email@bi.go.id "Nama"`. Akun admin dan pewawancara lain dibuat dari menu Pengguna dan Hak Akses.
+4. Buat admin pertama: `php backend/atur_password_admin.php email@kantor "Nama"`. Akun admin dan pewawancara lain dibuat dari menu Pengguna dan Hak Akses.
 5. Pastikan `backend/uploads/` dan `backend/logs/` bisa ditulis PHP.
-6. Web server: Apache cukup dengan `.htaccess` (butuh `mod_headers` dan `mod_alias`). Untuk Nginx + PHP-FPM, lihat `deploy/nginx-portal-magang.conf`.
+6. Web server: Apache cukup dengan `.htaccess` (butuh `mod_headers` dan `mod_alias`). Untuk Nginx + PHP-FPM, lihat `deploy/nginx.conf`.
 7. Pasang HTTPS. Kamera dan GPS untuk absen hanya jalan di HTTPS.
 8. Cron harian untuk menghapus akun pelamar yang tidak lolos (H+7 setelah keputusan):
 
@@ -34,7 +42,7 @@ Selama `SMTP_HOST` kosong, email tidak dikirim dan hanya ditulis ke `backend/log
 
    `php backend/bersihkan_akun.php --uji` menampilkan daftarnya tanpa menghapus.
 
-Database yang dibuat dari versi lama diperbarui dengan menjalankan `backend/migrasi/` secara berurutan.
+Database yang dibuat dari versi lama diperbarui dengan menjalankan `backend/migrasi/` secara berurutan. Migrasi 007 mengganti nama tabel `periode` menjadi `pengaturan` tanpa menghapus isinya.
 
 ## Sebelum online
 
@@ -48,7 +56,7 @@ Database yang dibuat dari versi lama diperbarui dengan menjalankan `backend/migr
 
 | Lokasi | Isi |
 | --- | --- |
-| `*.html` | Halaman pelamar (`dashboard`, `formulir`, `status_pengajuan`, `absen`, ...) dan backoffice (`admin_*`) |
+| `*.html` | Halaman pelamar (`index`, `formulir`, `status_pengajuan`, `absen`, ...) dan backoffice (`admin_*`) |
 | `assets/` | `portal.css`, `common.js` (fetch dengan CSRF, toast, dialog), `admin.js` (sidebar dan cek peran), `ikon.js`, `gerak.js` |
 | `backend/api/` | Endpoint JSON. Hanya folder ini yang menjalankan PHP dari web |
 | `backend/config.php` | Koneksi database, sesi, CSRF, helper umum |
@@ -56,3 +64,4 @@ Database yang dibuat dari versi lama diperbarui dengan menjalankan `backend/migr
 | `backend/logbook_excel.php` | Excel logbook format kantor, ditulis dengan `xlsx_sederhana.php` |
 | `backend/migrasi/` | Perubahan skema untuk database lama |
 | `deploy/` | Contoh konfigurasi Nginx dan router untuk `php -S` |
+| `tests/asap.php` | Uji asap alur utama |
