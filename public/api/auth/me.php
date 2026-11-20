@@ -3,7 +3,7 @@ require __DIR__ . '/../../../backend/config.php';
 
 $userId = require_user();
 
-$stmt = $pdo->prepare("SELECT id, nama, email, no_wa FROM users WHERE id = ?");
+$stmt = $pdo->prepare("SELECT id, nama, email, no_wa, foto FROM users WHERE id = ?");
 $stmt->execute([$userId]);
 $user = $stmt->fetch();
 

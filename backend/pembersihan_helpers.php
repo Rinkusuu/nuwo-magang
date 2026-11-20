@@ -47,8 +47,9 @@ function hapus_akun_pelamar(PDO $pdo, int $userId, string $dirUpload): void {
         SELECT f.stored_name FROM application_files f JOIN applications a ON a.id = f.application_id WHERE a.user_id = ?
         UNION ALL SELECT b.stored_name FROM berkas_pkl b JOIN applications a ON a.id = b.application_id WHERE a.user_id = ?
         UNION ALL SELECT CONCAT('absen/', ab.foto) FROM absen ab JOIN applications a ON a.id = ab.application_id WHERE a.user_id = ? AND ab.foto IS NOT NULL
+        UNION ALL SELECT CONCAT('profil/', foto) FROM users WHERE id = ? AND foto IS NOT NULL
     ");
-    $q->execute([$userId, $userId, $userId]);
+    $q->execute([$userId, $userId, $userId, $userId]);
     $berkas = $q->fetchAll(PDO::FETCH_COLUMN);
 
     $pdo->beginTransaction();

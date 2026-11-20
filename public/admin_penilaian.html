@@ -113,7 +113,7 @@
 
       <section class="card applicant">
         <div class="who">
-          <span class="avatar lg">${esc(initials(app.nama))}</span>
+          <span class="avatar lg">${avatarHtml(app.foto_profil ? `api/auth/foto_profil.php?id=${app.user_id}&v=${encodeURIComponent(app.foto_profil)}` : null)}</span>
           <div>
             <b>${esc(app.nama)}</b> <span class="muted">· ${esc(app.no_pendaftaran)}</span>
             <p>${esc(app.universitas)} · ${esc(app.jenjang)} ${esc(prodi)} · Semester ${esc(app.semester)} · IPK ${fmtAngka(app.ipk)} · ${esc(app.batch ? app.batch.nama : '-')}</p>

@@ -84,6 +84,13 @@ $pelamar = tempnam(sys_get_temp_dir(), 'pelamar');
 $r = minta('/api/auth/login.php', ['email' => 'rahmat@email.com', 'password' => 'Demo1234'], $pelamar);
 cek(($r['json']['success'] ?? false) === true, 'login pelamar');
 cek((minta('/api/formulir/status.php', null, $pelamar)['json']['has_application'] ?? false) === true, 'status pendaftaran');
+$c = curl_init($base . '/api/auth/foto_profil.php');
+curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_COOKIEFILE => $pelamar, CURLOPT_COOKIEJAR => $pelamar,
+    CURLOPT_HTTPHEADER => ['X-CSRF-Token: ' . json_decode(minta('/api/auth/csrf.php', null, $pelamar)['isi'], true)['token']],
+    CURLOPT_POSTFIELDS => ['foto' => new CURLFile("$akar/public/assets/apple-touch-icon.png", 'image/png')]]);
+cek((json_decode((string) curl_exec($c), true)['success'] ?? false) === true, 'unggah foto profil');
+cek(minta('/api/auth/foto_profil.php', null, $pelamar)['kode'] === 200, 'foto profil bisa dilihat pemiliknya');
+cek(minta('/api/auth/foto_profil.php?id=1')['kode'] === 404, 'foto profil tertutup untuk yang belum login');
 $hariKerja = date('N') < 6;
 cek((minta('/api/absen/status.php', null, $pelamar)['json']['boleh'] ?? null) === $hariKerja, $hariKerja ? 'peserta boleh absen' : 'absen ditolak di akhir pekan');
 $r = minta('/api/pkl/logbook_excel.php', null, $pelamar);

@@ -5,7 +5,7 @@ require __DIR__ . '/../../../backend/app_helpers.php';
 $adminId = require_staf();
 $id = (int) ($_GET['id'] ?? 0);
 
-$stmt = $pdo->prepare("SELECT * FROM applications WHERE id = ? AND submitted_at IS NOT NULL");
+$stmt = $pdo->prepare("SELECT a.*, u.foto AS foto_profil FROM applications a JOIN users u ON u.id = a.user_id WHERE a.id = ? AND a.submitted_at IS NOT NULL");
 $stmt->execute([$id]);
 $app = $stmt->fetch();
 if (!$app || (staf_pewawancara() && $app['status_seleksi'] !== 'lolos')) fail('Data pelamar tidak ditemukan.', 404);

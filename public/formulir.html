@@ -84,7 +84,7 @@
     <div class="right">
       <span class="autosave" id="autosave">Tersimpan otomatis sebagai draf</span>
       <a href="status_pengajuan.html" class="nav-link">Status</a>
-      <span class="user"><span class="avatar" id="avatar">–</span><span class="name" id="userName"></span></span>
+      <span class="user"><button type="button" class="avatar" id="avatar" aria-label="Foto profil"></button><span class="name" id="userName"></span></span>
       <button type="button" class="link" id="logoutBtn">Keluar</button>
     </div>
   </div>
@@ -202,7 +202,7 @@
   (async () => {
     const me = await api('api/auth/me.php');
     if (!me.success) { window.location.href = 'login.html'; return; }
-    $('avatar').textContent = initials(me.user.nama);
+    pasangAvatarSaya($('avatar'), me.user);
     $('userName').textContent = me.user.nama;
 
     const [info, st] = await Promise.all([api('api/public/info.php'), api('api/formulir/status.php')]);

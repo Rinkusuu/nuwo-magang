@@ -104,8 +104,54 @@ function fmtAngka(n, digits = 2) {
   return Number(n).toFixed(digits).replace('.', ',');
 }
 
-function initials(name) {
-  return String(name || '').split(/[^\p{L}]+/u).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '–';
+const IKON_TAMU = '<svg viewBox="0 0 40 40" aria-hidden="true"><rect width="40" height="40" fill="#DFE5E7"/><circle cx="20" cy="15.5" r="7" fill="#fff"/><path d="M5 40c1.2-9.5 7.2-14.5 15-14.5S33.8 30.5 35 40z" fill="#fff"/></svg>';
+
+function avatarHtml(url) {
+  return url ? `<img src="${esc(url)}" alt="">` : IKON_TAMU;
+}
+
+function pasangAvatarSaya(el, user) {
+  let foto = user.foto;
+  const url = () => foto ? 'api/auth/foto_profil.php?v=' + encodeURIComponent(foto) : null;
+  el.innerHTML = avatarHtml(url());
+  el.onclick = () => {
+    const d = document.createElement('dialog');
+    d.className = 'dialog foto-profil';
+    d.setAttribute('aria-label', 'Foto profil');
+    const gambar = () => {
+      d.innerHTML = `<div class="isi"><span class="avatar xl">${avatarHtml(url())}</span><h2>Foto profil</h2>
+          <p id="fotoInfo">JPG, PNG, atau WebP. Foto dipotong persegi.</p></div>
+        <div class="aksi"><button type="button" class="btn btn-primary" value="unggah">${foto ? 'Ganti foto' : 'Unggah foto'}</button>
+          ${foto ? '<button type="button" class="btn btn-outline" value="hapus">Hapus foto</button>' : ''}
+          <button type="button" class="btn btn-outline" value="tutup">Tutup</button></div>
+        <input type="file" accept="image/jpeg,image/png,image/webp" hidden>`;
+      const input = d.querySelector('input');
+      d.querySelector('[value="tutup"]').onclick = () => d.close();
+      d.querySelector('[value="unggah"]').onclick = () => input.click();
+      input.onchange = async () => {
+        if (!input.files[0]) return;
+        const fd = new FormData();
+        fd.append('foto', input.files[0]);
+        const res = await api('api/auth/foto_profil.php', { method: 'POST', body: fd });
+        selesai(res);
+      };
+      const hapus = d.querySelector('[value="hapus"]');
+      if (hapus) hapus.onclick = async () => selesai(await api('api/auth/foto_profil.php', { json: { hapus: true } }));
+    };
+    const selesai = (res) => {
+      // toast tertutup backdrop dialog, jadi galat ditulis di dalam dialog
+      if (!res.success) { const p = d.querySelector('#fotoInfo'); p.textContent = res.message; p.className = 'galat'; return; }
+      foto = res.foto;
+      el.innerHTML = avatarHtml(url());
+      d.close();
+      toast(res.message);
+    };
+    gambar();
+    document.body.appendChild(d);
+    d.addEventListener('close', () => d.remove());
+    d.addEventListener('click', e => { if (e.target === d) d.close(); });
+    d.showModal();
+  };
 }
 
 function pill(map, key, fallback = '') {
