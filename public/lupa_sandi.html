@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lupa Kata Sandi · Nuwo Magang</title>
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+</head>
+<body>
+
+<div class="auth">
+  <aside class="auth-side">
+    <div class="pola-titik" aria-hidden="true"></div>
+    <svg class="rute" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-halte="0.3,0.55,0.8">
+      <path class="garis" d="M-20 890 C 210 880 320 800 400 730 S 560 540 600 390 S 650 90 710 -20"/>
+    </svg>
+    <a href="index.html" class="brand">
+      <span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="36" height="36"></span>
+      <span><b>Nuwo Magang</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
+    </a>
+    <div>
+      <div class="kicker">Akun Pelamar</div>
+      <h1 data-muncul style="--urut:1">Atur ulang kata sandi akun Anda.</h1>
+      <p>Kami akan mengirim tautan untuk membuat kata sandi baru ke email yang Anda gunakan saat mendaftar.</p>
+    </div>
+    <div class="foot">Tautan berlaku 60 menit dan hanya dapat dipakai sekali.</div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="index.html" class="auth-mobile-brand"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="36" height="36"></span><span><b>Nuwo Magang</b><span>KPwBI Provinsi Lampung</span></span></a>
+      <a href="login.html" class="back"><span data-ikon="kembali" data-ikon-ukuran="16"></span>Kembali ke halaman masuk</a>
+      <div class="card" data-muncul style="--urut:1">
+        <div class="kicker">Lupa kata sandi</div>
+        <h2>Kirim tautan atur ulang</h2>
+        <p class="lead">Masukkan email akun pelamar Anda.</p>
+        <form id="lupaForm" novalidate>
+          <div class="field" id="emailField">
+            <label for="email">Email</label>
+            <input class="input" type="email" id="email" placeholder="nama@email.com" autocomplete="email" required>
+            <span class="err">Masukkan alamat email yang valid.</span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn" style="margin-top:8px;">Kirim Tautan</button>
+        </form>
+        <div id="terkirim" hidden>
+          <div class="notice green"><b>Periksa email Anda</b><span id="pesan"></span></div>
+          <p class="alt">Tidak menerima email dalam beberapa menit? <button type="button" class="link" id="ulangBtn">Kirim ulang</button></p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  async function kirim() {
+    const email = $('email').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    $('emailField').classList.toggle('has-error', !ok);
+    if (!ok) return;
+    $('submitBtn').disabled = true;
+    $('submitBtn').textContent = 'Mengirim…';
+    const data = await api('api/auth/lupa_sandi.php', { json: { email } });
+    $('submitBtn').disabled = false;
+    $('submitBtn').textContent = 'Kirim Tautan';
+    if (!data.success) { toast(data.message || 'Permintaan gagal dikirim.', true); return; }
+    $('pesan').textContent = data.message;
+    $('lupaForm').hidden = true;
+    $('terkirim').hidden = false;
+  }
+  $('lupaForm').addEventListener('submit', e => { e.preventDefault(); kirim(); });
+  $('ulangBtn').addEventListener('click', () => { $('terkirim').hidden = true; $('lupaForm').hidden = false; });
+</script>
+</body>
+</html>

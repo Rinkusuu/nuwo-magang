@@ -1,7 +1,6 @@
 .DS_Store
 backend/uploads/*
-!backend/uploads/.htaccess
 !backend/uploads/contoh.pdf
 backend/config.local.php
 backend/logs/*
-!backend/logs/.htaccess
+!backend/logs/.gitkeep

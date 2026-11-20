@@ -1,36 +1,20 @@
 <?php
-// Hanya untuk php -S di laptop: php -S tidak membaca .htaccess.
+// Hanya untuk laptop: php -S -t public deploy/router-lokal.php (php -S tidak membaca .htaccess).
 
-$akar = dirname(__DIR__);
+$akar = dirname(__DIR__) . '/public';
 $path = rawurldecode(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH) ?: '/');
+if ($path === '/') $path = '/index.html';
 
-function tidak_ditemukan(string $akar): bool {
+$berkas = realpath($akar . $path);
+if (preg_match('#(^|/)\.#', $path) || $berkas === false || !str_starts_with($berkas, $akar . '/') || !is_file($berkas)) {
     http_response_code(404);
     header('Content-Type: text/html; charset=utf-8');
     readfile($akar . '/404.html');
     return true;
 }
-
-if ($path === '/' || $path === '') {
+if ($path === '/index.html') {
     header('Content-Type: text/html; charset=utf-8');
-    readfile($akar . '/index.html');
+    readfile($berkas);
     return true;
 }
-
-$diblokir = [
-    '#(^|/)\.#',
-    '#\.(sql|md|log|lock|dist)$#i',
-    '#^/deploy/#',
-    '#^/backend/(vendor|logs|migrasi|uploads|font)(/|$)#',
-    '#^/backend/(config|config\.local|config\.local\.example|app_helpers|absen_helpers|mailer|batas_percobaan|atur_password_admin)\.php$#',
-    '#^/backend/composer\.json$#',
-];
-foreach ($diblokir as $pola) {
-    if (preg_match($pola, $path)) return tidak_ditemukan($akar);
-}
-
-$berkas = realpath($akar . $path);
-if ($berkas === false || strpos($berkas, $akar) !== 0 || !is_file($berkas)) return tidak_ditemukan($akar);
-if (str_ends_with($berkas, '.php') && !preg_match('#^/backend/api/.+\.php$#', $path)) return tidak_ditemukan($akar);
-
 return false;

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Seleksi dan Wawancara · Backoffice Nuwo Magang</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+<style>
+  .batch-info{display:flex;justify-content:space-between;align-items:center;gap:16px 24px;flex-wrap:wrap;margin-bottom:18px;}
+  .batch-info .detail{display:flex;gap:18px 28px;flex-wrap:wrap;font-size:13.5px;}
+  .batch-info .detail span{display:block;font-size:12px;color:var(--ink-3);font-weight:600;}
+  .batch-info .detail b{font-size:14.5px;}
+  .batch-info .field{min-width:220px;}
+  table.data tr.baris-lolos td:first-child{box-shadow:inset 4px 0 0 var(--green);}
+  table.data tr.baris-tidak td:first-child{box-shadow:inset 4px 0 0 var(--red);}
+  table.data tr.baris-tidak td{background:#FFFBFB;}
+  .seg button{display:inline-flex;align-items:center;gap:6px;}
+  .catatan-seleksi{font-size:12px;color:var(--ink-3);margin-top:6px;}
+</style>
+</head>
+<body data-menu="wawancara">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
+    <div class="page-head">
+      <div>
+        <div class="meta">Tahap 2 dan 3 · Pelamar dengan berkas lengkap</div>
+        <h1>Seleksi dan Wawancara</h1>
+        <div class="sub">Tentukan pelamar yang lolos ke wawancara daring. Yang diloloskan menerima email berisi tautan ke halaman status, tempat jadwal dan link Zoom batch ditampilkan.</div>
+      </div>
+      <a href="admin_rubrik.html" class="btn btn-outline">Lihat Rubrik</a>
+    </div>
+
+    <section class="card batch-info" id="batchInfo">
+      <div class="field"><label for="fBatch">Batch</label><select class="select" id="fBatch"></select></div>
+      <div class="detail" id="detailBatch"></div>
+    </section>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="data">
+          <thead><tr><th>Pelamar</th><th>Prodi · Smt · IPK</th><th>Berkas</th><th>Keputusan seleksi</th><th>Nilai wawancara</th><th>Aksi</th></tr></thead>
+          <tbody id="rows" data-kerangka-tabel="6"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  let semua = [], daftarBatch = [], peran = null;
+  const params = new URLSearchParams(location.search);
+
+  (async () => {
+    if (!(peran = (await requireAdmin(['admin', 'pewawancara']))?.peran)) return;
+    sesuaikanPeran();
+    await muat();
+  })();
+
+  function sesuaikanPeran() {
+    if (peran === 'admin') return;
+    document.querySelector('.page-head .meta').textContent = 'Pelamar yang diundang wawancara';
+    document.querySelector('.page-head h1').textContent = 'Daftar Wawancara';
+    document.querySelectorAll('thead th')[3].textContent = 'Status';
+    document.querySelector('.page-head .sub').textContent = 'Pilih pelamar untuk mengisi penilaian wawancara Anda. Nilai dari setiap pewawancara dirata-rata menjadi nilai akhir pelamar.';
+  }
+
+  async function muat() {
+    const data = await api('api/admin/applications.php');
+    if (!data.success) { toast(data.message, true); return; }
+    semua = data.data.filter(r => r.status_admin === 'memenuhi');
+    if (!daftarBatch.length) {
+      daftarBatch = data.batch;
+      $('fBatch').innerHTML = '<option value="">Semua batch</option>' + daftarBatch.map(b => `<option value="${b.id}">${esc(b.nama)}</option>`).join('');
+      const awal = params.get('batch') || (semua[0] && semua[0].batch_id) || '';
+      $('fBatch').value = String(awal);
+    }
+    render();
+  }
+  $('fBatch').addEventListener('input', render);
+
+  function prodi(s) { const p = String(s || '').split('/'); return p[p.length - 1].trim(); }
+
+  function render() {
+    const id = $('fBatch').value;
+    const b = daftarBatch.find(x => String(x.id) === id);
+    $('detailBatch').innerHTML = b ? `
+      <div><span>Jadwal wawancara</span><b>${b.wawancara_tanggal ? fmtTanggal(b.wawancara_tanggal) + (b.wawancara_jam ? ', ' + esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : '') : 'Belum diatur'}</b></div>
+      <div><span>Link Zoom</span><b>${b.link_zoom ? `<a class="link" href="${esc(b.link_zoom)}" target="_blank" rel="noopener">Buka Zoom</a>` : 'Belum diatur'}</b></div>
+      ${peran === 'admin' ? '<div><span>Pengaturan</span><b><a class="link" href="admin_batch.html">Ubah di Batch dan Jadwal</a></b></div>' : ''}`
+      : '<div><span>Batch</span><b>Pilih batch untuk melihat jadwal dan link Zoom</b></div>';
+
+    const rows = semua.filter(r => !id || String(r.batch_id) === id);
+    $('rows').removeAttribute('aria-busy');
+    $('rows').innerHTML = rows.length ? rows.map(r => {
+      const s = r.status_seleksi;
+      const terkunci = !!r.hasil_akhir;
+      return `<tr data-id="${r.id}" class="${s === 'lolos' ? 'baris-lolos' : s === 'tidak_lolos' ? 'baris-tidak' : ''}">
+        <td class="name"><b>${esc(r.nama)}</b><span>${esc(r.no_pendaftaran)} · ${esc(r.universitas)}</span></td>
+        <td>${esc(prodi(r.fakultas_prodi))} · ${esc(r.semester)} · ${fmtAngka(r.ipk)}</td>
+        <td><a class="link" href="${peran === 'admin' ? `admin_verifikasi.html?id=${r.id}` : `admin_penilaian.html?id=${r.id}`}">Lihat berkas</a></td>
+        <td>${peran !== 'admin' ? pill(LABEL.seleksi, s) : `<div class="seg">
+            <button type="button" data-putus="lolos" class="${s === 'lolos' ? 'on-green' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('centang', 13)}Loloskan</button>
+            <button type="button" data-putus="tidak_lolos" class="${s === 'tidak_lolos' ? 'on-red' : ''}" ${terkunci ? 'disabled' : ''}>${ikon('tutup', 13)}Tidak lolos</button>
+          </div>
+          <div class="catatan-seleksi">${terkunci ? 'Hasil akhir sudah ditetapkan.' : s ? 'Klik pilihan yang aktif untuk membatalkan.' : 'Belum diputuskan.'}</div>`}</td>
+        <td>${s !== 'lolos' ? '<span class="muted">—</span>' : r.nilai !== null
+          ? `<b class="num">${fmtAngka(r.nilai)}</b> <span class="muted">· ${r.jumlah_penilai} pewawancara</span><br><span style="font-size:12.5px;">${esc(LABEL.rekomendasi[r.kategori] || '')}</span>`
+          : '<span class="muted">Belum dinilai</span>'}</td>
+        <td>${s === 'lolos' ? `<a class="link" href="admin_penilaian.html?id=${r.id}">${r.sudah_saya_nilai ? 'Lihat / ubah' : 'Nilai'}</a>` : '<span class="muted">—</span>'}</td>
+      </tr>`;
+    }).join('') : `<tr><td colspan="6" class="empty">${peran === 'admin' ? 'Belum ada pelamar dengan berkas lengkap di batch ini.' : 'Belum ada pelamar yang diundang wawancara di batch ini.'}</td></tr>`;
+  }
+
+  $('rows').addEventListener('click', async e => {
+    const btn = e.target.closest('[data-putus]');
+    if (!btn) return;
+    const r = semua.find(x => String(x.id) === btn.closest('tr').dataset.id);
+    const keputusan = r.status_seleksi === btn.dataset.putus ? null : btn.dataset.putus;
+    if (keputusan === 'lolos' && !await konfirmasi({ judul: `Loloskan ${r.nama}?`, pesan: 'Pelamar akan menerima email bahwa ia lolos ke tahap wawancara, berisi tautan ke halaman status.', ya: 'Loloskan' })) return;
+    btn.closest('.seg').querySelectorAll('button').forEach(b => { b.disabled = true; });
+    const res = await api('api/admin/seleksi.php', { json: { id: r.id, keputusan } });
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+    if (res.success) { r.status_seleksi = keputusan; }
+    render();
+  });
+</script>
+</body>
+</html>

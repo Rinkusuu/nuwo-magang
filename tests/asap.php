@@ -32,7 +32,7 @@ function minta(string $url, ?array $json = null, string $jar = ''): array {
     $c = curl_init($base . $url);
     curl_setopt_array($c, [CURLOPT_RETURNTRANSFER => true, CURLOPT_COOKIEJAR => $jar, CURLOPT_COOKIEFILE => $jar]);
     if ($json !== null) {
-        $token[$jar] ??= json_decode(minta('/backend/api/auth/csrf.php', null, $jar)['isi'], true)['token'];
+        $token[$jar] ??= json_decode(minta('/api/auth/csrf.php', null, $jar)['isi'], true)['token'];
         curl_setopt_array($c, [CURLOPT_POSTFIELDS => json_encode($json),
             CURLOPT_HTTPHEADER => ['Content-Type: application/json', 'X-CSRF-Token: ' . $token[$jar]]]);
     }
@@ -45,8 +45,8 @@ function minta(string $url, ?array $json = null, string $jar = ''): array {
 
 preg_match('/const BOBOT_ASPEK = \[([^\]]*)\]/', file_get_contents("$akar/backend/config.php"), $m);
 $bobotPhp = array_map('intval', explode(',', $m[1]));
-preg_match_all('/bobot: (\d+)/', file_get_contents("$akar/assets/rubrik.js"), $m);
-cek($bobotPhp === array_map('intval', $m[1]), 'bobot di assets/rubrik.js sama dengan BOBOT_ASPEK');
+preg_match_all('/bobot: (\d+)/', file_get_contents("$akar/public/assets/rubrik.js"), $m);
+cek($bobotPhp === array_map('intval', $m[1]), 'bobot di public/assets/rubrik.js sama dengan BOBOT_ASPEK');
 
 $ganti = fn($f) => str_replace('magang_bi', 'magang_uji', file_get_contents("$akar/$f"));
 sql($ganti('setup.sql') . $ganti('contoh_data.sql'));
@@ -58,35 +58,35 @@ sql("USE magang_uji;
 
 $env = ['MAGANG_DB_HOST' => $db['host'], 'MAGANG_DB_PORT' => $db['port'], 'MAGANG_DB_USER' => $db['user'],
         'MAGANG_DB_PASS' => $db['pass'], 'MAGANG_DB_NAME' => 'magang_uji', 'MAGANG_BATAS_PERCOBAAN' => '0'] + getenv();
-$server = proc_open([PHP_BINARY, '-S', "127.0.0.1:$port", 'deploy/router-lokal.php'],
+$server = proc_open([PHP_BINARY, '-S', "127.0.0.1:$port", '-t', 'public', 'deploy/router-lokal.php'],
     [1 => ['file', '/dev/null', 'w'], 2 => ['file', '/dev/null', 'w']], $pipa, $akar, $env);
 register_shutdown_function(fn() => proc_terminate($server));
 for ($i = 0; $i < 50 && !@fsockopen('127.0.0.1', $port); $i++) usleep(100000);
 
 $r = minta('/');
 cek($r['kode'] === 200 && str_contains($r['isi'], 'Nuwo Magang'), 'beranda tampil');
-foreach (['/setup.sql', '/contoh_data.sql', '/backend/config.php', '/backend/config.local.php', '/deploy/nginx.conf', '/tests/asap.php'] as $p) {
+foreach (['/setup.sql', '/backend/config.php', '/backend/uploads/contoh.pdf', '/../setup.sql', '/.htaccess', '/.user.ini'] as $p) {
     cek(minta($p)['kode'] === 404, "$p tertutup");
 }
 
 $admin = tempnam(sys_get_temp_dir(), 'admin');
-$r = minta('/backend/api/auth/admin_login.php', ['email' => 'admin@contoh.test', 'password' => 'AdminBI2026'], $admin);
+$r = minta('/api/auth/admin_login.php', ['email' => 'admin@contoh.test', 'password' => 'AdminBI2026'], $admin);
 cek(($r['json']['success'] ?? false) === true, 'login admin');
-$r = minta('/backend/api/admin/applications.php', null, $admin);
+$r = minta('/api/admin/applications.php', null, $admin);
 cek(count($r['json']['data'] ?? []) === 2, 'daftar pelamar berisi 2 data contoh');
-cek(str_starts_with(minta('/backend/api/admin/export.php', null, $admin)['isi'], "\xEF\xBB\xBF"), 'ekspor CSV');
-$r = minta('/backend/api/admin/pengaturan.php', null, $admin);
+cek(str_starts_with(minta('/api/admin/export.php', null, $admin)['isi'], "\xEF\xBB\xBF"), 'ekspor CSV');
+$r = minta('/api/admin/pengaturan.php', null, $admin);
 cek(isset($r['json']['pengaturan']['kantor_lat']), 'baca pengaturan');
-$r = minta('/backend/api/admin/pengaturan.php', ['hari_perbaikan' => 4, 'kantor_lat' => '-5.4', 'kantor_lng' => '105.26', 'radius_m' => 150, 'akurasi_maks_m' => 100], $admin);
+$r = minta('/api/admin/pengaturan.php', ['hari_perbaikan' => 4, 'kantor_lat' => '-5.4', 'kantor_lng' => '105.26', 'radius_m' => 150, 'akurasi_maks_m' => 100], $admin);
 cek(($r['json']['success'] ?? false) === true, 'simpan pengaturan');
 
 $pelamar = tempnam(sys_get_temp_dir(), 'pelamar');
-$r = minta('/backend/api/auth/login.php', ['email' => 'rahmat@email.com', 'password' => 'Demo1234'], $pelamar);
+$r = minta('/api/auth/login.php', ['email' => 'rahmat@email.com', 'password' => 'Demo1234'], $pelamar);
 cek(($r['json']['success'] ?? false) === true, 'login pelamar');
-cek((minta('/backend/api/formulir/status.php', null, $pelamar)['json']['has_application'] ?? false) === true, 'status pendaftaran');
+cek((minta('/api/formulir/status.php', null, $pelamar)['json']['has_application'] ?? false) === true, 'status pendaftaran');
 $hariKerja = date('N') < 6;
-cek((minta('/backend/api/absen/status.php', null, $pelamar)['json']['boleh'] ?? null) === $hariKerja, $hariKerja ? 'peserta boleh absen' : 'absen ditolak di akhir pekan');
-$r = minta('/backend/api/pkl/logbook_excel.php', null, $pelamar);
+cek((minta('/api/absen/status.php', null, $pelamar)['json']['boleh'] ?? null) === $hariKerja, $hariKerja ? 'peserta boleh absen' : 'absen ditolak di akhir pekan');
+$r = minta('/api/pkl/logbook_excel.php', null, $pelamar);
 $xlsx = tempnam(sys_get_temp_dir(), 'lb');
 file_put_contents($xlsx, $r['isi']);
 $zip = new ZipArchive();

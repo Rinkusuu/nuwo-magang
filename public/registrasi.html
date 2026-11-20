@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daftar Akun · Nuwo Magang</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+</head>
+<body>
+
+<div class="auth">
+  <aside class="auth-side">
+    <div class="pola-titik" aria-hidden="true"></div>
+    <svg class="rute" viewBox="0 0 600 900" preserveAspectRatio="xMidYMid slice" aria-hidden="true" focusable="false" data-halte="0.3,0.55,0.8">
+      <path class="garis" d="M-20 890 C 210 880 320 800 400 730 S 560 540 600 390 S 650 90 710 -20"/>
+    </svg>
+    <a href="index.html" class="brand">
+      <span class="logo-mark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="36" height="36"></span>
+      <span><b>Nuwo Magang</b><span>Kantor Perwakilan Bank Indonesia Provinsi Lampung</span></span>
+    </a>
+    <div>
+      <div class="kicker">Registrasi Akun</div>
+      <h1 data-muncul style="--urut:1">Mulai pendaftaran PKL di KPwBI Provinsi Lampung.</h1>
+      <p>Satu akun untuk seluruh tahapan seleksi, dari pengisian formulir hingga pengumuman penempatan.</p>
+      <div class="auth-steps">
+        <div><span class="n">01</span><span>Buat akun dengan email aktif.</span></div>
+        <div><span class="n">02</span><span>Isi data diri dan data akademik, lalu pilih periode PKL.</span></div>
+        <div><span class="n">03</span><span>Unggah lima berkas administrasi (PDF, maks. 2 MB), lalu kirim pendaftaran.</span></div>
+      </div>
+    </div>
+    <div class="foot">Khusus mahasiswa aktif jenjang S1, minimal semester 4.</div>
+  </aside>
+
+  <main class="auth-main">
+    <div class="auth-card">
+      <a href="index.html" class="auth-mobile-brand"><span class="logo-mark dark"><img src="assets/bi-logo-bulat.webp" alt="Bank Indonesia" width="36" height="36"></span><span><b>Nuwo Magang</b><span>KPwBI Provinsi Lampung</span></span></a>
+      <a href="login.html" class="back"><span data-ikon="kembali" data-ikon-ukuran="16"></span>Sudah punya akun? Masuk</a>
+      <div class="card" data-muncul style="--urut:1">
+        <div class="kicker">Registrasi Akun</div>
+        <h2>Buat akun pelamar</h2>
+        <p class="lead">Gunakan email aktif; seluruh informasi seleksi dikirim ke alamat ini.</p>
+
+        <form id="regForm" novalidate>
+          <div class="field" id="namaField">
+            <label for="nama">Nama lengkap</label>
+            <input class="input" type="text" id="nama" placeholder="Nama lengkap" autocomplete="name" required>
+            <span class="err">Nama lengkap wajib diisi.</span>
+          </div>
+          <div class="field" id="emailField">
+            <label for="email">Email aktif</label>
+            <input class="input" type="email" id="email" placeholder="nama@email.com" autocomplete="email" required>
+            <span class="err">Email tidak valid.</span>
+          </div>
+          <div class="field" id="passField">
+            <label for="password">Kata sandi</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="password" placeholder="Minimal 8 karakter" autocomplete="new-password" required>
+              <button type="button" data-toggle="password">Lihat</button>
+            </div>
+            <div class="kekuatan" id="kekuatan" aria-live="polite"></div>
+            <span class="err">Kata sandi minimal 8 karakter.</span>
+          </div>
+          <div class="field" id="confirmField">
+            <label for="confirm">Ulangi kata sandi</label>
+            <div class="pass-wrap">
+              <input class="input" type="password" id="confirm" placeholder="Ulangi kata sandi" autocomplete="new-password" required>
+              <button type="button" data-toggle="confirm">Lihat</button>
+            </div>
+            <span class="err">Kata sandi tidak sama.</span>
+          </div>
+          <label class="check" id="agreeWrap" style="margin:6px 0 18px;">
+            <input type="checkbox" id="agree">
+            <span>Saya menyetujui penggunaan data pribadi untuk keperluan seleksi PKL mahasiswa di KPwBI Provinsi Lampung.</span>
+          </label>
+          <button type="submit" class="btn btn-primary btn-block" id="submitBtn">Buat Akun</button>
+        </form>
+        <p class="alt">Sudah punya akun? <a href="login.html">Masuk</a></p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script>
+  document.querySelectorAll('[data-toggle]').forEach(btn => btn.addEventListener('click', () => {
+    const input = document.getElementById(btn.dataset.toggle);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    btn.textContent = show ? 'Sembunyikan' : 'Lihat';
+  }));
+
+  const $ = id => document.getElementById(id);
+  pasangKekuatanSandi($('password'), $('kekuatan'));
+  pasangCekEmail($('email'), $('emailField'));
+  const rules = [
+    ['namaField', () => $('nama').value.trim().length >= 3],
+    ['emailField', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test($('email').value.trim())],
+    ['passField', () => $('password').value.length >= 8],
+    ['confirmField', () => $('confirm').value === $('password').value && $('confirm').value.length >= 8],
+  ];
+
+  $('regForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    let valid = true;
+    rules.forEach(([id, ok]) => { const pass = ok(); $(id).classList.toggle('has-error', !pass); if (!pass) valid = false; });
+    $('agreeWrap').style.color = $('agree').checked ? '' : 'var(--red)';
+    if (!$('agree').checked) valid = false;
+    if (!valid) return;
+
+    const btn = $('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Memproses…';
+    const data = await api('api/auth/register.php', { json: {
+      nama: $('nama').value.trim(),
+      email: $('email').value.trim().toLowerCase(),
+      password: $('password').value,
+    }});
+    if (!data.success) {
+      toast(data.message || 'Gagal membuat akun.', true);
+      btn.disabled = false;
+      btn.textContent = 'Buat Akun';
+      return;
+    }
+    toast('Akun berhasil dibuat. Mengarahkan ke formulir…');
+    setTimeout(() => { window.location.href = 'formulir.html'; }, 800);
+  });
+</script>
+</body>
+</html>

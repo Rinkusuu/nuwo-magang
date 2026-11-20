@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Batch dan Jadwal · Backoffice Nuwo Magang</title>
+<meta name="theme-color" content="#0A2A4A">
+<link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="assets/bi-logo-bulat.png" sizes="192x192" type="image/png">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="preload" href="assets/fonts/plus-jakarta-sans-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="assets/fonts/source-serif-4-latin.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="assets/fonts.css">
+<link rel="stylesheet" href="assets/portal.css">
+<script src="assets/gerak.js"></script>
+<style>
+  .batch-tabel td{vertical-align:top;}
+  .batch-tabel td b{display:block;}
+  .batch-tabel td small{display:block;font-size:12px;color:var(--ink-3);margin-top:2px;}
+  .batch-tabel .angka{display:flex;gap:14px;font-size:12.5px;color:var(--ink-2);white-space:nowrap;}
+  .batch-tabel .angka b{font-size:15px;color:var(--ink);display:block;}
+  .batch-tabel .tautan{display:flex;flex-direction:column;gap:4px;font-size:12.5px;}
+  .batch-tabel .ada{color:var(--green);font-weight:700;}
+  .batch-tabel .belum{color:var(--ink-3);}
+  .aksi-sel{display:flex;gap:6px;flex-wrap:wrap;}
+  dialog.dialog.form-batch{width:min(720px,calc(100% - 32px));}
+  .form-batch form{padding:24px 26px 8px;max-height:72vh;overflow:auto;}
+  .form-batch h3{font-size:14px;font-weight:700;margin:18px 0 10px;color:var(--navy-800);}
+  .form-batch h3:first-of-type{margin-top:0;}
+  .pengaturan{max-width:760px;margin-top:22px;}
+  .pengaturan .sub-judul{font-size:15px;font-weight:700;margin:22px 0 4px;padding-top:18px;border-top:1px solid var(--line);}
+  .lokasi-aksi{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:12px;font-size:12.5px;}
+</style>
+</head>
+<body data-menu="batch">
+<div class="bo">
+  <aside class="bo-side" id="sidebar"></aside>
+  <main class="bo-main">
+    <button type="button" class="btn btn-outline btn-sm bo-menu-btn" id="menuBtn"><span data-ikon="menu"></span>Menu</button>
+    <div class="page-head">
+      <div>
+        <h1>Batch dan Jadwal</h1>
+        <div class="sub">Atur periode PKL dari tahun ke tahun: tanggal pendaftaran, pelaksanaan, wawancara daring, link Zoom, dan link grup WhatsApp peserta.</div>
+      </div>
+      <button type="button" class="btn btn-primary" id="tambahBtn">Tambah batch</button>
+    </div>
+
+    <div class="table-card">
+      <div class="table-scroll">
+        <table class="data batch-tabel">
+          <thead><tr><th>Batch</th><th>Pendaftaran</th><th>Pelaksanaan</th><th>Wawancara</th><th>Tautan</th><th>Pelamar</th><th>Aksi</th></tr></thead>
+          <tbody id="rows" data-kerangka-tabel="7"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <form class="card pengaturan" id="formUmum" novalidate>
+      <h2 class="card-title">Pengaturan umum</h2>
+      <div class="grid-2">
+        <div class="field"><label for="hari_perbaikan">Batas perbaikan berkas (hari kerja)</label><input class="input" id="hari_perbaikan" type="number" min="1" max="30"></div>
+      </div>
+      <h3 class="sub-judul">Lokasi absen harian</h3>
+      <p class="card-sub">Peserta hanya bisa absen bila berada dalam radius dari titik kantor. Paling mudah: buka halaman ini di HP saat berada di kantor, lalu tekan "Gunakan lokasi saya sekarang".</p>
+      <div class="grid-2">
+        <div class="field"><label for="kantor_lat">Lintang kantor</label><input class="input" id="kantor_lat" inputmode="decimal" placeholder="-5.4…"></div>
+        <div class="field"><label for="kantor_lng">Bujur kantor</label><input class="input" id="kantor_lng" inputmode="decimal" placeholder="105.2…"></div>
+        <div class="field"><label for="radius_m">Radius absen (meter)</label><input class="input" id="radius_m" type="number" min="20" max="2000"></div>
+        <div class="field"><label for="akurasi_maks_m">Akurasi GPS maksimal (meter)</label><input class="input" id="akurasi_maks_m" type="number" min="10" max="1000"><span class="hint">Lokasi yang kurang akurat dari batas ini ditolak.</span></div>
+      </div>
+      <div class="lokasi-aksi"><button type="button" class="btn btn-outline btn-sm" id="lokasiSaya">Gunakan lokasi saya sekarang</button><span class="muted" id="lokasiInfo"></span></div>
+      <div style="display:flex;justify-content:flex-end;margin-top:16px;"><button type="submit" class="btn btn-primary" id="simpanUmum">Simpan</button></div>
+    </form>
+  </main>
+</div>
+
+<dialog class="dialog form-batch" id="dialogBatch" aria-labelledby="judulBatch">
+  <form id="formBatch" novalidate>
+    <h2 id="judulBatch" style="margin-bottom:6px;">Tambah batch</h2>
+    <p class="card-sub">Pelamar dapat memilih batch selama tanggal pendaftarannya berlangsung.</p>
+    <input type="hidden" id="b_id">
+    <div class="field" style="margin-bottom:14px;"><label for="b_nama">Nama batch</label><input class="input" id="b_nama" placeholder="Contoh: Periode 1 2027" maxlength="100"></div>
+    <h3>Pendaftaran</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_daftar_buka">Dibuka</label><input class="input" type="date" id="b_daftar_buka"></div>
+      <div class="field"><label for="b_daftar_tutup">Ditutup</label><input class="input" type="date" id="b_daftar_tutup"></div>
+    </div>
+    <h3>Pelaksanaan PKL</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_mulai">Mulai</label><input class="input" type="date" id="b_mulai"></div>
+      <div class="field"><label for="b_selesai">Selesai</label><input class="input" type="date" id="b_selesai"></div>
+    </div>
+    <h3>Wawancara daring (boleh diisi belakangan)</h3>
+    <div class="grid-2">
+      <div class="field"><label for="b_wawancara_tanggal">Tanggal</label><input class="input" type="date" id="b_wawancara_tanggal"></div>
+      <div class="field"><label for="b_wawancara_jam">Jam mulai (WIB)</label><input class="input" type="time" id="b_wawancara_jam"></div>
+    </div>
+    <div class="field" style="margin-top:14px;"><label for="b_link_zoom">Link Zoom</label><input class="input" id="b_link_zoom" placeholder="https://zoom.us/j/…"><span class="hint">Satu link untuk seluruh pelamar yang lolos seleksi berkas di batch ini.</span></div>
+    <h3>Peserta yang diterima</h3>
+    <div class="field"><label for="b_link_wa">Link grup WhatsApp</label><input class="input" id="b_link_wa" placeholder="https://chat.whatsapp.com/…"><span class="hint">Hanya tampil kepada peserta yang sudah menyatakan bersedia.</span></div>
+  </form>
+  <div class="aksi"><button type="button" class="btn btn-outline" id="batalBatch">Batal</button><button type="button" class="btn btn-primary" id="simpanBatch">Simpan batch</button></div>
+</dialog>
+
+<script src="assets/ikon.js"></script>
+<script src="assets/common.js"></script>
+<script src="assets/admin.js"></script>
+<script>
+  const $ = id => document.getElementById(id);
+  const KOLOM = ['nama', 'daftar_buka', 'daftar_tutup', 'mulai', 'selesai', 'wawancara_tanggal', 'wawancara_jam', 'link_zoom', 'link_wa'];
+  let daftar = [];
+  const rentang = (a, b) => `${fmtTanggal(a)} – ${fmtTanggal(b)}`;
+
+  function statusBatch(b, hariIni) {
+    if (b.terbuka) return '<span class="pill green">Pendaftaran dibuka</span>';
+    if (hariIni < b.daftar_buka) return '<span class="pill blue">Akan dibuka</span>';
+    if (hariIni <= b.selesai) return '<span class="pill gray">Berjalan</span>';
+    return '<span class="pill gray">Selesai</span>';
+  }
+
+  async function muat() {
+    const data = await api('api/admin/batch.php');
+    if (!data.success) { toast(data.message, true); return; }
+    daftar = data.batch;
+    $('rows').removeAttribute('aria-busy');
+    $('rows').innerHTML = daftar.length ? daftar.map(b => `
+      <tr>
+        <td><b>${esc(b.nama)}</b>${statusBatch(b, data.hari_ini)}</td>
+        <td>${rentang(b.daftar_buka, b.daftar_tutup)}</td>
+        <td>${rentang(b.mulai, b.selesai)}</td>
+        <td>${b.wawancara_tanggal ? `<b>${fmtTanggal(b.wawancara_tanggal)}</b><small>${b.wawancara_jam ? esc(b.wawancara_jam.slice(0, 5)) + ' WIB' : 'Jam belum diisi'}</small>` : '<span class="belum">Belum dijadwalkan</span>'}</td>
+        <td><div class="tautan">
+          <span class="${b.link_zoom ? 'ada' : 'belum'}">Zoom: ${b.link_zoom ? 'ada' : 'belum'}</span>
+          <span class="${b.link_wa ? 'ada' : 'belum'}">Grup WA: ${b.link_wa ? 'ada' : 'belum'}</span></div></td>
+        <td><div class="angka"><span><b>${b.pendaftar}</b>daftar</span><span><b>${b.lolos_seleksi}</b>wawancara</span><span><b>${b.diterima}</b>diterima</span><span><b>${b.bersedia}</b>bersedia</span></div></td>
+        <td><div class="aksi-sel"><button type="button" class="btn btn-outline btn-sm" data-ubah="${b.id}">Ubah</button>
+          ${Number(b.dipakai) === 0 ? `<button type="button" class="btn btn-danger btn-sm" data-hapus="${b.id}">Hapus</button>` : ''}</div></td>
+      </tr>`).join('') : '<tr><td colspan="7" class="empty">Belum ada batch. Tambahkan batch untuk membuka pendaftaran.</td></tr>';
+  }
+
+  function bukaForm(b) {
+    $('judulBatch').textContent = b ? `Ubah ${b.nama}` : 'Tambah batch';
+    $('b_id').value = b ? b.id : '';
+    KOLOM.forEach(k => { $('b_' + k).value = b && b[k] ? (k === 'wawancara_jam' ? b[k].slice(0, 5) : b[k]) : ''; });
+    $('dialogBatch').showModal();
+    $('b_nama').focus();
+  }
+
+  $('tambahBtn').addEventListener('click', () => bukaForm(null));
+  $('batalBatch').addEventListener('click', () => $('dialogBatch').close());
+  $('rows').addEventListener('click', async e => {
+    const ubah = e.target.closest('[data-ubah]');
+    if (ubah) return bukaForm(daftar.find(b => String(b.id) === ubah.dataset.ubah));
+    const hapus = e.target.closest('[data-hapus]');
+    if (!hapus) return;
+    const b = daftar.find(x => String(x.id) === hapus.dataset.hapus);
+    if (!await konfirmasi({ judul: `Hapus ${b.nama}?`, pesan: 'Batch yang belum dipilih pelamar mana pun dapat dihapus.', ya: 'Hapus', bahaya: true })) return;
+    const res = await api('api/admin/batch.php', { json: { hapus: b.id } });
+    toast(res.message, !res.success);
+    if (res.success) muat();
+  });
+  $('simpanBatch').addEventListener('click', async () => {
+    const payload = { id: $('b_id').value || null };
+    KOLOM.forEach(k => { payload[k] = $('b_' + k).value.trim(); });
+    const btn = $('simpanBatch');
+    btn.disabled = true;
+    const res = await api('api/admin/batch.php', { json: payload });
+    btn.disabled = false;
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+    if (res.success) { $('dialogBatch').close(); muat(); }
+  });
+
+  (async () => {
+    if (!await requireAdmin()) return;
+    muat();
+    const p = await api('api/admin/pengaturan.php');
+    const umum = p.pengaturan || {};
+    $('hari_perbaikan').value = umum.hari_perbaikan || 3;
+    $('kantor_lat').value = umum.kantor_lat ?? '';
+    $('kantor_lng').value = umum.kantor_lng ?? '';
+    $('radius_m').value = umum.radius_m || 150;
+    $('akurasi_maks_m').value = umum.akurasi_maks_m || 100;
+    $('lokasiSaya').insertAdjacentHTML('afterbegin', ikon('lokasi', 15));
+  })();
+
+  $('lokasiSaya').addEventListener('click', () => {
+    if (!navigator.geolocation || !window.isSecureContext) { toast('Lokasi hanya tersedia di alamat HTTPS.', true); return; }
+    $('lokasiInfo').textContent = 'Mencari lokasi…';
+    navigator.geolocation.getCurrentPosition(pos => {
+      $('kantor_lat').value = pos.coords.latitude.toFixed(7);
+      $('kantor_lng').value = pos.coords.longitude.toFixed(7);
+      $('lokasiInfo').textContent = `Terisi (akurasi ±${Math.round(pos.coords.accuracy)} m). Tekan Simpan untuk menyimpan.`;
+    }, err => {
+      $('lokasiInfo').textContent = err.code === 1 ? 'Akses lokasi ditolak oleh peramban.' : 'Lokasi tidak dapat ditentukan.';
+    }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+  });
+
+  $('formUmum').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = $('simpanUmum');
+    btn.disabled = true;
+    const kunci = ['hari_perbaikan', 'kantor_lat', 'kantor_lng', 'radius_m', 'akurasi_maks_m'];
+    const res = await api('api/admin/pengaturan.php', { json: Object.fromEntries(kunci.map(k => [k, $(k).value.trim().replace(',', '.')])) });
+    btn.disabled = false;
+    toast(res.message || (res.success ? 'Tersimpan.' : 'Gagal menyimpan.'), !res.success);
+  });
+</script>
+</body>
+</html>
